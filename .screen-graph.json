@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "src/components/common/RedirectIfAuthenticated.jsx",
+      "label": "RedirectIfAuthenticated",
+      "routes": [
+        "/",
+        "/verify-otp",
+        "/login",
+        "/forgot-password",
+        "/reset-password"
+      ],
+      "isRoot": true
+    },
+    {
+      "id": "src/components/common/ProtectedRoute.jsx",
+      "label": "ProtectedRoute",
+      "routes": [
+        "/admin-dashboard",
+        "/facility-dashboard"
+      ]
+    },
+    {
+      "id": "src/components/pages/onboarding.jsx",
+      "label": "onboarding",
+      "routes": [
+        "/onboarding"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "src/components/common/RedirectIfAuthenticated.jsx:11:11-to-src/components/common/ProtectedRoute.jsx",
+      "source": "src/components/common/RedirectIfAuthenticated.jsx",
+      "target": "src/components/common/ProtectedRoute.jsx",
+      "data": {
+        "viaRoute": "/admin-dashboard",
+        "trigger": {
+          "element": "<Navigate to=\"/admin-dashboard\" replace />",
+          "line": 11,
+          "endLine": 11,
+          "column": 11,
+          "endColumn": 53,
+          "sourceFile": "src/components/common/RedirectIfAuthenticated.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/common/ProtectedRoute.jsx",
+      "source": "src/components/common/RedirectIfAuthenticated.jsx",
+      "target": "src/components/common/ProtectedRoute.jsx",
+      "data": {
+        "viaRoute": "/facility-dashboard",
+        "trigger": {
+          "element": "<Navigate to=\"/facility-dashboard\" replace />",
+          "line": 15,
+          "endLine": 15,
+          "column": 11,
+          "endColumn": 56,
+          "sourceFile": "src/components/common/RedirectIfAuthenticated.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/common/ProtectedRoute.jsx:13:11-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/common/ProtectedRoute.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "<Navigate to=\"/login\" replace />",
+          "line": 13,
+          "endLine": 13,
+          "column": 11,
+          "endColumn": 43,
+          "sourceFile": "src/components/common/ProtectedRoute.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/onboarding.jsx:51:10-to-src/components/common/ProtectedRoute.jsx",
+      "source": "src/components/pages/onboarding.jsx",
+      "target": "src/components/common/ProtectedRoute.jsx",
+      "data": {
+        "viaRoute": "/facility-dashboard",
+        "trigger": {
+          "element": "navigate(\"/facility-dashboard\")",
+          "line": 51,
+          "endLine": 51,
+          "column": 10,
+          "endColumn": 41,
+          "sourceFile": "src/components/pages/onboarding.jsx"
+        }
+      }
+    }
+  ]
+}

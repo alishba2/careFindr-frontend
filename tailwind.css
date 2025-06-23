@@ -1,0 +1,143 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
+
+:root {
+  --3xl-semi-bold-font-family: "Inter", Helvetica;
+  --3xl-semi-bold-font-size: 30px;
+  --3xl-semi-bold-font-style: normal;
+  --3xl-semi-bold-font-weight: 600;
+  --3xl-semi-bold-letter-spacing: 0.15px;
+  --3xl-semi-bold-line-height: 36px;
+  --base-medium-font-family: "Inter", Helvetica;
+  --base-medium-font-size: 16px;
+  --base-medium-font-style: normal;
+  --base-medium-font-weight: 500;
+  --base-medium-letter-spacing: 0.08px;
+  --base-medium-line-height: 24px;
+  --bgbg: rgba(241, 243, 245, 1);
+  --bgbg-subtle: rgba(248, 249, 250, 1);
+  --bgdefault-bg: rgba(255, 255, 255, 1);
+  --box-shadow-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.1), 0px 1px 3px 0px
+    rgba(0, 0, 0, 0.1);
+  --fgborder: rgba(215, 219, 223, 1);
+  --fgline: rgba(223, 227, 230, 1);
+  --fgsolid: rgba(136, 144, 150, 1);
+  --fgtext: rgba(104, 112, 118, 1);
+  --fgtext-contrast: rgba(17, 24, 28, 1);
+  --input-default-medium-font-family: "Inter", Helvetica;
+  --input-default-medium-font-size: 15px;
+  --input-default-medium-font-style: normal;
+  --input-default-medium-font-weight: 500;
+  --input-default-medium-letter-spacing: 0.075px;
+  --input-default-medium-line-height: normal;
+  --input-medium-semi-bold-font-family: "Inter", Helvetica;
+  --input-medium-semi-bold-font-size: 15px;
+  --input-medium-semi-bold-font-style: normal;
+  --input-medium-semi-bold-font-weight: 600;
+  --input-medium-semi-bold-letter-spacing: 0.075px;
+  --input-medium-semi-bold-line-height: normal;
+  --input-small-medium-font-family: "Inter", Helvetica;
+  --input-small-medium-font-size: 14px;
+  --input-small-medium-font-style: normal;
+  --input-small-medium-font-weight: 500;
+  --input-small-medium-letter-spacing: -0.14000000000000004px;
+  --input-small-medium-line-height: normal;
+  --input-small-semi-bold-font-family: "Inter", Helvetica;
+  --input-small-semi-bold-font-size: 14px;
+  --input-small-semi-bold-font-style: normal;
+  --input-small-semi-bold-font-weight: 600;
+  --input-small-semi-bold-letter-spacing: 0.07000000000000002px;
+  --input-small-semi-bold-line-height: normal;
+  --primarybg-active: rgba(196, 234, 239, 1);
+  --primaryon-primary: rgba(255, 255, 255, 1);
+  --primarysolid: rgba(5, 162, 194, 1);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    --card: transparent;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+
+    --card: transparent;
+    --card-foreground: 213 31% 91%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
