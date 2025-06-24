@@ -9,6 +9,7 @@ import { Input } from "../../components/input";
 import { Label } from "../../components/label";
 import { createAdmin } from "../../services/admin";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const AdminRegister = () => {
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,7 @@ export const AdminRegister = () => {
       // Optional: redirect or toast success
     } catch (error) {
       console.error("Error creating admin:", error);
+      toast.error(error.response.data.error)
       // Optional: show error toast
     } finally {
       setLoading(false);

@@ -17,13 +17,17 @@ import { useNavigate } from "react-router-dom";
 import { lcdas } from "../enums/lcdas.jsx";
 import { registerFacility } from "../../services/auth.js";
 import { toast } from "react-toastify";
+
 const validationSchema = Yup.object({
   facilityType: Yup.string().required("Facility type is required"),
   facilityName: Yup.string().required("Facility name is required"),
   contactEmail: Yup.string().email("Invalid email address").required("Email is required"),
-  phoneNumber: Yup.string().matches(/^\+?[\d\s-]{10,}$/, "Invalid phone").required("Phone required"),
-  secondaryPhone: Yup.string().matches(/^\+?[\d\s-]{10,}$/, "Invalid phone").nullable(),
-  whatsapp: Yup.string().matches(/^\+?[\d\s-]{10,}$/, "Invalid WhatsApp number").nullable(),
+  phoneNumber: Yup.string()
+    .required("Phone number is required"),
+  secondaryPhone: Yup.string()
+    .nullable(),
+  whatsapp: Yup.string()
+    .nullable(),
   address: Yup.string().required("Address is required"),
   state: Yup.string().required("State is required"),
   lga: Yup.string().required("LGA is required"),
@@ -64,13 +68,19 @@ export const RegistrationStep = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setError(null);
+    // Prepend +234 to phone numbers if not already present
+    const formatPhoneNumber = (number) => {
+      if (!number) return undefined;
+      return number.startsWith("+234") ? number : `+234${number.replace(/^\+234/, "")}`;
+    };
+
     const facilityData = {
       name: values.facilityName,
       type: values.facilityType,
       email: values.contactEmail,
-      phone: values.phoneNumber,
-      secondaryPhone: values.secondaryPhone || undefined,
-      whatsapp: values.whatsapp || undefined,
+      phone: formatPhoneNumber(values.phoneNumber),
+      secondaryPhone: formatPhoneNumber(values.secondaryPhone) || undefined,
+      whatsapp: formatPhoneNumber(values.whatsapp) || undefined,
       address: values.address,
       state: values.state,
       lga: values.lga,
@@ -82,18 +92,39 @@ export const RegistrationStep = () => {
 
     try {
       await registerFacility(facilityData);
-      setSubmitting(false); 
+      setSubmitting(false);
       toast.success("Facility registered successfully!", {
         position: "top-right",
         autoClose: 3000,
       });
-      navigate("/verify-otp", { state: { phoneNumber: values.phoneNumber } });
+      navigate("/verify-otp", { state: { phoneNumber: facilityData.phone } });
     } catch (error) {
       setSubmitting(false);
-        console.log("Registration error:", error);
+      console.log("Registration error:", error);
       setError(error.response?.data?.error || "Failed to register facility. Please try again.");
     }
   };
+
+  // Handle phone input to strip +234 for display but include it in value
+  const handlePhoneInput = (e, setFieldValue, fieldName) => {
+    let value = e.target.value;
+
+    // Remove all non-digit characters
+    value = value.replace(/\D/g, "");
+
+    // Remove '234' if user types it
+    if (value.startsWith("234")) {
+      value = value.slice(3);
+    }
+
+    // Keep only the last 10 digits
+    if (value.length > 10) {
+      value = value.slice(-10);
+    }
+
+    setFieldValue(fieldName, value);
+  };
+
 
   return (
     <main className="flex flex-col min-h-screen items-center bg-white mb-20">
@@ -127,12 +158,12 @@ export const RegistrationStep = () => {
                       <label className="text-sm font-semibold">Facility Type</label>
                       <Field name="facilityType">
                         {({ field }) => (
-                          <Select value={field.value} onValueChange={val => setFieldValue("facilityType", val)}>
+                          <Select value={field.value} onValueChange={(val) => setFieldValue("facilityType", val)}>
                             <SelectTrigger className="h-12 border-[#d7dbdf]">
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                             <SelectContent>
-                              {["Hospital", "Laboratory", "Specialist Clinic", "Pharmacy", "Ambulance"].map(type => (
+                              {["Hospital", "Laboratory", "Specialist Clinic", "Pharmacy", "Ambulance", "Insurance"].map((type) => (
                                 <SelectItem key={type} value={type}>{type}</SelectItem>
                               ))}
                             </SelectContent>
@@ -159,7 +190,19 @@ export const RegistrationStep = () => {
 
                     <div className="flex-1">
                       <label className="text-sm font-semibold">Phone Number</label>
-                      <Field as={Input} name="phoneNumber" placeholder="Enter phone" className="h-12 border-[#d7dbdf]" />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm pointer-events-none">
+                          +234
+                        </span>
+                        <Field
+                          as={Input}
+                          name="phoneNumber"
+                          placeholder="8012345678"
+                          className="h-12 border-[#d7dbdf] pl-14 focus:border-primarysolid transition-all duration-200"
+                          type="tel"
+                          onChange={(e) => handlePhoneInput(e, setFieldValue, "phoneNumber")}
+                        />
+                      </div>
                       <ErrorMessage name="phoneNumber" component="div" className="text-red-500 text-sm" />
                     </div>
                   </div>
@@ -168,13 +211,37 @@ export const RegistrationStep = () => {
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">WhatsApp Number</label>
-                      <Field as={Input} name="whatsapp" placeholder="Enter WhatsApp number" className="h-12 border-[#d7dbdf]" />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm pointer-events-none">
+                          +234
+                        </span>
+                        <Field
+                          as={Input}
+                          name="whatsapp"
+                          placeholder="8012345678"
+                          className="h-12 border-[#d7dbdf] pl-14 focus:border-primarysolid transition-all duration-200"
+                          type="tel"
+                          onChange={(e) => handlePhoneInput(e, setFieldValue, "whatsapp")}
+                        />
+                      </div>
                       <ErrorMessage name="whatsapp" component="div" className="text-red-500 text-sm" />
                     </div>
 
                     <div className="flex-1">
                       <label className="text-sm font-semibold">Secondary Phone</label>
-                      <Field as={Input} name="secondaryPhone" placeholder="Enter secondary phone" className="h-12 border-[#d7dbdf]" />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm pointer-events-none">
+                          +234
+                        </span>
+                        <Field
+                          as={Input}
+                          name="secondaryPhone"
+                          placeholder="8012345678"
+                          className="h-12 border-[#d7dbdf] pl-14 focus:border-primarysolid transition-all duration-200"
+                          type="tel"
+                          onChange={(e) => handlePhoneInput(e, setFieldValue, "secondaryPhone")}
+                        />
+                      </div>
                       <ErrorMessage name="secondaryPhone" component="div" className="text-red-500 text-sm" />
                     </div>
                   </div>
@@ -202,7 +269,7 @@ export const RegistrationStep = () => {
                               <SelectValue placeholder="Select state" />
                             </SelectTrigger>
                             <SelectContent>
-                              {states.map(state => (
+                              {states.map((state) => (
                                 <SelectItem key={state} value={state}>{state}</SelectItem>
                               ))}
                             </SelectContent>
@@ -216,7 +283,7 @@ export const RegistrationStep = () => {
                       <label className="text-sm font-semibold">LGA</label>
                       <Field name="lga">
                         {({ field }) => (
-                          <Select value={field.value} onValueChange={val => {
+                          <Select value={field.value} onValueChange={(val) => {
                             setFieldValue("lga", val);
                             setFieldValue("lcda", "");
                           }}>
@@ -224,7 +291,7 @@ export const RegistrationStep = () => {
                               <SelectValue placeholder="Select LGA" />
                             </SelectTrigger>
                             <SelectContent>
-                              {(lgas[selectedState] || []).map(lga => (
+                              {(lgas[selectedState] || []).map((lga) => (
                                 <SelectItem key={lga} value={lga}>{lga}</SelectItem>
                               ))}
                             </SelectContent>
@@ -241,12 +308,12 @@ export const RegistrationStep = () => {
                       <label className="text-sm font-semibold">LCDA</label>
                       <Field name="lcda">
                         {({ field }) => (
-                          <Select value={field.value} onValueChange={val => setFieldValue("lcda", val)}>
+                          <Select value={field.value} onValueChange={(val) => setFieldValue("lcda", val)}>
                             <SelectTrigger className="h-12 border-[#d7dbdf]">
                               <SelectValue placeholder="Select LCDA" />
                             </SelectTrigger>
                             <SelectContent>
-                              {(lcdas[values.lga] || []).map(lcda => (
+                              {(lcdas[values.lga] || []).map((lcda) => (
                                 <SelectItem key={lcda} value={lcda}>{lcda}</SelectItem>
                               ))}
                             </SelectContent>
@@ -288,9 +355,9 @@ export const RegistrationStep = () => {
                   </div>
 
                   {/* Submit Button */}
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting} 
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
                     className="w-full h-12 bg-primarysolid text-white rounded-xl"
                   >
                     {isSubmitting ? "Registering..." : "Submit"}

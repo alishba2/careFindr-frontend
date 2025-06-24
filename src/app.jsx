@@ -17,8 +17,9 @@ import { AdminRegister } from "./components/pages/admin-registration";
 
 import { AuthProvider } from "./components/hook/auth";
 import { ProtectedRoute } from "./components/common/ProtectedRoute";
-import { RedirectIfAuthenticated } from "./components/common/RedirectIfAuthenticated";
 
+import { RedirectIfAuthenticated } from "./components/common/RedirectIfAuthenticated";
+import FacilityDetail from "./components/AdminDashboard/facility-detail";
 export const App = () => {
   return (
     <AuthProvider>
@@ -82,13 +83,14 @@ export const App = () => {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/register-admin" element={<AdminRegister />} />
           <Route
-            path="/admin-dashboard"
+            path="/admin-dashboard/*"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             }
           />
+
 
           {/* Onboarding route */}
           <Route path="/onboarding" element={<Onboarding />} />
@@ -109,6 +111,8 @@ export const App = () => {
               </ProtectedRoute>
             }
           />
+
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
