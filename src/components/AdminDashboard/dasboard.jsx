@@ -81,7 +81,7 @@ const AdminDashboard = () => {
         setActiveMenu(key);
         if (key === "1") navigate("/admin-dashboard");
         if (
-            ["all", "Hospital", "Laboratory", "Clinic", "Pharmacy", "Ambulance"].includes(key)
+            ["all", "Hospital", "Laboratory", "Clinic", "Pharmacy", "Ambulance","Insurance"].includes(key)
         ) {
             navigate("/admin-dashboard/facilities?type=" + key);
         }
@@ -127,6 +127,7 @@ const AdminDashboard = () => {
                             <Menu.Item key="Clinic" icon={<PlusCircleOutlined />}>Specialist Clinic</Menu.Item>
                             <Menu.Item key="Pharmacy" icon={<MedicineBoxOutlined />}>Pharmacy</Menu.Item>
                             <Menu.Item key="Ambulance" icon={<CarOutlined />}>Ambulance</Menu.Item>
+                            <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>Insurance</Menu.Item>
                         </SubMenu>
 
                         <Menu.Item key="4" icon={<TeamOutlined />}>
