@@ -4,19 +4,17 @@
       "id": "src/components/common/RedirectIfAuthenticated.jsx",
       "label": "RedirectIfAuthenticated",
       "routes": [
-        "/",
         "/verify-otp",
         "/login",
         "/forgot-password",
         "/reset-password"
-      ],
-      "isRoot": true
+      ]
     },
     {
       "id": "src/components/common/ProtectedRoute.jsx",
       "label": "ProtectedRoute",
       "routes": [
-        "/admin-dashboard",
+        "/admin-dashboard/*",
         "/facility-dashboard"
       ]
     },
@@ -26,25 +24,31 @@
       "routes": [
         "/onboarding"
       ]
+    },
+    {
+      "id": "src/components/AdminDashboard/facility-detail.jsx",
+      "label": "facility-detail",
+      "routes": [
+        "facilities/:id",
+        "/facilities/:id"
+      ]
+    },
+    {
+      "id": "src/components/AdminDashboard/allFacilities.jsx",
+      "label": "allFacilities",
+      "routes": [
+        "/facilities"
+      ]
+    },
+    {
+      "id": "src/components/AdminDashboard/admin.jsx",
+      "label": "admin",
+      "routes": [
+        "/admins"
+      ]
     }
   ],
   "edges": [
-    {
-      "id": "src/components/common/RedirectIfAuthenticated.jsx:11:11-to-src/components/common/ProtectedRoute.jsx",
-      "source": "src/components/common/RedirectIfAuthenticated.jsx",
-      "target": "src/components/common/ProtectedRoute.jsx",
-      "data": {
-        "viaRoute": "/admin-dashboard",
-        "trigger": {
-          "element": "<Navigate to=\"/admin-dashboard\" replace />",
-          "line": 11,
-          "endLine": 11,
-          "column": 11,
-          "endColumn": 53,
-          "sourceFile": "src/components/common/RedirectIfAuthenticated.jsx"
-        }
-      }
-    },
     {
       "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/common/ProtectedRoute.jsx",
       "source": "src/components/common/RedirectIfAuthenticated.jsx",

@@ -41,10 +41,13 @@ export const Login = () => {
 
   // Handle form submission
   const handleSubmit = async (values, { setStatus }) => {
+    alert('here');
     const loginData = {
       loginId: values.identifier,
       password: values.password,
     };
+
+    console.log("Login data:", loginData);
     try {
       const response = await loginFacility(loginData);
       // Store token in localStorage (or use context/auth provider)

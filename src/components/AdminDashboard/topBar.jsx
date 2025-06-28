@@ -2,6 +2,7 @@
 import React from "react";
 import { Layout, Badge } from "antd";
 import { BellOutlined } from "@ant-design/icons";
+import { LogOutIcon } from "lucide-react";
 
 const { Header } = Layout;
 
@@ -14,11 +15,13 @@ const Navbar = ({type}) => {
           {type} Dashboard
         </button>
       </div>
-      <div>
-        <Badge count={4} offset={[0, 0]}>
-          <BellOutlined className="text-xl text-gray-700" />
-        </Badge>
+
+      <div className="flex items-center justify-end gap-5">
+        <button className="flex h-10 w-10 items-center justify-center gap-2.5 rounded-xl">
+          <LogOutIcon className="h-6 w-6" />
+        </button>
       </div>
+
     </Header>
   );
 };
