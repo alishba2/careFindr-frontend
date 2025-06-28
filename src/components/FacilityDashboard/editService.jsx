@@ -11,6 +11,8 @@ import { UploadIcon } from "lucide-react";
 import { medicalSpecialties } from "../enums/medicalSpecialities";
 import { useAuth } from "../hook/auth";
 import { Textarea } from "../../components/textArea";
+
+
 export default function EditServices({ services }) {
   const { authData } = useAuth();
   const [hospitalData, setHospitalData] = useState(null);
