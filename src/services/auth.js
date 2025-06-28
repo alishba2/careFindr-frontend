@@ -49,7 +49,6 @@ export const loginFacility = async (loginData) => {
 };
 
 
-
 export const adminLogin = async (login) => {
     try {
         const response = await axios.post(`${backendUrl}/api/admin/login`,login);

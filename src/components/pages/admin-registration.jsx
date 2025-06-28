@@ -77,14 +77,14 @@ export const AdminRegister = () => {
         </div>
       </header>
 
-      <main className="flex flex-col items-center gap-10 py-10 w-full max-w-[768px]">
+      <main className="flex flex-col items-center gap-10 py-10 w-full max-w-[768px] bg-[#DFE3E6]">
         <div className="w-full">
           <h1 className="text-[30px] font-semibold leading-9 tracking-[0.15px] text-fgtext-contrast">
             Create Your Admin Account
           </h1>
         </div>
 
-        <form className="w-full">
+        <form className="w-full ">
           <Card className="w-full border-[#dfe3e6] shadow-box-shadow-shadow">
             <CardContent className="p-5 space-y-4">
               {/* First and Last Name */}
