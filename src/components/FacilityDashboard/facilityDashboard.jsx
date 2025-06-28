@@ -3,12 +3,16 @@ import React, { useState } from "react";
 import {
   HomeOutlined,
   ToolOutlined,
+  SettingFilled,
   AppstoreAddOutlined,
   CalendarOutlined,
   TeamOutlined,
   MessageOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  AreaChartOutlined ,
+  SnippetsOutlined ,
+  
 } from "@ant-design/icons";
 import { Layout, Menu, Button } from "antd";
 import Navbar from "../AdminDashboard/topBar";
@@ -28,11 +32,11 @@ const FacilityDashboard = () => {
 
   const menuItems = [
     { key: "home", icon: <HomeOutlined />, label: "Overview" },
-    { key: "profile", icon: <ToolOutlined />, label: " Profile Management" },
-    { key: "services", icon: <ToolOutlined />, label: " Services" },
-    { key: "appointments", icon: <CalendarOutlined />, label: "Appointments" },
-    { key: "referrals", icon: <TeamOutlined />, label: "Referrals" },
-    { key: "feedback", icon: <MessageOutlined />, label: "Feedback" },
+    { key: "profile", icon: <  SettingFilled/>, label: " Profile Management" },
+    { key: "services", icon: <AreaChartOutlined />, label: " Facility Information" },
+    { key: "appointments", icon: <CalendarOutlined />, label: "Service & Capacity" },
+    { key: "referrals", icon: <SnippetsOutlined />, label: "Document Upload" },
+    { key: "feedback", icon: <TeamOutlined />, label: "Get Support" },
   ];
 
   const renderContent = () => {
@@ -60,15 +64,19 @@ const FacilityDashboard = () => {
     <>
       <Navbar type={"Facility"} />
 
-      <Layout className="min-h-screen">
+
+      <Layout className="h-screen ">
+        
         <Sider
           width={320}
           collapsible
           collapsed={collapsed}
           trigger={null}
           className="bg-white shadow-md mt-6 mx-6 rounded-xl p-4"
-          style={{ height: "fit-content" }}
+          style={{ height: "640px" }}
         >
+
+          
           <div className="flex justify-end mb-4">
             <Button
               type="text"
@@ -85,6 +93,7 @@ const FacilityDashboard = () => {
             className="text-base"
             style={{ boxShadow: "none", border: "none" }}
           >
+
             {menuItems.map((item) => (
               <Menu.Item
                 key={item.key}
@@ -95,6 +104,7 @@ const FacilityDashboard = () => {
                   color: activeTab === item.key ? "#0C7792" : "#000",
                 }}
               >
+
                 {!collapsed && item.label}
               </Menu.Item>
             ))}
