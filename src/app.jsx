@@ -20,6 +20,8 @@ import { ProtectedRoute } from "./components/common/ProtectedRoute";
 
 import { RedirectIfAuthenticated } from "./components/common/RedirectIfAuthenticated";
 import FacilityDetail from "./components/AdminDashboard/facility-detail";
+import 'react-phone-input-2/lib/style.css';
+
 export const App = () => {
   return (
     <AuthProvider>

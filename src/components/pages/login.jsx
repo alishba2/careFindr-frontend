@@ -57,12 +57,8 @@ export const Login = () => {
       // Redirect to dashboard or home page
 
       localStorage.setItem("facilityType", response.facility.type.toLowerCase());
+      navigate("/facility-dashboard");
 
-      if (response.facility.onBoardingCompleted) {
-        navigate("/facility-dashboard");
-      } else {
-        navigate("/onboarding");
-      }
 
     } catch (error) {
       console.error("Login failed:", error);

@@ -4,6 +4,8 @@ module.exports = {
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
   ],
+  safelist: ['tooltip-custom'],
+
   theme: {
     extend: {
       colors: {

@@ -141,3 +141,27 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+@layer components {
+  .tooltip-custom {
+    @apply max-w-[200px] text-sm text-white bg-gray-800 p-2 rounded-md shadow-lg;
+    white-space: normal !important;
+    text-align: left;
+    z-index: 50;
+  }
+
+  .tooltip-custom[data-placement^='top']::after {
+    @apply border-t-gray-800;
+  }
+
+  .tooltip-custom[data-placement^='bottom']::after {
+    @apply border-b-gray-800;
+  }
+
+  .tooltip-custom[data-placement^='left']::after {
+    @apply border-l-gray-800;
+  }
+
+  .tooltip-custom[data-placement^='right']::after {
+    @apply border-r-gray-800;
+  }
+}
