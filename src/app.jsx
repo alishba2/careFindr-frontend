@@ -6,7 +6,6 @@ import { VerifyOtp } from "./components/pages/verifyOtp";
 import { Login } from "./components/pages/login";
 import { ForgotPassword } from "./components/pages/forgotPassword";
 import { ResetPassword } from "./components/pages/resetPassword";
-import Onboarding from "./components/pages/onboarding";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -94,23 +93,21 @@ export const App = () => {
           />
 
 
-          {/* Onboarding route */}
-          <Route path="/onboarding" element={<Onboarding />} />
 
           {/* Facility dashboard route */}
           <Route
             path="/facility-dashboard"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "hospital",
-                  "laboratory",
-                  "pharmacy",
-                  "ambulance",
-                ]} // Add all valid facility types
-              >
+              // <ProtectedRoute
+              //   allowedRoles={[
+              //     "Hospital",
+              //     "Laboratory",
+              //     "Pharmacy",
+              //     "Ambulance",
+              //   ]} // Add all valid facility types
+              // >
                 <FacilityDashboard />
-              </ProtectedRoute>
+             
             }
           />
 

@@ -41,7 +41,6 @@ export const Login = () => {
 
   // Handle form submission
   const handleSubmit = async (values, { setStatus }) => {
-    alert('here');
     const loginData = {
       loginId: values.identifier,
       password: values.password,

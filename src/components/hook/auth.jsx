@@ -1,60 +1,63 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { getFacility } from '../../services/facility';
 
 const AuthContext = createContext(null);
-import { getFacility } from '../../services/facility';
+
 export const AuthProvider = ({ children }) => {
-  const [authData, setAuthData] = useState(null); 
-  const [token, setToken] = useState('');
+  const [authData, setAuthData] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [facilityType, setFacilityType] = useState(localStorage.getItem('facilityType') || 'Hospital');
 
-  const [facilityType,setFacilityType] = useState("Hospital");
+  // Fetch auth data on mount if token exists
 
-  useEffect(()=>{
-    const token = localStorage.getItem('token');
-    setToken(token);
-  },[])
-
-  const login = (data) => {
-    setAuthData(data);
-  };
-
-useEffect(() => {
   const fetchAuthData = async () => {
-    const token = localStorage.getItem('token');
-    setToken(token);
-
-    if (token) {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
       try {
-        const res = await getFacility(); 
-        console.log(res, "response here");
-        setAuthData(res.services);
+        const res = await getFacility();
+        setAuthData(res.facility);
+        setFacilityType(res.facility.type); // Update facilityType from response
+        localStorage.setItem('facilityType', res.facility.type); // Sync with localStorage
       } catch (err) {
-        console.error("Failed to fetch facility data", err);
+        console.error('Failed to fetch facility data:', err);
+        // Optionally clear token and authData on failure
+        setAuthData(null);
+        setToken('');
+        setFacilityType('Hospital');
+        localStorage.removeItem('token');
+        localStorage.removeItem('facilityType');
       }
     }
   };
 
-  fetchAuthData();
-}, []);
+  useEffect(() => {
 
-useEffect(()=>{
+    fetchAuthData();
+  }, []);
 
-    console.log(authData, "auth data is here");
-
-},[authData])
+  // Debug authData changes (optional, remove in production)
+ 
+  const login = (data) => {
+    setAuthData(data);
+    setToken(localStorage.getItem('token') || '');
+    setFacilityType(localStorage.getItem('facilityType') || 'Hospital');
+  };
 
   const logout = () => {
     setAuthData(null);
-    // localStorage.removeItem('auth');
+    setToken('');
+    setFacilityType('Hospital');
+    localStorage.removeItem('token');
+    localStorage.removeItem('facilityType');
   };
 
   return (
-    <AuthContext.Provider value={{ authData, login, logout ,facilityType}}>
+    <AuthContext.Provider value={{ authData, login, logout, facilityType, fetchAuthData ,setAuthData}}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

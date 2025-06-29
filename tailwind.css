@@ -23,6 +23,7 @@
   --bgbg: rgba(241, 243, 245, 1);
   --bgbg-subtle: rgba(248, 249, 250, 1);
   --bgdefault-bg: rgba(255, 255, 255, 1);
+  --bg-form: rgba(248, 249, 250, 1);
   --box-shadow-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.1), 0px 1px 3px 0px
     rgba(0, 0, 0, 0.1);
   --fgborder: rgba(215, 219, 223, 1);

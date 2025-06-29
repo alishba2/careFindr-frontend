@@ -1,34 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HomeOutlined,
-  ToolOutlined,
   SettingFilled,
-  AppstoreAddOutlined,
-  CalendarOutlined,
+  AreaChartOutlined,
+  CloudUploadOutlined,
   TeamOutlined,
+  BellOutlined,
   MessageOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  AreaChartOutlined,
-  SnippetsOutlined,
-  BellOutlined,
-  UserOutlined,
-  FileTextOutlined,
   DatabaseOutlined,
-  CloudUploadOutlined,
 } from "@ant-design/icons";
+import { Layout, Menu, Button, Avatar } from "antd";
 
-
-
-import { Layout, Menu, Button } from "antd";
-import Navbar from "../AdminDashboard/topBar";
 import DashboardHome from "./dashboardHome";
-import EditServices from "./editService";
-import EquipmentMenu from "./equipmentMenu";
-import Appointments from "./appointment";
+import Services from './services';
 import Referrals from "./referrals";
 import Feedback from "./feedback";
-import Profile from "./profile";
+import { FacilityInformation } from "./facilityInformation";
+import Header from "../pages/header";
+import { DocumentUpload } from "./documentUpload";
+import { useAuth } from "../hook/auth";
+
 
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
@@ -36,6 +29,9 @@ const { SubMenu } = Menu;
 const FacilityDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const { fetchAuthData } = useAuth();
+
+
 
   const menuItems = [
     { key: "home", icon: <HomeOutlined />, label: "Overview" },
@@ -44,10 +40,22 @@ const FacilityDashboard = () => {
       icon: <SettingFilled />,
       label: "Profile Management",
       children: [
-        { key: "facility-info", icon: <DatabaseOutlined />, label: "Facility Information" },
-        { key: "service-capacity", icon: <AreaChartOutlined />, label: "Service & Capacity" },
-        { key: "document-upload", icon: <CloudUploadOutlined />, label: "Document Upload" },
-      ]
+        {
+          key: "facility-info",
+          icon: <DatabaseOutlined />,
+          label: "Facility Information",
+        },
+        {
+          key: "service-capacity",
+          icon: <AreaChartOutlined />,
+          label: "Service & Capacity",
+        },
+        {
+          key: "document-upload",
+          icon: <CloudUploadOutlined />,
+          label: "Document Upload",
+        },
+      ],
     },
     { key: "referrals", icon: <TeamOutlined />, label: "Referrals" },
     { key: "notifications", icon: <BellOutlined />, label: "Notifications" },
@@ -59,15 +67,20 @@ const FacilityDashboard = () => {
       case "home":
         return <DashboardHome />;
       case "facility-info":
-        return <EditServices />; // Facility Information component
+        return <FacilityInformation />;
       case "service-capacity":
-        return <Appointments />; // Service & Capacity component
+        return <Services />;
       case "document-upload":
-        return <Profile />; // Document Upload component
+        return <DocumentUpload />;
       case "referrals":
         return <Referrals />;
       case "notifications":
-        return <div className="p-6"><h2 className="text-2xl font-bold">Notifications</h2><p>Notifications content goes here...</p></div>;
+        return (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold">Notifications</h2>
+            <p>Notifications content goes here...</p>
+          </div>
+        );
       case "support":
         return <Feedback />;
       default:
@@ -75,73 +88,19 @@ const FacilityDashboard = () => {
     }
   };
 
-  const renderMenuItems = (items) => {
-    return items.map((item) => {
-      if (item.children) {
-        return (
-          <SubMenu
-            key={item.key}
-            icon={item.icon}
-            title={item.label}
-            style={{
-              backgroundColor: "transparent", 
-              color: "#000",
-              fontSize: "16px",
-              marginBottom: "2px",
-            }}
-          >
-            {item.children.map((child) => (
-              <Menu.Item
-                key={child.key}
-                icon={child.icon}
-                style={{
-                  backgroundColor: activeTab === child.key ? "#E7F9FB" : "transparent",
-                  color: activeTab === child.key ? "#0C7792" : "#000",
-                  fontSize: "16px",
-                  paddingLeft: "48px", // Proper indentation for submenu items
-                  margin: "0",
-                  borderRadius: "8px",
-                  marginBottom: "2px",
-                  
-                }}
-              >
-                {child.label}
-              </Menu.Item>
-            ))}
-          </SubMenu>
-        );
-      }
-
-      return (
-        <Menu.Item
-          key={item.key}
-          icon={item.icon}
-          style={{
-            backgroundColor: activeTab === item.key ? "#E7F9FB" : "transparent",
-            color: activeTab === item.key ? "#0C7792" : "#000",
-            borderRadius: "8px",
-            margin: "0 0 2px 0",
-          }}
-        >
-          {!collapsed && item.label}
-        </Menu.Item>
-      );
-    });
-  };
-
   return (
     <>
-      <Navbar type={"Facility"} />
-
-      <Layout className="h-screen">
+      <Header />
+      <Layout style={{ height: "calc(100vh - 64px)" }} className="py-4">
         <Sider
-          width={320}
+          width={380}
           collapsible
           collapsed={collapsed}
           trigger={null}
-          className="bg-white shadow-md mt-6 mx-6 rounded-xl p-4"
-          style={{ height: "770px" }}
+          className="bg-white shadow-md mt-6 mx-6  rounded-xl px-4 py-6 "
+          style={{ height: "100%", overflow: "auto" }}
         >
+          {/* Collapse Button */}
           <div className="flex justify-end mb-4">
             <Button
               type="text"
@@ -151,24 +110,109 @@ const FacilityDashboard = () => {
             />
           </div>
 
+          {/* Avatar & Name */}
+          <div className="flex flex-col items-center mb-6">
+            <Avatar size={100} src="https://i.pravatar.cc/150?img=3" />
+            {!collapsed && (
+              <h3 className="mt-3 text-center font-semibold text-[18px] text-gray-800">
+                Mercy Life
+              </h3>
+            )}
+          </div>
           <Menu
             mode="inline"
             selectedKeys={[activeTab]}
             defaultOpenKeys={["profile-management"]}
             onClick={({ key }) => setActiveTab(key)}
-            style={{ 
-              boxShadow: "none", 
+            style={{
               border: "none",
-              fontSize: "16px"
+              fontSize: "17px",
+              backgroundColor: "transparent",
+              color: "#687076",
             }}
             inlineCollapsed={collapsed}
           >
-            {renderMenuItems(menuItems)}
+            {menuItems.map((item) =>
+              item.children ? (
+                <SubMenu
+                  key={item.key}
+                  // icon={item.icon}
+                  title={
+                    <span
+                      className="flex items-center gap-2"
+                      style={{
+                        backgroundColor: activeTab.startsWith(item.key) ? "#E7F9FB" : "transparent",
+                        color: activeTab.startsWith(item.key) ? "#0C7792" : "#687076",
+                        borderRadius: "10px",
+                        fontSize: "17px",
+                        // padding: "0px 8px",
+                     
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      {!collapsed && (
+                        <>
+                          {item.icon}
+                          {item.label}
+                        </>
+                      )}
+                    </span>
+                  }
+                  style={{
+                    marginBottom: "6px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  {item.children.map((child) => (
+                    <Menu.Item
+                      key={child.key}
+                      icon={child.icon}
+                      style={{
+                        backgroundColor: activeTab === child.key ? "#E7F9FB" : "transparent",
+                        color: activeTab === child.key ? "#0C7792" : "#687076",
+                        fontSize: "16px",
+                        // paddingLeft: "48px",
+                        borderRadius: "8px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {child.label}
+                    </Menu.Item>
+                  ))}
+                </SubMenu>
+              ) : (
+                <Menu.Item
+                  key={item.key}
+                  icon={item.icon}
+                  style={{
+                    backgroundColor: activeTab === item.key ? "#E7F9FB" : "transparent",
+                    color: activeTab === item.key ? "#0C7792" : "#687076",
+                    borderRadius: "10px",
+                    fontSize: "17px",
+                    marginBottom: "6px",
+                    paddingLeft: "20px",
+                    paddingRight: "10px",
+                  }}
+                >
+                  {item.label}
+                </Menu.Item>
+              )
+            )}
           </Menu>
+
         </Sider>
 
         <Layout>
-          <Content className="p-6">{renderContent()}</Content>
+          <Content
+            className="p-6"
+            style={{
+              overflowY: "auto",
+              height: "100%",
+            }}
+          >
+            {renderContent()}
+          </Content>
         </Layout>
       </Layout>
     </>
@@ -176,3 +220,4 @@ const FacilityDashboard = () => {
 };
 
 export default FacilityDashboard;
+

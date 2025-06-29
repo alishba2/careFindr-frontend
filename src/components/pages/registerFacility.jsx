@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { Button } from "../../components/button.jsx";
 import { Card, CardContent } from "../../components/card.jsx";
 import { Input } from "../../components/input.jsx";
@@ -230,9 +230,9 @@ export const RegistrationStep = () => {
   };
 
   return (
-    <main className="flex flex-col min-h-screen items-center bg-white pb-20 bg-[#DFE3E6]">
+    <main className="flex flex-col min-h-screen items-center  pb-20 bg-[#F8F9FA]">
       <Header />
-      <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 shadow-md rounded-[15px] bg-white border border-[#c9cbcd] border-[3px]">
+      <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 shadow-[0px_0px_4px_rgba(0,_0,_0,_0.25)] rounded-[15px] bg-white   ">
         <div className="mb-6 m-2 p-4 rounded-[5px] h-24 flex flex-col items-center justify-center">
           <h2 className="text-[30px] font-semibold text-fgtext-contrast">
             Create Your Account

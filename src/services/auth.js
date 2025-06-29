@@ -1,5 +1,5 @@
 import axios from "axios";
-let backendUrl = import.meta.env.VITE_APP_BASE_URL ;
+let backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
 // register a new facility
 export const registerFacility = async (facilityData) => {
@@ -48,13 +48,23 @@ export const loginFacility = async (loginData) => {
   }
 };
 
+export const updateFacility = async (data) => {
+  try {
+    const response = await axios.put(`${backendUrl}/api/auth/update`, data);
+    return response.data;
+  }
+  catch (error) {
+    throw error;
+  }
+}
+
 
 export const adminLogin = async (login) => {
-    try {
-        const response = await axios.post(`${backendUrl}/api/admin/login`,login);
-        return response.data;
-    } catch (error) {
-        console.error("Error logging in admin:", error);
-        throw error;
-    }
+  try {
+    const response = await axios.post(`${backendUrl}/api/admin/login`, login);
+    return response.data;
+  } catch (error) {
+    console.error("Error logging in admin:", error);
+    throw error;
+  }
 }

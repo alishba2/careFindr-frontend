@@ -10,7 +10,7 @@ import { Label } from "../../components/label";
 import { Select as ShadSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/select";
 import { Textarea } from "../../components/textArea";
 import { getFacilityById } from "../../services/facility";
-import { medicalSpecialties } from "../enums/medicalSpecialities";
+import { CoreClinicalSpecialities } from "../enums/medicalSpecialities";
 import { useAuth } from "../hook/auth";
 import { updateFacilityServices } from "../../services/facility";
 
@@ -348,9 +348,9 @@ const FacilityDetail = () => {
               {isEditing ? (
                 <Select
                   isMulti
-                  options={medicalSpecialties}
+                  options={CoreClinicalSpecialities}
                   className="text-sm"
-                  value={medicalSpecialties.filter((spec) => hospitalData.specialties?.includes(spec.value))}
+                  value={CoreClinicalSpecialities.filter((spec) => hospitalData.specialties?.includes(spec.value))}
                   onChange={(selected) =>
                     setHospitalData((prev) => ({
                       ...prev,
