@@ -68,3 +68,28 @@ export const adminLogin = async (login) => {
     throw error;
   }
 }
+
+export const uploadImage = async (file, facilityId) => {
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("facilityId", facilityId);
+
+    
+
+    const response = await axios.post(
+      `${backendUrl}/api/auth/upload-profile-image`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading profile image:", error);
+    throw error;
+  }
+};
