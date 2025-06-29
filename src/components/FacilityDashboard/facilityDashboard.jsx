@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HomeOutlined,
   SettingFilled,
@@ -32,6 +32,11 @@ const FacilityDashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
   const [profileImage, setProfileImage] = useState("");
   const { fetchAuthData, authData } = useAuth();
+
+
+  useEffect(()=>{
+    fetchAuthData();
+  },[])
 
   const handleImageUpload = async (file) => {
     try {
