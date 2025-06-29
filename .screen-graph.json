@@ -14,15 +14,14 @@
       "id": "src/components/common/ProtectedRoute.jsx",
       "label": "ProtectedRoute",
       "routes": [
-        "/admin-dashboard/*",
-        "/facility-dashboard"
+        "/admin-dashboard/*"
       ]
     },
     {
-      "id": "src/components/pages/onboarding.jsx",
-      "label": "onboarding",
+      "id": "src/components/FacilityDashboard/facilityDashboard.jsx",
+      "label": "facilityDashboard",
       "routes": [
-        "/onboarding"
+        "/facility-dashboard"
       ]
     },
     {
@@ -50,9 +49,9 @@
   ],
   "edges": [
     {
-      "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/common/ProtectedRoute.jsx",
+      "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/FacilityDashboard/facilityDashboard.jsx",
       "source": "src/components/common/RedirectIfAuthenticated.jsx",
-      "target": "src/components/common/ProtectedRoute.jsx",
+      "target": "src/components/FacilityDashboard/facilityDashboard.jsx",
       "data": {
         "viaRoute": "/facility-dashboard",
         "trigger": {
@@ -78,22 +77,6 @@
           "column": 11,
           "endColumn": 43,
           "sourceFile": "src/components/common/ProtectedRoute.jsx"
-        }
-      }
-    },
-    {
-      "id": "src/components/pages/onboarding.jsx:51:10-to-src/components/common/ProtectedRoute.jsx",
-      "source": "src/components/pages/onboarding.jsx",
-      "target": "src/components/common/ProtectedRoute.jsx",
-      "data": {
-        "viaRoute": "/facility-dashboard",
-        "trigger": {
-          "element": "navigate(\"/facility-dashboard\")",
-          "line": 51,
-          "endLine": 51,
-          "column": 10,
-          "endColumn": 41,
-          "sourceFile": "src/components/pages/onboarding.jsx"
         }
       }
     }
