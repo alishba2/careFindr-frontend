@@ -13,14 +13,9 @@ import {
   CameraOutlined
 } from "@ant-design/icons";
 import { Layout, Menu, Button } from "antd";
-
-import DashboardHome from "./dashboardHome";
-import Services from './services';
-import Referrals from "./referrals";
-import Feedback from "./feedback";
-import { FacilityInformation } from "./facilityInformation";
+import { NavLink, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Header from "../pages/header";
-import { DocumentUpload } from "./documentUpload";
 import { useAuth } from "../hook/auth";
 import { uploadImage } from "../../services/auth";
 
@@ -29,18 +24,27 @@ const { SubMenu } = Menu;
 
 const FacilityDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
-  const [profileImage, setProfileImage] = useState("");
   const { fetchAuthData, authData } = useAuth();
+  const [profileImage, setProfileImage] = useState("");
+  const location = useLocation();
 
+  // Set collapsed state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      setCollapsed(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchAuthData();
-  },[])
+  }, []);
 
   const handleImageUpload = async (file) => {
     try {
-      const res = await uploadImage(file, authData._id); // Upload image and get path
+      const res = await uploadImage(file, authData._id);
       setProfileImage(`${import.meta.env.VITE_APP_BASE_URL}/${res.imagePath}`);
     } catch (error) {
       console.error("Upload failed", error);
@@ -49,63 +53,40 @@ const FacilityDashboard = () => {
 
   const handleDeleteImage = () => {
     setProfileImage("");
-    // Optionally: Call backend to delete image as well
+    // Optionally: Call backend to delete image
   };
 
   const menuItems = [
-    { key: "home", icon: <HomeOutlined />, label: "Overview" },
+    { key: "home", icon: <HomeOutlined />, label: "Overview", path: "home" },
     {
       key: "profile-management",
       icon: <SettingFilled />,
       label: "Profile Management",
       children: [
-        { key: "facility-info", icon: <DatabaseOutlined />, label: "Facility Information" },
-        { key: "service-capacity", icon: <AreaChartOutlined />, label: "Service & Capacity" },
-        { key: "document-upload", icon: <CloudUploadOutlined />, label: "Document Upload" },
+        { key: "facility-info", icon: <DatabaseOutlined />, label: "Facility Information", path: "facility-info" },
+        { key: "service-capacity", icon: <AreaChartOutlined />, label: "Service & Capacity", path: "service-capacity" },
+        { key: "document-upload", icon: <CloudUploadOutlined />, label: "Document Upload", path: "document-upload" },
       ],
     },
-    { key: "referrals", icon: <TeamOutlined />, label: "Referrals" },
-    { key: "notifications", icon: <BellOutlined />, label: "Notifications" },
-    { key: "support", icon: <MessageOutlined />, label: "Get Support" },
+    { key: "referrals", icon: <TeamOutlined />, label: "Referrals", path: "referrals" },
+    { key: "notifications", icon: <BellOutlined />, label: "Notifications", path: "notifications" },
+    { key: "support", icon: <MessageOutlined />, label: "Get Support", path: "support" },
   ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "home":
-        return <DashboardHome />;
-      case "facility-info":
-        return <FacilityInformation />;
-      case "service-capacity":
-        return <Services />;
-      case "document-upload":
-        return <DocumentUpload />;
-      case "referrals":
-        return <Referrals />;
-      case "notifications":
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Notifications</h2>
-            <p>Notifications content goes here...</p>
-          </div>
-        );
-      case "support":
-        return <Feedback />;
-      default:
-        return <DashboardHome />;
-    }
-  };
 
   return (
     <>
       <Header />
-      <Layout style={{ height: "calc(100vh - 64px)" }} className="py-4">
+      <Layout className="py-4 min-h-[calc(100vh-64px)]">
         <Sider
           width={380}
           collapsible
           collapsed={collapsed}
           trigger={null}
-          className="bg-white shadow-md mt-6 mx-6 rounded-xl px-4 py-6"
-          style={{ height: "100%", overflow: "auto" }}
+          className="bg-white shadow-md mt-6 mx-2 sm:mx-4 md:mx-6 rounded-xl px-4 py-6"
+          // style={{ height: "100%", overflow: "auto" }}
+          breakpoint="md"
+          collapsedWidth={80}
+          onBreakpoint={(broken) => setCollapsed(broken)}
         >
           {/* Collapse Button */}
           <div className="flex justify-end mb-4">
@@ -118,13 +99,14 @@ const FacilityDashboard = () => {
           </div>
 
           {/* Profile Image */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="relative">
+          {!collapsed && (
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative">
               <div
                 className="rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
                 style={{
-                  width: 140,
-                  height: 140,
+                  width: 150,
+                  height: 150,
                   border: "4px solid #ccc",
                   position: "relative",
                   cursor: "pointer",
@@ -140,75 +122,51 @@ const FacilityDashboard = () => {
                 ) : (
                   <span className="text-gray-500 text-sm">No Image</span>
                 )}
+              </div>
+              <CameraOutlined
+                className="absolute bottom-0 right-3 bg-black bg-opacity-40 text-white p-2 rounded-full"
+                style={{ fontSize: 24 }}
+              />
 
-                <CameraOutlined
-                  style={{
-                    position: "absolute",
-                    fontSize: 28,
-                    color: "white",
-                    backgroundColor: "rgba(0,0,0,0.4)",
-                    padding: 8,
-                    borderRadius: "50%",
-                  }}
-                />
+                {/* Delete Button */}
+                {profileImage && (
+                  <span
+                    onClick={handleDeleteImage}
+                    title="Delete"
+                    className="absolute top-0 right-0 text-black rounded-full p-1 cursor-pointer text-xs"
+                    style={{ zIndex: 1 }}
+                  >
+                    X
+                  </span>
+                )}
               </div>
 
-              {/* Delete Button */}
-              {profileImage && (
-                <span
-                  onClick={handleDeleteImage}
-                  title="Delete"
-                  style={{
-                    position: "absolute",
-                    top: -6,
-                    right: -6,
-                    backgroundColor: "#f44336",
-                    color: "white",
-                    borderRadius: "50%",
-                    padding: "4px 6px",
-                    cursor: "pointer",
-                    fontSize: 12,
-                    zIndex: 1,
-                  }}
-                >
-                  ✕
-                </span>
-              )}
-            </div>
+              <input
+                type="file"
+                accept="image/*"
+                id="profile-image-input"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    handleImageUpload(file);
+                  }
+                }}
+              />
 
-            <input
-              type="file"
-              accept="image/*"
-              id="profile-image-input"
-              style={{ display: "none" }}
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  handleImageUpload(file);
-                }
-              }}
-            />
-
-            {!collapsed && (
               <h3 className="mt-3 text-center font-semibold text-[20px] text-gray-800">
-                {authData?.type || "Facility"}
+                {authData?.name || "Facility"}
               </h3>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Menu */}
           <Menu
             mode="inline"
-            selectedKeys={[activeTab]}
             defaultOpenKeys={["profile-management"]}
-            onClick={({ key }) => setActiveTab(key)}
-            style={{
-              border: "none",
-              fontSize: "17px",
-              backgroundColor: "transparent",
-              color: "#687076",
-            }}
+            className="bg-transparent text-[#687076] text-[17px]"
             inlineCollapsed={collapsed}
+            style={{ border: "none" }}
           >
             {menuItems.map((item) =>
               item.children ? (
@@ -216,22 +174,18 @@ const FacilityDashboard = () => {
                   key={item.key}
                   title={
                     <span
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-3 px-3 py-2"
                       style={{
-                        backgroundColor: activeTab.startsWith(item.key) ? "#E7F9FB" : "transparent",
-                        color: activeTab.startsWith(item.key) ? "#0C7792" : "#687076",
+                        // backgroundColor: item.children.some((child) => location.pathname === `/facility-dashboard/${child.path}`) ? "#E7F9FB" : "transparent",
+                        color: item.children.some((child) => location.pathname === `/facility-dashboard/${child.path}`) ? "#0C7792" : "#687076",
                         borderRadius: "10px",
-                        fontSize: "17px",
-                        display: "flex",
-                        alignItems: "center",
+                        position:'relative',
+                        left:'-12px'
+                        
                       }}
                     >
-                      {!collapsed && (
-                        <>
-                          {item.icon}
-                          {item.label}
-                        </>
-                      )}
+                      {item.icon}
+                      {!collapsed && item.label}
                     </span>
                   }
                   style={{
@@ -243,15 +197,18 @@ const FacilityDashboard = () => {
                     <Menu.Item
                       key={child.key}
                       icon={child.icon}
+                      className="flex items-center gap-3 px-6"
                       style={{
-                        backgroundColor: activeTab === child.key ? "#E7F9FB" : "transparent",
-                        color: activeTab === child.key ? "#0C7792" : "#687076",
-                        fontSize: "16px",
+                        backgroundColor: location.pathname === `/facility-dashboard/${child.path}` ? "#E7F9FB" : "transparent",
+                        color: location.pathname === `/facility-dashboard/${child.path}` ? "#0C7792" : "#687076",
                         borderRadius: "8px",
                         marginBottom: "2px",
+                        fontSize: "16px",
                       }}
                     >
-                      {child.label}
+                      <NavLink to={child.path} className="flex-1">
+                        {child.label}
+                      </NavLink>
                     </Menu.Item>
                   ))}
                 </SubMenu>
@@ -259,17 +216,18 @@ const FacilityDashboard = () => {
                 <Menu.Item
                   key={item.key}
                   icon={item.icon}
+                  className="flex items-center gap-3 px-3 py-2"
                   style={{
-                    backgroundColor: activeTab === item.key ? "#E7F9FB" : "transparent",
-                    color: activeTab === item.key ? "#0C7792" : "#687076",
+                    backgroundColor: location.pathname === `/facility-dashboard/${item.path}` ? "#E7F9FB" : "transparent",
+                    color: location.pathname === `/facility-dashboard/${item.path}` ? "#0C7792" : "#687076",
                     borderRadius: "10px",
-                    fontSize: "17px",
                     marginBottom: "6px",
-                    paddingLeft: "20px",
-                    paddingRight: "10px",
+                    fontSize: "17px",
                   }}
                 >
-                  {item.label}
+                  <NavLink to={item.path} className="flex-1">
+                    {item.label}
+                  </NavLink>
                 </Menu.Item>
               )
             )}
@@ -278,13 +236,14 @@ const FacilityDashboard = () => {
 
         <Layout>
           <Content
-            className="p-6"
+            className="p-4 sm:p-6 md:p-8"
             style={{
               overflowY: "auto",
               height: "100%",
+              backgroundColor: "#f5f5f5",
             }}
           >
-            {renderContent()}
+            <Outlet />
           </Content>
         </Layout>
       </Layout>

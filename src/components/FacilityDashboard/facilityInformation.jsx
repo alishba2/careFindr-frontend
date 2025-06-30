@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import PhoneInput from "react-phone-input-2";
 import { useAuth } from "../hook/auth.jsx";
 import StepProgress from "./stepProgress.jsx";
-import { updateFacility } from "../../services/auth.js";
+import { updateFacility, sendOtp, verifyOtp } from "../../services/auth.js";
 
 const validationSchema = Yup.object({
     facilityType: Yup.string().required("Facility type is required"),
@@ -37,6 +37,7 @@ const validationSchema = Yup.object({
     whatsapp: Yup.string().required("WhatsApp number is required"),
     state: Yup.string().required("State is required"),
     lga: Yup.string().required("LGA is required"),
+    registrationNumber: Yup.string().required("Registration number is required"),
     lcda: Yup.string()
         .transform((val) => (val === "" ? null : val))
         .nullable()
@@ -51,13 +52,45 @@ const validationSchema = Yup.object({
         .nullable(),
 });
 
+const OtpInput = ({ otp, setOtp, onVerify }) => {
+    const handleOtpChange = (index, value) => {
+        const newOtp = [...otp];
+        newOtp[index] = value;
+        setOtp(newOtp);
+
+        if (newOtp.every((digit) => digit !== "") && value !== "") {
+            onVerify(newOtp.join(""));
+        }
+    };
+
+    return (
+        <div className="flex gap-2 mt-2">
+            {otp.map((digit, index) => (
+                <input
+                    key={index}
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    className="w-12 h-12 text-center border border-gray-300 rounded focus:border-primarysolid"
+                />
+            ))}
+        </div>
+    );
+};
+
 export const FacilityInformation = () => {
-    const { authData, fetchAuthData } = useAuth(); // Assuming useAuth provides a loading state
+    const { authData, fetchAuthData } = useAuth();
     const [selectedState, setSelectedState] = useState("");
     const [error, setError] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [secondaryPhone, setSecondaryPhone] = useState("");
     const [whatsapp, setWhatsapp] = useState("");
+    const [isPhoneVerifying, setIsPhoneVerifying] = useState(false);
+    const [isWhatsappVerifying, setIsWhatsappVerifying] = useState(false);
+    const [phoneOtp, setPhoneOtp] = useState(["", "", "", "", "", ""]);
+    const [whatsappOtp, setWhatsappOtp] = useState(["", "", "", "", "", ""]);
+    const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+    const [isWhatsappVerified, setIsWhatsappVerified] = useState(false);
 
     const [initialValues, setInitialValues] = useState({
         facilityType: "Hospital",
@@ -71,6 +104,7 @@ export const FacilityInformation = () => {
         country: "Nigeria",
         state: "",
         lga: "",
+        registrationNumber: "",
         lcda: "",
         website: "",
     });
@@ -81,6 +115,8 @@ export const FacilityInformation = () => {
             setPhoneNumber(authData?.phone || "");
             setSecondaryPhone(authData?.secondaryPhone || "");
             setWhatsapp(authData?.whatsapp || "");
+            setIsPhoneVerified(authData?.isPhoneVerified || false);
+            setIsWhatsappVerified(authData?.isWhatsappNumberVerified || false);
             setInitialValues({
                 facilityType: authData?.type || "Hospital",
                 facilityName: authData?.name || "",
@@ -93,15 +129,67 @@ export const FacilityInformation = () => {
                 country: "Nigeria",
                 state: authData?.state || "",
                 lga: authData?.lga || "",
+                registrationNumber: authData?.registrationNumber || "",
                 lcda: authData?.lcda || "",
                 website: authData?.website || "",
             });
         }
     }, [authData]);
 
+    const handleSendOtp = async (number, type) => {
+        try {
+            let phone = number;
+            await sendOtp({ phone });
+            toast.success(`OTP sent to ${type === "phone" ? "phone" : "WhatsApp"} number`, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            if (type === "phone") {
+                setIsPhoneVerifying(true);
+            } else {
+                setIsWhatsappVerifying(true);
+            }
+        } catch (error) {
+            toast.error(`Failed to send OTP to ${type === "phone" ? "phone" : "WhatsApp"} number`, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        }
+    };
 
+    const handleVerifyOtp = async (otp, number, type) => {
+        try {
+            let phone = number;
+            await verifyOtp({ otp, phone, type });
+
+            if (type === "phone") {
+                setIsPhoneVerified(true);
+                setIsPhoneVerifying(false);
+                setPhoneOtp(["", "", "", "", "", ""]);
+            } else {
+                setIsWhatsappVerified(true);
+                setIsWhatsappVerifying(false);
+                setWhatsappOtp(["", "", "", "", "", ""]);
+            }
+            toast.success(`${type === "phone" ? "Phone" : "WhatsApp"} number verified successfully!`, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        } catch (error) {
+            toast.error(`Failed to verify ${type === "phone" ? "phone" : "WhatsApp"} number`, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        }
+    };
 
     const handleSubmit = async (values, { setSubmitting }) => {
+        if (!isPhoneVerified || !isWhatsappVerified) {
+            setError("Please verify both phone and WhatsApp numbers before submitting.");
+            setSubmitting(false);
+            return;
+        }
+
         setError(null);
 
         const formatPhoneNumber = (number) => {
@@ -124,8 +212,11 @@ export const FacilityInformation = () => {
             country: values.country,
             state: values.state,
             lga: values.lga,
+            registrationNumber: values.registrationNumber,
             lcda: values.lcda || null,
             website: values.website || null,
+            isPhoneVerified,
+            isWhatsappNumberVerified: isWhatsappVerified,
         };
 
         try {
@@ -144,7 +235,6 @@ export const FacilityInformation = () => {
             );
         }
     };
-
 
     return (
         <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
@@ -170,11 +260,11 @@ export const FacilityInformation = () => {
                         onSubmit={handleSubmit}
                         enableReinitialize
                     >
-                        {({ isSubmitting, values, setFieldValue }) => (
+                        {({ isSubmitting, values, setFieldValue, dirty }) => (
                             <Form className="space-y-6">
                                 {/* Row 1: Facility Type and Name */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
+                                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Facility Type <span className="text-red-600">*</span>
                                         </label>
@@ -188,7 +278,7 @@ export const FacilityInformation = () => {
                                                         setFieldValue("insuranceType", null);
                                                     }}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Choose facility type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -214,7 +304,7 @@ export const FacilityInformation = () => {
                                             className="text-red-500 text-sm"
                                         />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Facility Name <span className="text-red-600">*</span>
                                         </label>
@@ -222,7 +312,7 @@ export const FacilityInformation = () => {
                                             as={Input}
                                             name="facilityName"
                                             placeholder="Enter facility name"
-                                            className="h-12 border-[#d7dbdf]"
+                                            className="h-12 border-[#d7dbdf] w-full"
                                         />
                                         <ErrorMessage
                                             name="facilityName"
@@ -233,7 +323,7 @@ export const FacilityInformation = () => {
                                 </div>
                                 {/* Conditional Hospital Type */}
                                 {values.facilityType === "Hospital" && (
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Hospital Type <span className="text-red-600">*</span>
                                         </label>
@@ -243,11 +333,10 @@ export const FacilityInformation = () => {
                                                     value={field.value}
                                                     onValueChange={(val) => setFieldValue("hospitalType", val)}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select hospital type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        uencia
                                                         <SelectItem value="Primary">Primary</SelectItem>
                                                         <SelectItem value="Secondary">Secondary</SelectItem>
                                                         <SelectItem value="Tertiary">Tertiary</SelectItem>
@@ -264,7 +353,7 @@ export const FacilityInformation = () => {
                                 )}
                                 {/* Conditional Insurance Type */}
                                 {values.facilityType === "Insurance" && (
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Insurance Type <span className="text-red-600">*</span>
                                         </label>
@@ -274,7 +363,7 @@ export const FacilityInformation = () => {
                                                     value={field.value}
                                                     onValueChange={(val) => setFieldValue("insuranceType", val)}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select insurance type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -293,8 +382,8 @@ export const FacilityInformation = () => {
                                     </div>
                                 )}
                                 {/* Row 2: Email + Phone */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
+                                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Contact Email <span className="text-red-600">*</span>
                                         </label>
@@ -302,7 +391,7 @@ export const FacilityInformation = () => {
                                             as={Input}
                                             name="contactEmail"
                                             placeholder="johndoe@mail.com"
-                                            className="h-12 border-[#d7dbdf]"
+                                            className="h-12 border-[#d7dbdf] w-full"
                                         />
                                         <ErrorMessage
                                             name="contactEmail"
@@ -310,37 +399,76 @@ export const FacilityInformation = () => {
                                             className="text-red-500 text-sm"
                                         />
                                     </div>
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 w-full relative">
                                         <label className="text-sm font-semibold">
-                                            Phone Number <span className="text-red-600">*</span>
+                                            Facility Phone Number <span className="text-red-600">*</span>
                                         </label>
-                                        <Field name="phoneNumber">
-                                            {({ field }) => (
-                                                <PhoneInput
-                                                    country={"ng"}
-                                                    value={field.value}
-                                                    onChange={(val) => {
-                                                        setPhoneNumber(val);
-                                                        setFieldValue("phoneNumber", val);
-                                                    }}
-                                                    inputClass="!h-12 !border !border-[#d7dbdf] !rounded"
-                                                    inputStyle={{ width: "100%" }}
-                                                    countryCodeEditable={false}
-                                                />
+                                        <div className="relative">
+                                            <Field name="phoneNumber">
+                                                {({ field }) => (
+                                                    <PhoneInput
+                                                        country={"ng"}
+                                                        value={field.value}
+                                                        onChange={(val) => {
+                                                            setPhoneNumber(val);
+                                                            setFieldValue("phoneNumber", val);
+                                                            if (val !== authData?.phone) {
+                                                                setIsPhoneVerified(false);
+                                                                setIsPhoneVerifying(false);
+                                                            }
+                                                        }}
+                                                        inputClass="!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full"
+                                                        inputStyle={{ width: "100%" }}
+                                                        countryCodeEditable={false}
+                                                    />
+                                                )}
+                                            </Field>
+                                            {isPhoneVerified ? (
+                                                <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSendOtp(phoneNumber, "phone")}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
+                                                >
+                                                    Verify
+                                                </button>
                                             )}
-                                        </Field>
+                                        </div>
                                         <ErrorMessage
                                             name="phoneNumber"
                                             component="div"
                                             className="text-red-500 text-sm"
                                         />
+                                        {isPhoneVerifying && (
+                                            <div className="mt-2">
+                                                <label className="text-sm font-medium">Enter OTP</label>
+                                                <OtpInput
+                                                    otp={phoneOtp}
+                                                    setOtp={setPhoneOtp}
+                                                    onVerify={(otp) => handleVerifyOtp(otp, phoneNumber, "phone")}
+                                                />
+                                                <div className="text-sm mt-1">
+                                                    Didn’t receive?{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSendOtp(phoneNumber, "phone")}
+                                                        className="text-blue-600"
+                                                    >
+                                                        Send again
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 {/* Row 3: Secondary Phone + WhatsApp */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1 relative">
+                                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                                    <div className="flex-1 w-full relative">
                                         <label className="text-sm font-semibold">
-                                            Secondary Phone
+                                            Facility Director/ Manager's Number
                                         </label>
                                         <Field name="secondaryPhone">
                                             {({ field }) => (
@@ -351,7 +479,7 @@ export const FacilityInformation = () => {
                                                         setSecondaryPhone(val);
                                                         setFieldValue("secondaryPhone", val);
                                                     }}
-                                                    inputClass="!h-12 !border !border-[#d7dbdf] !rounded"
+                                                    inputClass="!h-12 !border !border-[#d7dbdf] !rounded !w-full"
                                                     inputStyle={{ width: "100%" }}
                                                     countryCodeEditable={false}
                                                 />
@@ -363,35 +491,74 @@ export const FacilityInformation = () => {
                                             className="text-red-500 text-sm"
                                         />
                                     </div>
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 w-full relative">
                                         <label className="text-sm font-semibold">
-                                            WhatsApp Number <span className="text-red-600">*</span>
+                                            Facility WhatsApp Number <span className="text-red-600">*</span>
                                         </label>
-                                        <Field name="whatsapp">
-                                            {({ field }) => (
-                                                <PhoneInput
-                                                    country={"ng"}
-                                                    value={field.value}
-                                                    onChange={(val) => {
-                                                        setWhatsapp(val);
-                                                        setFieldValue("whatsapp", val);
-                                                    }}
-                                                    inputClass="!h-12 !border !border-[#d7dbdf] !rounded"
-                                                    inputStyle={{ width: "100%" }}
-                                                    countryCodeEditable={false}
-                                                />
+                                        <div className="relative">
+                                            <Field name="whatsapp">
+                                                {({ field }) => (
+                                                    <PhoneInput
+                                                        country={"ng"}
+                                                        value={field.value}
+                                                        onChange={(val) => {
+                                                            setWhatsapp(val);
+                                                            setFieldValue("whatsapp", val);
+                                                            if (val !== authData?.whatsapp) {
+                                                                setIsWhatsappVerified(false);
+                                                                setIsWhatsappVerifying(false);
+                                                            }
+                                                        }}
+                                                        inputClass="!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full"
+                                                        inputStyle={{ width: "100%" }}
+                                                        countryCodeEditable={false}
+                                                    />
+                                                )}
+                                            </Field>
+                                            {isWhatsappVerified ? (
+                                                <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSendOtp(whatsapp, "whatsapp")}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
+                                                >
+                                                    Verify
+                                                </button>
                                             )}
-                                        </Field>
+                                        </div>
                                         <ErrorMessage
                                             name="whatsapp"
                                             component="div"
                                             className="text-red-500 text-sm"
                                         />
+                                        {isWhatsappVerifying && (
+                                            <div className="mt-2">
+                                                <label className="text-sm font-medium">Enter OTP</label>
+                                                <OtpInput
+                                                    otp={whatsappOtp}
+                                                    setOtp={setWhatsappOtp}
+                                                    onVerify={(otp) => handleVerifyOtp(otp, whatsapp, "whatsapp")}
+                                                />
+                                                <div className="text-sm mt-1">
+                                                    Didn’t receive?{" "}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSendOtp(whatsapp, "whatsapp")}
+                                                        className="text-blue-600"
+                                                    >
+                                                        Send again
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 {/* Row 4: Country + State */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
+                                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             Country <span className="text-red-600">*</span>
                                         </label>
@@ -401,7 +568,7 @@ export const FacilityInformation = () => {
                                                     value={field.value}
                                                     onValueChange={(val) => setFieldValue("country", val)}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Nigeria" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -416,7 +583,7 @@ export const FacilityInformation = () => {
                                             className="text-red-500 text-sm"
                                         />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             State <span className="text-red-600">*</span>
                                         </label>
@@ -431,7 +598,7 @@ export const FacilityInformation = () => {
                                                         setSelectedState(val);
                                                     }}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select your state" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -451,42 +618,60 @@ export const FacilityInformation = () => {
                                         />
                                     </div>
                                 </div>
-                                {/* Row 5: LGA */}
-                                <div className="flex-1">
-                                    <label className="text-sm font-semibold">
-                                        Local Government Area <span className="text-red-600">*</span>
-                                    </label>
-                                    <Field name="lga">
-                                        {({ field }) => (
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={(val) => {
-                                                    setFieldValue("lga", val);
-                                                    setFieldValue("lcda", "");
-                                                }}
-                                            >
-                                                <SelectTrigger className="h-12 border-[#d7dbdf]">
-                                                    <SelectValue placeholder="Select your LGA" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {(lgas[selectedState] || []).map((lga) => (
-                                                        <SelectItem key={lga} value={lga}>
-                                                            {lga}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    </Field>
-                                    <ErrorMessage
-                                        name="lga"
-                                        component="div"
-                                        className="text-red-500 text-sm"
-                                    />
+                                {/* Row 5: LGA + Registration Number */}
+                                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                                    <div className="flex-1 w-full">
+                                        <label className="text-sm font-semibold">
+                                            Local Government Area <span className="text-red-600">*</span>
+                                        </label>
+                                        <Field name="lga">
+                                            {({ field }) => (
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={(val) => {
+                                                        setFieldValue("lga", val);
+                                                        setFieldValue("lcda", "");
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
+                                                        <SelectValue placeholder="Select your LGA" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {(lgas[selectedState] || []).map((lga) => (
+                                                            <SelectItem key={lga} value={lga}>
+                                                                {lga}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        </Field>
+                                        <ErrorMessage
+                                            name="lga"
+                                            component="div"
+                                            className="text-red-500 text-sm"
+                                        />
+                                    </div>
+                                    <div className="flex-1 w-full">
+                                        <label className="text-sm font-semibold">
+                                            Registration Number <span className="text-red-600">*</span>
+                                        </label>
+                                        <Field
+                                            as={Input}
+                                            name="registrationNumber"
+                                            placeholder="Enter registration number"
+                                            className="h-12 border-[#d7dbdf] w-full"
+                                        />
+                                        <ErrorMessage
+                                            name="registrationNumber"
+                                            component="div"
+                                            className="text-red-500 text-sm"
+                                        />
+                                    </div>
                                 </div>
                                 {/* Row 6: LCDA (if Lagos) */}
                                 {values.state === "Lagos" && (
-                                    <div className="flex-1">
+                                    <div className="flex-1 w-full">
                                         <label className="text-sm font-semibold">
                                             LCDA <span className="text-red-600">*</span>
                                         </label>
@@ -496,7 +681,7 @@ export const FacilityInformation = () => {
                                                     value={field.value}
                                                     onValueChange={(val) => setFieldValue("lcda", val)}
                                                 >
-                                                    <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select LCDA" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -517,13 +702,13 @@ export const FacilityInformation = () => {
                                     </div>
                                 )}
                                 {/* Row 7: Website URL */}
-                                <div>
+                                <div className="w-full">
                                     <label className="text-sm font-semibold">Website URL</label>
                                     <Field
                                         as={Input}
                                         name="website"
                                         placeholder="https://hospital.com"
-                                        className="h-12 border-[#d7dbdf] w-2/4"
+                                        className="h-12 border-[#d7dbdf] w-full"
                                     />
                                     <ErrorMessage
                                         name="website"
@@ -533,7 +718,7 @@ export const FacilityInformation = () => {
                                 </div>
                                 <Button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || !isPhoneVerified || !isWhatsappVerified || !dirty}
                                     className="w-full h-12 bg-primarysolid text-white rounded-xl"
                                 >
                                     {isSubmitting ? "Updating..." : "Update Facility Information"}

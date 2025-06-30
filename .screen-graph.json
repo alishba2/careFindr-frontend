@@ -14,14 +14,36 @@
       "id": "src/components/common/ProtectedRoute.jsx",
       "label": "ProtectedRoute",
       "routes": [
-        "/admin-dashboard/*"
+        "/admin-dashboard/*",
+        "/facility-dashboard"
       ]
     },
     {
-      "id": "src/components/FacilityDashboard/facilityDashboard.jsx",
-      "label": "facilityDashboard",
+      "id": "src/components/FacilityDashboard/dashboardHome.jsx",
+      "label": "dashboardHome",
       "routes": [
-        "/facility-dashboard"
+        "home"
+      ]
+    },
+    {
+      "id": "src/components/FacilityDashboard/services.jsx",
+      "label": "services",
+      "routes": [
+        "service-capacity"
+      ]
+    },
+    {
+      "id": "src/components/FacilityDashboard/referrals.jsx",
+      "label": "referrals",
+      "routes": [
+        "referrals"
+      ]
+    },
+    {
+      "id": "src/components/FacilityDashboard/feedback.jsx",
+      "label": "feedback",
+      "routes": [
+        "support"
       ]
     },
     {
@@ -49,9 +71,9 @@
   ],
   "edges": [
     {
-      "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/FacilityDashboard/facilityDashboard.jsx",
+      "id": "src/components/common/RedirectIfAuthenticated.jsx:15:11-to-src/components/common/ProtectedRoute.jsx",
       "source": "src/components/common/RedirectIfAuthenticated.jsx",
-      "target": "src/components/FacilityDashboard/facilityDashboard.jsx",
+      "target": "src/components/common/ProtectedRoute.jsx",
       "data": {
         "viaRoute": "/facility-dashboard",
         "trigger": {

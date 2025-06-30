@@ -72,7 +72,7 @@ export default function DashboardHome() {
         </Col>
 
         {facilityType === "Hospital" && (
-          <Col xs={24} md={24}>
+          <Col xs={24} md={24} className="mt-6">
             <Card className="rounded-xl shadow border-none">
               <Subspecialties />
             </Card>

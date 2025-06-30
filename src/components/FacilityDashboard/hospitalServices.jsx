@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import StepProgress from "./stepProgress";
 import { Input } from "../input";
 import { Button } from "../button";
@@ -12,15 +12,15 @@ import { message } from 'antd';
 const { Option } = Select;
 
 export const HospitalServices = () => {
-    const { authData, facilityType } = useAuth();
-
-    const [porgress, stepProgress]= useState(0);
-
-
-
+    const { authData, facilityType ,fetchAuthData} = useAuth();
+    const [progress, setProgress] = useState(0);
     const [facility, setFacility] = useState();
     const [subSpecialities, setSubspecialities] = useState([]);
     const [saving, setSaving] = useState(false);
+    const [initialCapabilities, setInitialCapabilities] = useState(null);
+    const [initialSubSpecialities, setInitialSubSpecialities] = useState([]);
+    const [isServiceSaved, setIsServiceSaved] = useState(false);
+    const [timeError, setTimeError] = useState("");
     const [capabilities, setCapabilities] = useState({
         operatingDays: [],
         openingTime: "",
@@ -34,7 +34,7 @@ export const HospitalServices = () => {
         hasPharmacy: "",
         hasLaboratory: "",
         acceptExternalPatients: "",
-        hasOtherBranches: "",
+        hasOtherBranches: "", // Default to "No"
         branchAddresses: [""],
         additionalInformation: "",
         accreditationStatus: "",
@@ -58,31 +58,69 @@ export const HospitalServices = () => {
     });
 
     useEffect(() => {
-        console.log(facilityType, "facility types");
         setFacility(facilityType);
     }, [facilityType]);
 
-    // Fetch existing service data on component mount
+    // Deep comparison function
+    const areStatesEqual = (state1, state2) => {
+        return JSON.stringify(state1) === JSON.stringify(state2);
+    };
+
+    // Validate time difference (at least 30 minutes)
+    const validateOperatingHours = () => {
+        if (!capabilities.openingTime || !capabilities.closingTime) {
+            setTimeError("");
+            return true;
+        }
+
+        const [openHours, openMinutes] = capabilities.openingTime.split(":").map(Number);
+        const [closeHours, closeMinutes] = capabilities.closingTime.split(":").map(Number);
+
+        const openTimeInMinutes = openHours * 60 + openMinutes;
+        let closeTimeInMinutes = closeHours * 60 + closeMinutes;
+
+        if (closeTimeInMinutes < openTimeInMinutes) {
+            closeTimeInMinutes += 24 * 60;
+        }
+
+        const timeDifference = closeTimeInMinutes - openTimeInMinutes;
+
+        if (timeDifference < 30) {
+            setTimeError("Operating hours must have at least a 30-minute difference.");
+            return false;
+        }
+
+        setTimeError("");
+        return true;
+    };
+
+    // Memoized hasChanges
+    const hasChanges = useMemo(() => {
+        if (!initialCapabilities || !initialSubSpecialities) return false;
+        return (
+            !areStatesEqual(capabilities, initialCapabilities) ||
+            !areStatesEqual(subSpecialities, initialSubSpecialities)
+        ) && validateOperatingHours();
+    }, [capabilities, subSpecialities, initialCapabilities, initialSubSpecialities]);
+
+    // Fetch existing service data
     useEffect(() => {
         const getFacilityServices = async () => {
             if (authData?._id) {
                 try {
                     const response = await GetFacilityService();
-                    console.log(response?.service, "response here");
-
                     if (response?.service) {
-
                         const serviceData = response.service;
-                        stepProgress(2);
-
-                        console.log(serviceData, "FacilityServices");
+                        setProgress(2);
                         setFacility(serviceData.facilityType);
+                        setIsServiceSaved(true);
 
-                        // Initialize capabilities based on facility type
+                        let newCapabilities = { ...capabilities };
+
                         switch (serviceData.facilityType) {
                             case "Hospital":
-                                setCapabilities((prev) => ({
-                                    ...prev,
+                                newCapabilities = {
+                                    ...newCapabilities,
                                     operatingDays: serviceData.hospitalDetails.operationDays || [],
                                     openingTime: serviceData.hospitalDetails.openingTime || "",
                                     closingTime: serviceData.hospitalDetails.closingTime || "",
@@ -99,15 +137,14 @@ export const HospitalServices = () => {
                                     hasOtherBranches: serviceData.hospitalDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.hospitalDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.hospitalDetails.additionalInfo || "",
-                                }));
-
-                                console.log(serviceData.hospitalDetails.subSpecialities, "hospital specialities here");
+                                };
                                 setSubspecialities(serviceData.hospitalDetails.subSpecialities || []);
+                                setInitialSubSpecialities(serviceData.hospitalDetails.subSpecialities || []);
                                 break;
 
                             case "Laboratory":
-                                setCapabilities((prev) => ({
-                                    ...prev,
+                                newCapabilities = {
+                                    ...newCapabilities,
                                     accreditationStatus: serviceData.labDetails.accreditationStatus || "",
                                     homeSampleCollection: serviceData.labDetails.homeSampleCollection ? "Yes" : "No",
                                     offersCovidTesting: serviceData.labDetails.covid19Testing ? "Yes" : "No",
@@ -116,13 +153,13 @@ export const HospitalServices = () => {
                                     hasOtherBranches: serviceData.labDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.labDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.labDetails.additionalInfo || "",
-                                    operatingDays: [], // Add if needed based on schema
-                                }));
+                                    operatingDays: [],
+                                };
                                 break;
 
                             case "Pharmacy":
-                                setCapabilities((prev) => ({
-                                    ...prev,
+                                newCapabilities = {
+                                    ...newCapabilities,
                                     hasLicensedPharmacist: serviceData.pharmacyDetails.hasLicensedPharmacistOnSite
                                         ? "Yes"
                                         : "No",
@@ -134,13 +171,13 @@ export const HospitalServices = () => {
                                     hasOtherBranches: serviceData.pharmacyDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.pharmacyDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.pharmacyDetails.additionalInfo || "",
-                                    operatingDays: [], // Add if needed based on schema
-                                }));
+                                    operatingDays: [],
+                                };
                                 break;
 
                             case "Ambulance":
-                                setCapabilities((prev) => ({
-                                    ...prev,
+                                newCapabilities = {
+                                    ...newCapabilities,
                                     ambulanceTypes: serviceData.ambulanceDetails.ambulanceTypes || [],
                                     vehicleEquipment: serviceData.ambulanceDetails.vehicleEquipment || [],
                                     typicalCrew: serviceData.ambulanceDetails.typicalCrew || [],
@@ -161,21 +198,30 @@ export const HospitalServices = () => {
                                     hasOtherBranches: serviceData.ambulanceDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.ambulanceDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.ambulanceDetails.additionalInfo || "",
-                                    operatingDays: [], // Add if needed based on schema
-                                }));
+                                    operatingDays: [],
+                                };
                                 break;
 
                             default:
                                 break;
                         }
+                        setCapabilities(newCapabilities);
+                        setInitialCapabilities(JSON.parse(JSON.stringify(newCapabilities)));
+                    } else {
+                        setIsServiceSaved(false);
+                        setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
+                        setInitialSubSpecialities([]);
                     }
                 } catch (error) {
                     console.error("Error fetching service:", error);
+                    setIsServiceSaved(false);
+                    setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
+                    setInitialSubSpecialities([]);
                 }
-            }
-        };
+            };
+        }
         getFacilityServices();
-    }, []);
+    }, [authData?._id]);
 
     const weekDays = [
         "Monday",
@@ -185,6 +231,7 @@ export const HospitalServices = () => {
         "Friday",
         "Saturday",
         "Sunday",
+        "24/7",
     ];
 
     const facilityFeatures = [
@@ -207,15 +254,31 @@ export const HospitalServices = () => {
         });
     };
 
+    const handleDayToggle = (day) => {
+        setCapabilities((prev) => {
+            let updatedDays = [...prev.operatingDays];
+            if (day === "24/7") {
+                updatedDays = updatedDays.includes("24/7")
+                    ? [] // Deselect all
+                    : weekDays.filter((d) => d !== "24/7").concat("24/7"); // Select all days including 24/7
+            } else {
+                if (updatedDays.includes(day)) {
+                    updatedDays = updatedDays.filter((d) => d !== day && d !== "24/7");
+                } else {
+                    updatedDays = [...updatedDays, day].filter((d) => d !== "24/7");
+                }
+            }
+            return { ...prev, operatingDays: updatedDays };
+        });
+    };
+
     const ToggleSwitch = ({ isOn, onToggle }) => (
         <div
-            className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${isOn ? "bg-cyan-500" : "bg-gray-300"
-                }`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${isOn ? "bg-cyan-500" : "bg-gray-300"}`}
             onClick={onToggle}
         >
             <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isOn ? "translate-x-6" : "translate-x-1"
-                    }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isOn ? "translate-x-6" : "translate-x-1"}`}
             />
         </div>
     );
@@ -287,7 +350,13 @@ export const HospitalServices = () => {
         });
     };
 
-    // Prepare data for submission based on facility type
+    const handleTimeChange = (field, value) => {
+        setCapabilities((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
     const prepareServiceData = () => {
         const serviceData = {
             facilityId: authData?._id,
@@ -298,9 +367,9 @@ export const HospitalServices = () => {
             case "Hospital":
                 serviceData.hospitalDetails = {
                     coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
-                    subSpecialities: subSpecialities, // Assuming Subspecialties component populates this
+                    subSpecialities: subSpecialities,
                     facilityFeatures: capabilities.facilityFeatures,
-                    operationDays: capabilities.operatingDays,
+                    operationDays: capabilities.operatingDays.filter((day) => day !== "24/7"),
                     openingTime: capabilities.openingTime,
                     closingTime: capabilities.closingTime,
                     admissionFee: Number(capabilities.admissionFee) || 0,
@@ -312,7 +381,7 @@ export const HospitalServices = () => {
                         lab: capabilities.acceptExternalPatients === "Yes",
                         pharmacy: capabilities.acceptExternalPatients === "Yes",
                     },
-                    branches: capabilities.branchAddresses.map((address) => ({ address })),
+                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                     additionalInfo: capabilities.additionalInformation,
                 };
                 break;
@@ -326,7 +395,7 @@ export const HospitalServices = () => {
                         openingTime: capabilities.openingTime,
                         closingTime: capabilities.closingTime,
                     },
-                    branches: capabilities.branchAddresses.map((address) => ({ address })),
+                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                     additionalInfo: capabilities.additionalInformation,
                 };
                 break;
@@ -341,7 +410,7 @@ export const HospitalServices = () => {
                         openingTime: capabilities.openingTime,
                         closingTime: capabilities.closingTime,
                     },
-                    branches: capabilities.branchAddresses.map((address) => ({ address })),
+                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                     additionalInfo: capabilities.additionalInformation,
                 };
                 break;
@@ -351,19 +420,19 @@ export const HospitalServices = () => {
                     ambulanceTypes: capabilities.ambulanceTypes,
                     vehicleEquipment: capabilities.vehicleEquipment,
                     typicalCrew: capabilities.typicalCrew,
-                    avgResponseTime: `${capabilities.averageResponseMin || 0}:${capabilities.averageResponseSec || 0}`, // Format as "min:sec"
+                    avgResponseTime: `${capabilities.averageResponseMin || 0}:${capabilities.averageResponseSec || 0}`,
                     numRoadWorthyAmbulances: Number(capabilities.noRoadworthyAmbulances) || 0,
                     maxTripsDaily: Number(capabilities.maxDailyTrips) || 0,
                     backupVehicles: capabilities.hasBackupVehicles === "Yes" ? 1 : 0,
                     payPerTrip: Number(capabilities.payPerTrip) || 0,
-                    flatRates: Number(capabilities.payPerTrip) || 0, // Assuming flatRates is same as payPerTrip
+                    flatRates: Number(capabilities.payPerTrip) || 0,
                     insuranceAccepted: capabilities.nhisInsuranceAccepted === "Yes",
                     registeredWithFederalHealth: capabilities.registeredWithFMOH === "Yes",
                     operatingHours: {
                         openingTime: capabilities.openingTime,
                         closingTime: capabilities.closingTime,
                     },
-                    branches: capabilities.branchAddresses.map((address) => ({ address })),
+                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                     additionalInfo: capabilities.additionalInformation,
                 };
                 break;
@@ -375,28 +444,32 @@ export const HospitalServices = () => {
         return serviceData;
     };
 
-    // Handle form submission
     const handleSubmit = async () => {
+        if (!validateOperatingHours()) {
+            message.error("Please fix the operating hours before saving.");
+            return;
+        }
         try {
             const serviceData = prepareServiceData();
             setSaving(true);
-            console.log(serviceData, "serviceData");
-            const response = await FacilityServices(serviceData); // Fixed function name
+            const response = await FacilityServices(serviceData);
+            setIsServiceSaved(true);
+            setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
+            setInitialSubSpecialities([...subSpecialities]);
             setSaving(false);
-            console.log("Service created:", response);
+            fetchAuthData();
             message.success("Service Updated Successfully!");
-            // Optionally reset form or show success message
         } catch (error) {
             console.error("Error submitting service:", error);
             setSaving(false);
+            message.error("Failed to update service. Please try again.");
         }
     };
-    
-   
+
     return (
         <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
             <StepProgress currentStep={authData?.onBoardingStep} />
-            <div className="mb-10 p-6 h-24 flex flex-col gap-2">
+            <div className="mb-6 p-6 h-24 flex flex-col gap-2">
                 <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
                     Service & Capacity
                 </h2>
@@ -409,7 +482,6 @@ export const HospitalServices = () => {
                 <div className="p-6 space-y-6 border-none">
                     {facility === "Hospital" ? (
                         <>
-                            {/* Core Clinical Specialities */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Core Clinical Specialities
@@ -430,10 +502,8 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Subspecialties */}
                             <Subspecialties subSpecialities={subSpecialities} setSubspecialities={setSubspecialities} />
 
-                            {/* Facility Features */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">Facility Features</h1>
                                 <div className="flex flex-wrap gap-4">
@@ -456,6 +526,7 @@ export const HospitalServices = () => {
                                                         facilityFeatures: updated,
                                                     }));
                                                 }}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {feature.label}
                                         </label>
@@ -463,7 +534,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Weekly Operating Days */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Weekly Operating Days
@@ -478,16 +548,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={day}
                                                 checked={capabilities.operatingDays.includes(day)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    const updated = checked
-                                                        ? [...capabilities.operatingDays, day]
-                                                        : capabilities.operatingDays.filter((d) => d !== day);
-                                                    setCapabilities((prev) => ({
-                                                        ...prev,
-                                                        operatingDays: updated,
-                                                    }));
-                                                }}
+                                                onChange={() => handleDayToggle(day)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {day}
                                         </label>
@@ -495,7 +557,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Opening & Closing Time */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
@@ -505,12 +566,7 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.openingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                openingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("openingTime", e.target.value)}
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -521,55 +577,61 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.closingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                closingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("closingTime", e.target.value)}
                                     />
                                 </div>
                             </div>
+                            {timeError && (
+                                <p className="text-red-500 text-sm">{timeError}</p>
+                            )}
 
-                            {/* Admission Fee & Consultation Fee */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
-                                        Admission Fee
+                                        Admission Fee (₦)
                                     </label>
-                                    <Input
-                                        type="number"
-                                        className="h-12 border-gray-300 rounded-md"
-                                        value={capabilities.admissionFee}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                admissionFee: e.target.value,
-                                            }))
-                                        }
-                                        placeholder="Enter admission fee"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type="number"
+                                            className="h-12 border-gray-300 rounded-md pr-12"
+                                            value={capabilities.admissionFee}
+                                            onChange={(e) =>
+                                                setCapabilities((prev) => ({
+                                                    ...prev,
+                                                    admissionFee: e.target.value,
+                                                }))
+                                            }
+                                            placeholder="Enter amount in ₦"
+                                        />
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                            ₦
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
-                                        Consultation Fee
+                                        Consultation Fee (₦)
                                     </label>
-                                    <Input
-                                        type="number"
-                                        className="h-12 border-gray-300 rounded-md"
-                                        value={capabilities.consultationFee}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                consultationFee: e.target.value,
-                                            }))
-                                        }
-                                        placeholder="Enter consultation fee"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type="number"
+                                            className="h-12 border-gray-300 rounded-md pr-12"
+                                            value={capabilities.consultationFee}
+                                            onChange={(e) =>
+                                                setCapabilities((prev) => ({
+                                                    ...prev,
+                                                    consultationFee: e.target.value,
+                                                }))
+                                            }
+                                            placeholder="Enter amount in ₦"
+                                        />
+                                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                            ₦
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Total Bed Space */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Total Bed Space
@@ -584,29 +646,10 @@ export const HospitalServices = () => {
                                             totalBedSpace: e.target.value,
                                         }))
                                     }
-                                    placeholder="Enter total bed space"
+                                    placeholder="Enter number of beds"
                                 />
                             </div>
 
-                            {/* Additional Information */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
-                                    Additional Information
-                                </label>
-                                <textarea
-                                    className="w-full h-32 border rounded-md p-2"
-                                    value={capabilities.additionalInformation}
-                                    onChange={(e) =>
-                                        setCapabilities((prev) => ({
-                                            ...prev,
-                                            additionalInformation: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Enter any additional information"
-                                />
-                            </div>
-
-                            {/* Other Branches */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Other Branches
@@ -623,9 +666,11 @@ export const HospitalServices = () => {
                                         }))
                                     }
                                 >
+
                                     <Option value="">Select</Option>
-                                    <Option value="Yes">Yes</Option>
+
                                     <Option value="No">No</Option>
+                                    <Option value="Yes">Yes</Option>
                                 </Select>
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
@@ -656,14 +701,30 @@ export const HospitalServices = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-800">
+                                    Additional Information
+                                </label>
+                                <textarea
+                                    className="w-full h-32 border rounded-md p-2"
+                                    value={capabilities.additionalInformation}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            additionalInformation: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter any additional information"
+                                />
+                            </div>
                         </>
                     ) : facility === "Laboratory" ? (
                         <>
-                            {/* Accreditation Status and Home Sample Collection */}
                             <div className="flex flex-wrap gap-4">
                                 <div className="flex-1">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-800">
+                                        <label className="text-sm font-bold text-gray-800">
                                             Accreditation Status
                                         </label>
                                         <Select
@@ -685,7 +746,7 @@ export const HospitalServices = () => {
                                 </div>
                                 <div className="flex-1">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-800">
+                                        <label className="text-sm font-bold text-gray-800">
                                             Home Sample Collection
                                         </label>
                                         <Select
@@ -707,11 +768,10 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* COVID-19 Testing */}
                             <div className="flex flex-wrap gap-4">
                                 <div className="flex-1">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-800">
+                                        <label className="text-sm font-bold text-gray-800">
                                             Do you offer COVID-19 testing?
                                         </label>
                                         <Select
@@ -733,7 +793,7 @@ export const HospitalServices = () => {
                                 </div>
                                 <div className="flex-1">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-800">
+                                        <label className="text-sm font-bold text-gray-800">
                                             Other Branches
                                         </label>
                                         <Select
@@ -749,14 +809,13 @@ export const HospitalServices = () => {
                                             }
                                         >
                                             <Option value="">Select</Option>
-                                            <Option value="Yes">Yes</Option>
                                             <Option value="No">No</Option>
+                                            <Option value="Yes">Yes</Option>
                                         </Select>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Weekly Operating Days */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Weekly Operating Days
@@ -771,16 +830,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={day}
                                                 checked={capabilities.operatingDays.includes(day)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    const updated = checked
-                                                        ? [...capabilities.operatingDays, day]
-                                                        : capabilities.operatingDays.filter((d) => d !== day);
-                                                    setCapabilities((prev) => ({
-                                                        ...prev,
-                                                        operatingDays: updated,
-                                                    }));
-                                                }}
+                                                onChange={() => handleDayToggle(day)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {day}
                                         </label>
@@ -788,66 +839,43 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Opening & Closing Time */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Opening Time
                                     </label>
                                     <Input
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.openingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                openingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("openingTime", e.target.value)}
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Closing Time
                                     </label>
                                     <Input
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.closingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                closingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("closingTime", e.target.value)}
                                     />
                                 </div>
                             </div>
+                            {timeError && (
+                                <p className="text-red-500 text-sm">{timeError}</p>
+                            )}
 
-                            {/* Additional Information */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
-                                    Additional Information
-                                </label>
-                                <textarea
-                                    className="w-full h-32 border rounded-md p-2"
-                                    value={capabilities.additionalInformation}
-                                    onChange={(e) =>
-                                        setCapabilities((prev) => ({
-                                            ...prev,
-                                            additionalInformation: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Enter any additional information"
-                                />
-                            </div>
-
-                            {/* Other Branches */}
                             <div className="space-y-2">
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
+                                        <label className="text-sm font-bold text-gray-800">
+                                            Branch Full Address (Specify the floor if the building has multiple levels)
+                                        </label>
                                         {capabilities.branchAddresses.map((address, index) => (
                                             <div key={index} className="flex gap-4 items-center">
+
                                                 <Input
                                                     type="text"
                                                     className="h-12 border-gray-300 rounded-md flex-1"
@@ -873,10 +901,26 @@ export const HospitalServices = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Additional Information
+                                </label>
+                                <textarea
+                                    className="w-full h-32 border rounded-md p-2"
+                                    value={capabilities.additionalInformation}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            additionalInformation: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter any additional information"
+                                />
+                            </div>
                         </>
                     ) : facility === "Pharmacy" ? (
                         <>
-                            {/* Licensed Pharmacist */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Do you have a licensed pharmacist on-site?
@@ -898,7 +942,6 @@ export const HospitalServices = () => {
                                 </Select>
                             </div>
 
-                            {/* Delivery Services */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Do you offer delivery?
@@ -920,7 +963,6 @@ export const HospitalServices = () => {
                                 </Select>
                             </div>
 
-                            {/* Compliance Documents */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Compliance Documents
@@ -935,10 +977,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={doc}
                                                 checked={capabilities.complianceDocuments.includes(doc)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    handleToggleCompliance(doc);
-                                                }}
+                                                onChange={(e) => handleToggleCompliance(doc)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {doc}
                                         </label>
@@ -946,7 +986,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Accepted Payments */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Accepted Payments
@@ -961,10 +1000,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={payment}
                                                 checked={capabilities.acceptedPayments.includes(payment)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    handleTogglePayment(payment);
-                                                }}
+                                                onChange={(e) => handleTogglePayment(payment)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {payment}
                                         </label>
@@ -972,7 +1009,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Weekly Operating Days */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Weekly Operating Days
@@ -987,16 +1023,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={day}
                                                 checked={capabilities.operatingDays.includes(day)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    const updated = checked
-                                                        ? [...capabilities.operatingDays, day]
-                                                        : capabilities.operatingDays.filter((d) => d !== day);
-                                                    setCapabilities((prev) => ({
-                                                        ...prev,
-                                                        operatingDays: updated,
-                                                    }));
-                                                }}
+                                                onChange={() => handleDayToggle(day)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {day}
                                         </label>
@@ -1004,7 +1032,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Opening & Closing Time */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
@@ -1014,12 +1041,7 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.openingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                openingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("openingTime", e.target.value)}
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -1030,35 +1052,14 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.closingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                closingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("closingTime", e.target.value)}
                                     />
                                 </div>
                             </div>
+                            {timeError && (
+                                <p className="text-red-500 text-sm">{timeError}</p>
+                            )}
 
-                            {/* Additional Information */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
-                                    Additional Information
-                                </label>
-                                <textarea
-                                    className="w-full h-32 border rounded-md p-2"
-                                    value={capabilities.additionalInformation}
-                                    onChange={(e) =>
-                                        setCapabilities((prev) => ({
-                                            ...prev,
-                                            additionalInformation: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Enter any additional information"
-                                />
-                            </div>
-
-                            {/* Other Branches */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Other Branches
@@ -1075,9 +1076,8 @@ export const HospitalServices = () => {
                                         }))
                                     }
                                 >
-                                    <Option value="">Select</Option>
-                                    <Option value="Yes">Yes</Option>
                                     <Option value="No">No</Option>
+                                    <Option value="Yes">Yes</Option>
                                 </Select>
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
@@ -1108,10 +1108,26 @@ export const HospitalServices = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-800">
+                                    Additional Information
+                                </label>
+                                <textarea
+                                    className="w-full h-32 border rounded-md p-2"
+                                    value={capabilities.additionalInformation}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            additionalInformation: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter any additional information"
+                                />
+                            </div>
                         </>
                     ) : facility === "Ambulance" ? (
                         <>
-                            {/* Ambulance Types */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Ambulance Types
@@ -1126,10 +1142,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={type}
                                                 checked={capabilities.ambulanceTypes.includes(type)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    handleToggleAmbulanceType(type);
-                                                }}
+                                                onChange={(e) => handleToggleAmbulanceType(type)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {type}
                                         </label>
@@ -1137,7 +1151,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Vehicle Equipment Checklist */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Vehicle Equipment Checklist
@@ -1152,10 +1165,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={equipment}
                                                 checked={capabilities.vehicleEquipment.includes(equipment)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    handleToggleVehicleEquipment(equipment);
-                                                }}
+                                                onChange={(e) => handleToggleVehicleEquipment(equipment)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {equipment}
                                         </label>
@@ -1163,7 +1174,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Typical Crew per Ambulance */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Typical Crew per Ambulance
@@ -1178,10 +1188,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={crew}
                                                 checked={capabilities.typicalCrew.includes(crew)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    handleToggleCrew(crew);
-                                                }}
+                                                onChange={(e) => handleToggleCrew(crew)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {crew}
                                         </label>
@@ -1189,7 +1197,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Average Response Time */}
                             <div className="space-y-4">
                                 <div className="flex gap-4">
                                     <div className="flex-1 max-w-[150px]">
@@ -1229,7 +1236,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* No Roadworthy Ambulances & Max Daily Trips */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <div className="space-y-2">
@@ -1271,7 +1277,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Backup Vehicles & Pay per Trip Flat Rates */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <div className="space-y-2">
@@ -1298,25 +1303,29 @@ export const HospitalServices = () => {
                                 <div className="flex-1">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium text-gray-800">
-                                            Pay per Trip Flat Rates
+                                            Pay per Trip Flat Rates (₦)
                                         </label>
-                                        <Input
-                                            type="number"
-                                            className="h-12 border-gray-300 rounded-md"
-                                            value={capabilities.payPerTrip}
-                                            onChange={(e) =>
-                                                setCapabilities((prev) => ({
-                                                    ...prev,
-                                                    payPerTrip: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="Enter amount"
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type="number"
+                                                className="h-12 border-gray-300 rounded-md pr-12"
+                                                value={capabilities.payPerTrip}
+                                                onChange={(e) =>
+                                                    setCapabilities((prev) => ({
+                                                        ...prev,
+                                                        payPerTrip: e.target.value,
+                                                    }))
+                                                }
+                                                placeholder="Enter amount in ₦"
+                                            />
+                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                ₦
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* NHIS / Insurance Accepted & Registered with Federal Ministry of Health */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <div className="space-y-2">
@@ -1364,7 +1373,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Weekly Operating Days */}
                             <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Weekly Operating Days
@@ -1379,16 +1387,8 @@ export const HospitalServices = () => {
                                                 type="checkbox"
                                                 value={day}
                                                 checked={capabilities.operatingDays.includes(day)}
-                                                onChange={(e) => {
-                                                    const checked = e.target.checked;
-                                                    const updated = checked
-                                                        ? [...capabilities.operatingDays, day]
-                                                        : capabilities.operatingDays.filter((d) => d !== day);
-                                                    setCapabilities((prev) => ({
-                                                        ...prev,
-                                                        operatingDays: updated,
-                                                    }));
-                                                }}
+                                                onChange={() => handleDayToggle(day)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
                                             />
                                             {day}
                                         </label>
@@ -1396,7 +1396,6 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            {/* Opening & Closing Time */}
                             <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
@@ -1406,12 +1405,7 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.openingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                openingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("openingTime", e.target.value)}
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -1422,35 +1416,14 @@ export const HospitalServices = () => {
                                         type="time"
                                         className="h-12 border-gray-300 rounded-md"
                                         value={capabilities.closingTime}
-                                        onChange={(e) =>
-                                            setCapabilities((prev) => ({
-                                                ...prev,
-                                                closingTime: e.target.value,
-                                            }))
-                                        }
+                                        onChange={(e) => handleTimeChange("closingTime", e.target.value)}
                                     />
                                 </div>
                             </div>
+                            {timeError && (
+                                <p className="text-red-500 text-sm">{timeError}</p>
+                            )}
 
-                            {/* Additional Information */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
-                                    Additional Information
-                                </label>
-                                <textarea
-                                    className="w-full h-32 border rounded-md p-2"
-                                    value={capabilities.additionalInformation}
-                                    onChange={(e) =>
-                                        setCapabilities((prev) => ({
-                                            ...prev,
-                                            additionalInformation: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Enter any additional information"
-                                />
-                            </div>
-
-                            {/* Other Branches */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Other Branches
@@ -1467,9 +1440,8 @@ export const HospitalServices = () => {
                                         }))
                                     }
                                 >
-                                    <Option value="">Select</Option>
-                                    <Option value="Yes">Yes</Option>
                                     <Option value="No">No</Option>
+                                    <Option value="Yes">Yes</Option>
                                 </Select>
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
@@ -1500,6 +1472,23 @@ export const HospitalServices = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-800">
+                                    Additional Information
+                                </label>
+                                <textarea
+                                    className="w-full h-32 border rounded-md p-2"
+                                    value={capabilities.additionalInformation}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            additionalInformation: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter any additional information"
+                                />
+                            </div>
                         </>
                     ) : null}
                 </div>
@@ -1509,7 +1498,7 @@ export const HospitalServices = () => {
                 <Button
                     className="h-12 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
                     onClick={handleSubmit}
-                    disabled={saving}
+                    disabled={saving || !hasChanges}
                 >
                     {saving ? (
                         <>

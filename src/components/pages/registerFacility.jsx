@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../../components/button.jsx";
 import { Card, CardContent } from "../../components/card.jsx";
 import { Input } from "../../components/input.jsx";
@@ -202,6 +202,7 @@ export const RegistrationStep = () => {
       phone: formatPhoneNumber(values.phoneNumber),
       secondaryPhone: formatPhoneNumber(values.secondaryPhone) || null,
       whatsapp: formatPhoneNumber(values.whatsapp) || null,
+      registrationNumber: values.registration,
       country: values.country,
       state: values.state,
       lga: values.lga,
@@ -212,19 +213,28 @@ export const RegistrationStep = () => {
       isWhatsappNumberVerified: whatsappVerified,
     };
 
+
     try {
-      await registerFacility(facilityData);
+
+      if (!(phoneVerified && whatsappVerified)) {
+        toast.error("Please verify both phone and WhatsApp numbers before submitting.");
+        setSubmitting(false);
+        return;
+      }
+      let response = await registerFacility(facilityData);
       setSubmitting(false);
       toast.success("Facility registered successfully!", {
         position: "top-right",
         autoClose: 3000,
       });
-      navigate("/login", { state: { phoneNumber: facilityData.phone } });
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("facilityType", response.facility.type.toLowerCase());
+      navigate("/facility-dashboard");
     } catch (error) {
       setSubmitting(false);
       setError(
         error.response?.data?.error ||
-          "Failed to register facility. Please try again."
+        "Failed to register facility. Please try again."
       );
     }
   };
@@ -297,98 +307,103 @@ export const RegistrationStep = () => {
                         className="text-red-500 text-sm"
                       />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                    {/* Conditional Hospital Type */}
+                    {values.facilityType === "Hospital" && (
+                      <div className="flex-1">
                         <label className="text-sm font-semibold">
-                          Facility Name <span className="text-red-600">*</span>
+                          Hospital Type <span className="text-red-600">*</span>
                         </label>
-                        <span
-                          data-tooltip-id="facility-name-tooltip"
-                          data-tooltip-content="If your facility has more than one branch, name it as: Facility Name (Branch Location)."
-                          className="text-blue-500 cursor-pointer"
-                        >
-                          <Info className="h-4 w-4 text-gray-500" />
-                        </span>
-                        <ReactTooltip
-                          id="facility-name-tooltip"
-                          place="right"
-                          effect="solid"
-                          className="max-w-xs bg-gray-800 text-white text-xs rounded py-1 px-2"
+                        <Field name="hospitalType">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(val) => setFieldValue("hospitalType", val)}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Select hospital type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Primary">Primary</SelectItem>
+                                <SelectItem value="Secondary">Secondary</SelectItem>
+                                <SelectItem value="Tertiary">Tertiary</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="hospitalType"
+                          component="div"
+                          className="text-red-500 text-sm"
                         />
                       </div>
-                      <Field
-                        as={Input}
-                        name="facilityName"
-                        placeholder="Enter facility name"
-                        className="h-12 border-[#d7dbdf]"
-                      />
-                      <ErrorMessage
-                        name="facilityName"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
+                    )}
+
+                    {/* Conditional Insurance Type */}
+                    {values.facilityType === "Insurance" && (
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Insurance Type <span className="text-red-600">*</span>
+                        </label>
+                        <Field name="insuranceType">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(val) => setFieldValue("insuranceType", val)}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Select insurance type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="HMO">HMO (Health Maintenance Organization)</SelectItem>
+                                <SelectItem value="PPO">PPO (Preferred Provider Organization)</SelectItem>
+                                <SelectItem value="NHIA">NHIA (Government-backed)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="insuranceType"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
-                  {/* Conditional Hospital Type */}
-                  {values.facilityType === "Hospital" && (
-                    <div className="flex-1">
+
+                  {/* Facility Name */}
+                  <div className="mt-4">
+                    <div className="flex items-center gap-2">
                       <label className="text-sm font-semibold">
-                        Hospital Type <span className="text-red-600">*</span>
+                        Facility Name <span className="text-red-600">*</span>
                       </label>
-                      <Field name="hospitalType">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => setFieldValue("hospitalType", val)}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Select hospital type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Primary">Primary</SelectItem>
-                              <SelectItem value="Secondary">Secondary</SelectItem>
-                              <SelectItem value="Tertiary">Tertiary</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="hospitalType"
-                        component="div"
-                        className="text-red-500 text-sm"
+                      <span
+                        data-tooltip-id="facility-name-tooltip"
+                        data-tooltip-content="If your facility has more than one branch, name it as: Facility Name (Branch Location)."
+                        className="text-blue-500 cursor-pointer"
+                      >
+                        <Info className="h-4 w-4 text-gray-500" />
+                      </span>
+                      <ReactTooltip
+                        id="facility-name-tooltip"
+                        place="right"
+                        effect="solid"
+                        className="max-w-xs bg-gray-800 text-white text-xs rounded py-1 px-2"
                       />
                     </div>
-                  )}
-                  {/* Conditional Insurance Type */}
-                  {values.facilityType === "Insurance" && (
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Insurance Type <span className="text-red-600">*</span>
-                      </label>
-                      <Field name="insuranceType">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => setFieldValue("insuranceType", val)}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Select insurance type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="HMO">HMO (Health Maintenance Organization)</SelectItem>
-                              <SelectItem value="PPO">PPO (Preferred Provider Organization)</SelectItem>
-                              <SelectItem value="NHIA">NHIA (Government-backed)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="insuranceType"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                  )}
+                    <Field
+                      as={Input}
+                      name="facilityName"
+                      placeholder="Enter facility name"
+                      className="h-12 border-[#d7dbdf]"
+                    />
+                    <ErrorMessage
+                      name="facilityName"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
+                  </div>
+
+
                   {/* Row 2: Email + Phone */}
                   <div className="flex gap-4">
                     <div className="flex-1">
@@ -437,7 +452,7 @@ export const RegistrationStep = () => {
                                   <Button
                                     type="button"
                                     onClick={() => handleSendOtp(phoneNumber, "phone")}
-                                    className="absolute right-2 h-8 bg-blue-600 text-white px-3 text-sm"
+                                    className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
                                   >
                                     Verify
                                   </Button>
@@ -533,7 +548,7 @@ export const RegistrationStep = () => {
                                   <Button
                                     type="button"
                                     onClick={() => handleSendOtp(whatsapp, "whatsapp")}
-                                    className="absolute right-2 h-8 bg-blue-600 text-white px-3 text-sm"
+                                    className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
                                   >
                                     Verify
                                   </Button>
@@ -796,7 +811,8 @@ export const RegistrationStep = () => {
                   />
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !phoneVerified || !whatsappVerified}
+
                     className="w-full h-12 bg-primarysolid text-white rounded-xl"
                   >
                     {isSubmitting ? "Registering..." : "Create Hospital Account"}

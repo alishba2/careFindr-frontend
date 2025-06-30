@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button, Upload, Card, message } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import StepProgress from "./stepProgress";
@@ -8,7 +8,7 @@ import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
 const { Dragger } = Upload;
 
 export const DocumentUpload = () => {
-  const { facilityType, authData } = useAuth();
+  const { facilityType, authData ,fetchAuthData} = useAuth();
 
   const [fileList, setFileList] = useState({
     facilityPhotos: [],
@@ -20,7 +20,45 @@ export const DocumentUpload = () => {
 
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [initialFiles, setInitialFiles] = useState(null);
+  const [initialAdditionalInfo, setInitialAdditionalInfo] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Deep comparison function for file lists
+  const areFileListsEqual = (current, initial) => {
+    if (!initial) {
+      return (
+        current.facilityPhotos.length === 0 &&
+        current.specialistSchedules.length === 0 &&
+        current.priceList.length === 0 &&
+        current.facilityDetails.length === 0 &&
+        current.licenseRegistration.length === 0
+      );
+    }
+    const compareField = (currentField, initialField) => {
+      if (currentField.length !== initialField.length) return false;
+      const currentUids = currentField.map((file) => file.uid).sort();
+      const initialUids = initialField.map((file) => file.uid).sort();
+      return currentUids.every((uid, index) => uid === initialUids[index]);
+    };
+    return (
+      compareField(current.facilityPhotos, initial.facilityPhotos || []) &&
+      compareField(current.specialistSchedules, initial.specialistSchedules || []) &&
+      compareField(current.priceList, initial.priceList || []) &&
+      compareField(current.facilityDetails, initial.facilityDetails || []) &&
+      compareField(current.licenseRegistration, initial.licenseRegistration || [])
+    );
+  };
+
+  // Memoized hasChanges
+  const hasChanges = useMemo(() => {
+    if (initialFiles === null && !additionalInfo && areFileListsEqual(fileList, {})) {
+      return false; // No changes if no initial data, no files, and no additional info
+    }
+    return (
+      !areFileListsEqual(fileList, initialFiles) ||
+      additionalInfo !== initialAdditionalInfo
+    );
+  }, [fileList, additionalInfo, initialFiles, initialAdditionalInfo]);
 
   // Fetch existing documents on mount
   useEffect(() => {
@@ -28,9 +66,7 @@ export const DocumentUpload = () => {
       try {
         const response = await GetFacilityDocs();
         if (response) {
-          setInitialFiles(response);
-          setAdditionalInfo(response.additionalInfo || "");
-          setFileList({
+          const newFileList = {
             facilityPhotos: response.facilityPhotos?.map((path) => ({
               uid: path,
               name: path.split('/').pop(),
@@ -52,11 +88,31 @@ export const DocumentUpload = () => {
             licenseRegistration: response.licenseRegistrationFile
               ? [{ uid: response.licenseRegistrationFile, name: response.licenseRegistrationFile.split('/').pop(), status: 'done', url: response.licenseRegistrationFile }]
               : [],
+          };
+          setFileList(newFileList);
+          setInitialFiles(newFileList);
+          setAdditionalInfo(response.additionalInfo || "");
+          setInitialAdditionalInfo(response.additionalInfo || "");
+        } else {
+          setInitialFiles({
+            facilityPhotos: [],
+            specialistSchedules: [],
+            priceList: [],
+            facilityDetails: [],
+            licenseRegistration: [],
           });
+          setInitialAdditionalInfo("");
         }
       } catch (error) {
         console.error("Error fetching facility documents:", error);
-
+        setInitialFiles({
+          facilityPhotos: [],
+          specialistSchedules: [],
+          priceList: [],
+          facilityDetails: [],
+          licenseRegistration: [],
+        });
+        setInitialAdditionalInfo("");
       }
     };
     fetchFacilityDocs();
@@ -92,6 +148,10 @@ export const DocumentUpload = () => {
   });
 
   const handleSubmit = async () => {
+    if (!hasChanges) {
+      message.info("No changes to save.");
+      return;
+    }
     try {
       setSaving(true);
       const formData = new FormData();
@@ -101,7 +161,7 @@ export const DocumentUpload = () => {
 
       // Append Facility Photos
       fileList.facilityPhotos.forEach((file) => {
-        if (!initialFiles?.facilityPhotos?.includes(file.url || file.name)) {
+        if (!initialFiles?.facilityPhotos?.find((f) => f.url === (file.url || file.name))) {
           formData.append("facilityPhotos", file.originFileObj || new File([], file.name));
         }
       });
@@ -109,7 +169,7 @@ export const DocumentUpload = () => {
       // Append Specialist Schedules (if Hospital)
       if (facilityType === "Hospital") {
         fileList.specialistSchedules.forEach((file) => {
-          if (!initialFiles?.specialistScheduleFiles?.includes(file.url || file.name)) {
+          if (!initialFiles?.specialistSchedules?.find((f) => f.url === (file.url || file.name))) {
             formData.append("specialistSchedules", file.originFileObj || new File([], file.name));
           }
         });
@@ -121,7 +181,7 @@ export const DocumentUpload = () => {
         { field: "facilityDetails", key: "facilityDetailsDoc" },
         { field: "licenseRegistration", key: "licenseRegistrationFile" },
       ].forEach(({ field, key }) => {
-        const existingFile = initialFiles?.[key];
+        const existingFile = initialFiles?.[key]?.[0]?.url;
         if (
           fileList[field]?.[0]?.originFileObj &&
           (!existingFile || existingFile !== fileList[field][0].url)
@@ -132,17 +192,20 @@ export const DocumentUpload = () => {
 
       await FacilityDocs(formData, initialFiles !== null);
       message.success("Facility documents uploaded successfully!");
+      setInitialFiles(JSON.parse(JSON.stringify(fileList)));
+      setInitialAdditionalInfo(additionalInfo);
+      await fetchAuthData();
       setSaving(false);
-
     } catch (error) {
       setSaving(false);
       console.error("Error uploading:", error);
+      message.error("Failed to upload documents. Please try again.");
     }
   };
 
   return (
     <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
-            <StepProgress currentStep={authData?.onBoardingStep} />
+      <StepProgress currentStep={authData?.onBoardingStep} />
 
       <div className="p-6 h-24 flex flex-col gap-2">
         <h2 className="text-[30px] font-semibold text-gray-900 leading-[36px] tracking-[0.5%]">
@@ -163,43 +226,30 @@ export const DocumentUpload = () => {
               <p className="ant-upload-text">Drag and Drop files here or Click to Upload</p>
               <p className="ant-upload-hint text-gray-500">Accepts .jpg, .png, .pdf (max 100MB)</p>
             </Dragger>
-
-            {fileList.facilityPhotos.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
-                {fileList.facilityPhotos.map((file) => (
-                  <div
-                    key={file.uid}
-                    className="flex justify-between items-center px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
-                  >
-                    <span className="text-sm text-gray-800 truncate">{file.name}</span>
-                    <DeleteOutlined
-                      onClick={() => handleDelete(file, "facilityPhotos")}
-                      className="text-red-500 cursor-pointer text-lg"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Other Files */}
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              { field: "facilityDetails", label: "Upload File with Facility Details Document" },
-              { field: "licenseRegistration", label: "Upload File with License and Registration Certificate" },
+              { field: "facilityDetails", label: "Upload Documents with Details about your Facility" },
+              { field: "licenseRegistration", label: "License and Registration Certificates" },
               ...(facilityType === "Hospital"
                 ? [{ field: "specialistSchedules", label: "Upload File With Specialist Schedules" }]
                 : []),
-              { field: "priceList", label: "Upload File with Price List" },
+              { field: "priceList", label: "Upload Price List (NGN)" },
             ].map(({ field, label }) => (
               <div key={field} className="space-y-2 w-full">
-                <h1 className="text-sm font-bold text-gray-900 mb-1">{label}</h1>
-                <Upload {...uploadProps(field)}>
-                  <Button icon={<UploadOutlined />} className="w-full h-10">
-                    {fileList[field]?.[0]?.name || "Select File"}
+                <h1 className="text-sm font-semibold text-gray-900">{label}</h1>
+                <Upload {...uploadProps(field)} className="w-full">
+                  <Button
+                    icon={<UploadOutlined className="ml-auto text-gray-500 text-[20px]" />}
+                    className="w-[500px] h-11 my-3 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
+                  >
+                    <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096]">
+                      {fileList[field]?.[0]?.name || "Accepts DOC, PDF, XLS"}
+                    </p>
                   </Button>
                 </Upload>
-                <p className="text-xs text-gray-500">Accepts .doc, .pdf, .xls</p>
               </div>
             ))}
           </div>
@@ -218,8 +268,11 @@ export const DocumentUpload = () => {
       </Card>
 
       <div className="flex justify-end p-4">
-        {/* <Button className="h-12 px-6 bg-gray-200 text-gray-700 rounded-md">Back</Button> */}
-        <Button className="h-12 px-6 bg-cyan-500 text-white rounded-md" onClick={handleSubmit}>
+        <Button
+          className="h-12 px-6 bg-cyan-500 text-white rounded-md"
+          onClick={handleSubmit}
+          disabled={saving || !hasChanges}
+        >
           {saving ? (
             <>
               <span className="loader mr-2" /> Saving...
