@@ -14,7 +14,7 @@ const Header = () => {
   };
 
   return (
-    <header className="relative w-full h-20 flex items-center justify-between px-4 md:px-10 bg-white border-b border-gray-200 z-50">
+    <header className="relative w-full h-20 flex items-center justify-around px-4 md:px-10 bg-white border-b border-gray-200 z-50">
       {/* Logo */}
       <div className="flex items-center space-x-2">
         <HeartOutlined className="text-[#05A2C2] text-2xl" />
