@@ -23,6 +23,7 @@ import Referrals from "./components/FacilityDashboard/referrals";
 import Feedback from "./components/FacilityDashboard/feedback";
 import { FacilityInformation } from "./components/FacilityDashboard/facilityInformation";
 import { DocumentUpload } from "./components/FacilityDashboard/documentUpload";
+import Notifications from "./components/FacilityDashboard/notification";
 
 export const App = () => {
   return (
@@ -110,12 +111,7 @@ export const App = () => {
             <Route path="service-capacity" element={<Services />} />
             <Route path="document-upload" element={<DocumentUpload />} />
             <Route path="referrals" element={<Referrals />} />
-            <Route path="notifications" element={
-              <div className="p-6">
-                <h2 className="text-2xl font-bold">Notifications</h2>
-                <p>Notifications content goes here...</p>
-              </div>
-            } />
+            <Route path="notifications" element={<Notifications/>}/>
             <Route path="support" element={<Feedback />} />
             <Route path="*" element={<Navigate to="home" replace />} />
           </Route>

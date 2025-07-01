@@ -40,6 +40,13 @@
       ]
     },
     {
+      "id": "src/components/FacilityDashboard/notification.jsx",
+      "label": "notification",
+      "routes": [
+        "notifications"
+      ]
+    },
+    {
       "id": "src/components/FacilityDashboard/feedback.jsx",
       "label": "feedback",
       "routes": [
@@ -87,15 +94,15 @@
       }
     },
     {
-      "id": "src/components/common/ProtectedRoute.jsx:13:11-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/common/ProtectedRoute.jsx:10:11-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/common/ProtectedRoute.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "<Navigate to=\"/login\" replace />",
-          "line": 13,
-          "endLine": 13,
+          "line": 10,
+          "endLine": 10,
           "column": 11,
           "endColumn": 43,
           "sourceFile": "src/components/common/ProtectedRoute.jsx"
