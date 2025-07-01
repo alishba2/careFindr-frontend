@@ -11,10 +11,16 @@
       ]
     },
     {
+      "id": "src/components/AdminDashboard/dasboard.jsx",
+      "label": "dasboard",
+      "routes": [
+        "/admin-dashboard/*"
+      ]
+    },
+    {
       "id": "src/components/common/ProtectedRoute.jsx",
       "label": "ProtectedRoute",
       "routes": [
-        "/admin-dashboard/*",
         "/facility-dashboard"
       ]
     },
@@ -87,15 +93,63 @@
       }
     },
     {
-      "id": "src/components/common/ProtectedRoute.jsx:13:11-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:252:28-to-src/components/AdminDashboard/allFacilities.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/AdminDashboard/allFacilities.jsx",
+      "data": {
+        "viaRoute": "/facilities",
+        "trigger": {
+          "element": "<Route path=\"/facilities\" element={<AllFacilities />} />",
+          "line": 252,
+          "endLine": 252,
+          "column": 28,
+          "endColumn": 84,
+          "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/AdminDashboard/dasboard.jsx:253:28-to-src/components/AdminDashboard/facility-detail.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/AdminDashboard/facility-detail.jsx",
+      "data": {
+        "viaRoute": "/facilities/:id",
+        "trigger": {
+          "element": "<Route path=\"/facilities/:id\" element={<FacilityDetail />} />",
+          "line": 253,
+          "endLine": 253,
+          "column": 28,
+          "endColumn": 89,
+          "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/AdminDashboard/dasboard.jsx:254:28-to-src/components/AdminDashboard/admin.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/AdminDashboard/admin.jsx",
+      "data": {
+        "viaRoute": "/admins",
+        "trigger": {
+          "element": "<Route path=\"/admins\" element={<AdminList />} />",
+          "line": 254,
+          "endLine": 254,
+          "column": 28,
+          "endColumn": 76,
+          "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/common/ProtectedRoute.jsx:10:11-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/common/ProtectedRoute.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "<Navigate to=\"/login\" replace />",
-          "line": 13,
-          "endLine": 13,
+          "line": 10,
+          "endLine": 10,
           "column": 11,
           "endColumn": 43,
           "sourceFile": "src/components/common/ProtectedRoute.jsx"
