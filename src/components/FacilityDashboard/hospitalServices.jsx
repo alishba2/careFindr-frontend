@@ -10,17 +10,24 @@ import { useAuth } from "../hook/auth";
 import { FacilityServices, GetFacilityService } from "../../services/service";
 import { message } from 'antd';
 const { Option } = Select;
+import { useLocation } from "react-router-dom";
 
 export const HospitalServices = () => {
-    const { authData, facilityType ,fetchAuthData} = useAuth();
+    const { authData, facilityType, fetchAuthData } = useAuth();
     const [progress, setProgress] = useState(0);
-    const [facility, setFacility] = useState();
+    const [facility, setFacility] = useState(null);
     const [subSpecialities, setSubspecialities] = useState([]);
     const [saving, setSaving] = useState(false);
     const [initialCapabilities, setInitialCapabilities] = useState(null);
     const [initialSubSpecialities, setInitialSubSpecialities] = useState([]);
     const [isServiceSaved, setIsServiceSaved] = useState(false);
     const [timeError, setTimeError] = useState("");
+    const location = useLocation();
+    const type = location.state?.type;
+
+    const [typeFacility, setTypeFacility] = useState(null);
+
+
     const [capabilities, setCapabilities] = useState({
         operatingDays: [],
         openingTime: "",
@@ -58,8 +65,20 @@ export const HospitalServices = () => {
     });
 
     useEffect(() => {
-        setFacility(facilityType);
-    }, [facilityType]);
+        console.log(type, "type i shere");
+        setFacility(null);
+        if (type === "ambulance") {
+            setFacility("Ambulance")
+            return;
+        } else {
+            setFacility(facilityType);
+        }
+    }, [facilityType, type]);
+
+    useEffect(() => {
+        console.log(facility, "facility");
+
+    }, [facility])
 
     // Deep comparison function
     const areStatesEqual = (state1, state2) => {
@@ -112,10 +131,12 @@ export const HospitalServices = () => {
                     if (response?.service) {
                         const serviceData = response.service;
                         setProgress(2);
-                        setFacility(serviceData.facilityType);
+
                         setIsServiceSaved(true);
 
                         let newCapabilities = { ...capabilities };
+
+                        setTypeFacility(serviceData?.facilityType)
 
                         switch (serviceData.facilityType) {
                             case "Hospital":
@@ -124,20 +145,36 @@ export const HospitalServices = () => {
                                     operatingDays: serviceData.hospitalDetails.operationDays || [],
                                     openingTime: serviceData.hospitalDetails.openingTime || "",
                                     closingTime: serviceData.hospitalDetails.closingTime || "",
-                                    coreClinicalSpecialities:
-                                        serviceData.hospitalDetails.coreClinicalSpecialities || [],
+                                    coreClinicalSpecialities: serviceData.hospitalDetails.coreClinicalSpecialities || [],
                                     facilityFeatures: serviceData.hospitalDetails.facilityFeatures || [],
                                     admissionFee: serviceData.hospitalDetails.admissionFee?.toString() || "",
                                     consultationFee: serviceData.hospitalDetails.consultationFee?.toString() || "",
                                     totalBedSpace: serviceData.hospitalDetails.totalBedSpace?.toString() || "",
                                     hasPharmacy: serviceData.hospitalDetails.hasPharmacy ? "Yes" : "No",
                                     hasLaboratory: serviceData.hospitalDetails.hasLaboratory ? "Yes" : "No",
-                                    acceptExternalPatients:
-                                        serviceData.hospitalDetails.externalPatientsAllowed?.lab ? "Yes" : "No",
+                                    acceptExternalPatients: serviceData.hospitalDetails.externalPatientsAllowed?.lab ? "Yes" : "No",
                                     hasOtherBranches: serviceData.hospitalDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.hospitalDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.hospitalDetails.additionalInfo || "",
                                 };
+
+                                if (serviceData?.ambulanceDetails) {
+                                    newCapabilities = {
+                                        ...newCapabilities,
+                                        ambulanceTypes: serviceData.ambulanceDetails.ambulanceTypes || [],
+                                        vehicleEquipment: serviceData.ambulanceDetails.vehicleEquipment || [],
+                                        typicalCrew: serviceData.ambulanceDetails.typicalCrew || [],
+                                        averageResponseMin: serviceData.ambulanceDetails.avgResponseTime?.split(":")[0] || "",
+                                        averageResponseSec: serviceData.ambulanceDetails.avgResponseTime?.split(":")[1] || "",
+                                        noRoadworthyAmbulances: serviceData.ambulanceDetails.numRoadWorthyAmbulances?.toString() || "",
+                                        maxDailyTrips: serviceData.ambulanceDetails.maxTripsDaily?.toString() || "",
+                                        hasBackupVehicles: serviceData.ambulanceDetails.backupVehicles ? "Yes" : "No",
+                                        payPerTrip: serviceData.ambulanceDetails.payPerTrip?.toString() || "",
+                                        nhisInsuranceAccepted: serviceData.ambulanceDetails.insuranceAccepted ? "Yes" : "No",
+                                        registeredWithFMOH: serviceData.ambulanceDetails.registeredWithFederalHealth ? "Yes" : "No",
+                                    };
+                                }
+
                                 setSubspecialities(serviceData.hospitalDetails.subSpecialities || []);
                                 setInitialSubSpecialities(serviceData.hospitalDetails.subSpecialities || []);
                                 break;
@@ -357,35 +394,39 @@ export const HospitalServices = () => {
         }));
     };
 
+
     const prepareServiceData = () => {
         const serviceData = {
             facilityId: authData?._id,
-            facilityType: facility
+            facilityType: facilityType, // Use the auth facilityType
+            type: "full",
         };
 
-        switch (facility) {
-            case "Hospital":
-                serviceData.hospitalDetails = {
-                    coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
-                    subSpecialities: subSpecialities,
-                    facilityFeatures: capabilities.facilityFeatures,
-                    operationDays: capabilities.operatingDays.filter((day) => day !== "24/7"),
-                    openingTime: capabilities.openingTime,
-                    closingTime: capabilities.closingTime,
-                    admissionFee: Number(capabilities.admissionFee) || 0,
-                    consultationFee: Number(capabilities.consultationFee) || 0,
-                    totalBedSpace: Number(capabilities.totalBedSpace) || 0,
-                    hasPharmacy: capabilities.hasPharmacy === "Yes",
-                    hasLaboratory: capabilities.hasLaboratory === "Yes",
-                    externalPatientsAllowed: {
-                        lab: capabilities.acceptExternalPatients === "Yes",
-                        pharmacy: capabilities.acceptExternalPatients === "Yes",
-                    },
-                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
-                    additionalInfo: capabilities.additionalInformation,
-                };
-                break;
+        // Always include hospital details if they exist and were previously saved
+        if (initialCapabilities?.coreClinicalSpecialities?.length > 0) {
+            serviceData.hospitalDetails = {
+                coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
+                subSpecialities: subSpecialities,
+                facilityFeatures: capabilities.facilityFeatures,
+                operationDays: capabilities.operatingDays.filter((day) => day !== "24/7"),
+                openingTime: capabilities.openingTime,
+                closingTime: capabilities.closingTime,
+                admissionFee: Number(capabilities.admissionFee) || 0,
+                consultationFee: Number(capabilities.consultationFee) || 0,
+                totalBedSpace: Number(capabilities.totalBedSpace) || 0,
+                hasPharmacy: capabilities.hasPharmacy === "Yes",
+                hasLaboratory: capabilities.hasLaboratory === "Yes",
+                externalPatientsAllowed: {
+                    lab: capabilities.acceptExternalPatients === "Yes",
+                    pharmacy: capabilities.acceptExternalPatients === "Yes",
+                },
+                branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
+                additionalInfo: capabilities.additionalInformation,
+            };
+        }
 
+        // Include data based on the current facility
+        switch (facility) {
             case "Laboratory":
                 serviceData.labDetails = {
                     accreditationStatus: capabilities.accreditationStatus,
@@ -438,6 +479,28 @@ export const HospitalServices = () => {
                 break;
 
             default:
+                // If facility is Hospital, only include hospitalDetails if not already included
+                if (!serviceData.hospitalDetails) {
+                    serviceData.hospitalDetails = {
+                        coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
+                        subSpecialities: subSpecialities,
+                        facilityFeatures: capabilities.facilityFeatures,
+                        operationDays: capabilities.operatingDays.filter((day) => day !== "24/7"),
+                        openingTime: capabilities.openingTime,
+                        closingTime: capabilities.closingTime,
+                        admissionFee: Number(capabilities.admissionFee) || 0,
+                        consultationFee: Number(capabilities.consultationFee) || 0,
+                        totalBedSpace: Number(capabilities.totalBedSpace) || 0,
+                        hasPharmacy: capabilities.hasPharmacy === "Yes",
+                        hasLaboratory: capabilities.hasLaboratory === "Yes",
+                        externalPatientsAllowed: {
+                            lab: capabilities.acceptExternalPatients === "Yes",
+                            pharmacy: capabilities.acceptExternalPatients === "Yes",
+                        },
+                        branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
+                        additionalInfo: capabilities.additionalInformation,
+                    };
+                }
                 break;
         }
 
@@ -451,6 +514,7 @@ export const HospitalServices = () => {
         }
         try {
             const serviceData = prepareServiceData();
+            console.log(serviceData, "service data ishere");
             setSaving(true);
             const response = await FacilityServices(serviceData);
             setIsServiceSaved(true);
@@ -471,7 +535,15 @@ export const HospitalServices = () => {
             <StepProgress currentStep={authData?.onBoardingStep} />
             <div className="mb-6 p-6 h-24 flex flex-col gap-2">
                 <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
-                    Service & Capacity
+
+                    {
+                        typeFacility === "Hospital" && facility === "Ambulance" ? (
+                            "Ambulance Details"
+                        ) : (
+                            " Service & Capacity"
+                        )
+                    }
+
                 </h2>
                 <p className="text-base font-inter font-medium text-[16px] leading-24px tracking-[0.5%] font-[500]">
                     Ensuring accuracy for patients, regulators, and partners
@@ -650,7 +722,7 @@ export const HospitalServices = () => {
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                            {type !== "ambulance" && <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Other Branches
                                 </label>
@@ -700,9 +772,9 @@ export const HospitalServices = () => {
                                         </Button>
                                     </div>
                                 )}
-                            </div>
+                            </div>}
 
-                            <div className="space-y-2">
+                            {type !== "ambulance" && <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Additional Information
                                 </label>
@@ -717,7 +789,7 @@ export const HospitalServices = () => {
                                     }
                                     placeholder="Enter any additional information"
                                 />
-                            </div>
+                            </div>}
                         </>
                     ) : facility === "Laboratory" ? (
                         <>
@@ -1373,7 +1445,7 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
+                            {typeFacility === "Ambulance" && <div className="space-y-2">
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Weekly Operating Days
                                 </h1>
@@ -1395,8 +1467,8 @@ export const HospitalServices = () => {
                                     ))}
                                 </div>
                             </div>
-
-                            <div className="flex gap-4">
+                            }
+                            {typeFacility === "Ambulance" && <div className="flex gap-4">
                                 <div className="flex-1">
                                     <label className="text-sm font-medium text-gray-800">
                                         Opening Time
@@ -1419,12 +1491,12 @@ export const HospitalServices = () => {
                                         onChange={(e) => handleTimeChange("closingTime", e.target.value)}
                                     />
                                 </div>
-                            </div>
+                            </div>}
                             {timeError && (
                                 <p className="text-red-500 text-sm">{timeError}</p>
                             )}
 
-                            <div className="space-y-2">
+                            {typeFacility === "Ambulance" && <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Other Branches
                                 </label>
@@ -1471,7 +1543,7 @@ export const HospitalServices = () => {
                                         </Button>
                                     </div>
                                 )}
-                            </div>
+                            </div>}
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">

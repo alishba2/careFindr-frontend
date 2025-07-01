@@ -240,14 +240,15 @@ export const RegistrationStep = () => {
   };
 
   return (
-    <main className="flex flex-col min-h-screen items-center  pb-20 bg-[#F8F9FA]">
+    <main className="flex flex-col min-h-screen items-center pb-20 bg-[#F8F9FA]">
       <Header />
-      <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 shadow-[0px_0px_4px_rgba(0,_0,_0,_0.25)] rounded-[15px] bg-white   ">
-        <div className="mb-6 m-2 p-4 rounded-[5px] h-24 flex flex-col items-center justify-center">
-          <h2 className="text-[30px] font-semibold text-fgtext-contrast">
+      <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 md:bg-white rounded-[15px] border-none shadow-none md:shadow-[0px_0px_4px_rgba(0,_0,_0,_0.25)] md:border">
+
+       <div className="mb-6 py-4 rounded-[5px] flex flex-col items-center justify-center text-center">
+          <h2 className="text-[24px] md:text-[30px] font-semibold text-fgtext-contrast">
             Create Your Account
           </h2>
-          <p className="text-base font-inter font-medium text-fgtext leading-24px tracking-[0.5%]">
+          <p className="text-sm md:text-base font-medium text-fgtext">
             Join hundreds of verified healthcare providers
           </p>
         </div>
@@ -264,7 +265,7 @@ export const RegistrationStep = () => {
               onSubmit={handleSubmit}
             >
               {({ isSubmitting, values, setFieldValue }) => (
-                <Form className="space-y-6">
+<Form className="space-y-6 w-full">
                   {/* Row 1: Facility Type and Name */}
                   <div className="flex gap-4">
                     <div className="flex-1">
@@ -405,7 +406,7 @@ export const RegistrationStep = () => {
 
 
                   {/* Row 2: Email + Phone */}
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-4 md:flex-row flex-col">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">
                         Contact Email <span className="text-red-600">*</span>
@@ -490,7 +491,7 @@ export const RegistrationStep = () => {
                     </div>
                   </div>
                   {/* Row 3: Facility Director/Manager's number + WhatsApp */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 md:flex-row flex-col">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">
                         Facility Director/Manager's number
@@ -586,7 +587,7 @@ export const RegistrationStep = () => {
                     </div>
                   </div>
                   {/* Row 4: Country + State */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 md:flex-row flex-col">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">
                         Country <span className="text-red-600">*</span>
@@ -648,7 +649,7 @@ export const RegistrationStep = () => {
                     </div>
                   </div>
                   {/* Row 5: Facility Registration Number + Local Government Area */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 md:flex-row flex-col">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">
                         Facility Registration Number
@@ -729,7 +730,7 @@ export const RegistrationStep = () => {
                     </div>
                   )}
                   {/* Row 7: Passwords */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 md:flex-row flex-col">
                     <div className="flex-1">
                       <label className="text-sm font-semibold">
                         Password <span className="text-red-600">*</span>

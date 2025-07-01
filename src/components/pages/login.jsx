@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/button.jsx";
-import { Card, CardContent } from "../../components/card.jsx";
 import { Input } from "../../components/input.jsx";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { loginFacility } from "../../services/auth.js";
-import { toast } from "react-toastify";
+import bgimg from "../../assets/medical.jpg";
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
   identifier: Yup.string()
     .test(
@@ -22,175 +20,175 @@ const validationSchema = Yup.object({
       }
     )
     .required("Phone number or email is required"),
-  password: Yup.string()
-    .required("Password is required"),
+  password: Yup.string().required("Password is required"),
 });
 
 export const Login = () => {
-  // Initial form values
   const initialValues = {
     identifier: "",
     password: "",
   };
 
-  // For navigation after successful login
   const navigate = useNavigate();
-
-  // State for error messages
   const [loginError, setLoginError] = useState(null);
 
-  // Handle form submission
   const handleSubmit = async (values, { setStatus }) => {
     const loginData = {
       loginId: values.identifier,
       password: values.password,
     };
 
-    console.log("Login data:", loginData);
     try {
       const response = await loginFacility(loginData);
-      // Store token in localStorage (or use context/auth provider)
       localStorage.setItem("token", response.token);
-      setStatus(null); // Clear any previous errors
-      setLoginError(null);
-      // Redirect to dashboard or home page
-
       localStorage.setItem("facilityType", response.facility.type.toLowerCase());
+      setStatus(null);
+      setLoginError(null);
       navigate("/facility-dashboard");
-
-
     } catch (error) {
-      console.error("Login failed:", error);
-      const errorMessage = error.response?.data?.error || "Login failed. Please try again.";
+      const errorMessage =
+        error.response?.data?.error || "Login failed. Please try again.";
       setStatus({ error: errorMessage });
       setLoginError(errorMessage);
     }
   };
 
   return (
-    <main
-      className="flex flex-col min-h-screen items-center relative bg-white"
-      data-model-id="2:1264"
-    >
-      {/* Header */}
-      <header className="flex w-full h-20 items-center justify-around px-20 py-0 relative bg-bgdefault-bg">
-        <div className="flex items-center gap-[775px] relative flex-1 grow">
-          <div className="inline-flex items-center gap-10 relative flex-[0_0_auto]">
-            <div className="relative w-[83px] h-9">
-              <h1 className="text-4xl font-bold text-primarysolid tracking-[-0.36px]">
-                Logo
-              </h1>
+    <div className="flex min-h-screen">
+      {/* Left Image Section (hidden on small screens) */}
+      <div
+        className="w-1/2 relative hidden md:flex items-center justify-center bg-cover bg-center"
+        style={{ backgroundImage: `url(${bgimg})` }}
+      >
+        <div className="absolute inset-0 bg-black opacity-50"></div> {/* dark overlay */}
+
+        <div className="relative z-10 text-white text-center px-8 py-12">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Welcome Back</h2>
+          <p className="text-lg sm:text-xl mb-8 max-w-md mx-auto">
+            Join thousands of trusted medical professionals managing their facilities with ease and confidence.
+          </p>
+
+          <div className="flex flex-row items-center justify-center gap-10 text-xl sm:text-2xl font-semibold">
+            <div className="flex flex-col items-center">
+              <span className="text-3xl sm:text-5xl">500+</span> <br />
+              <span className="text-base sm:text-lg font-normal">Facilities Registered</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-3xl sm:text-5xl">94%</span> <br />
+              <span className="text-base sm:text-lg font-normal">Success Rate</span>
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <div className="flex flex-col items-center gap-10 pt-10 pb-0 px-0 relative flex-1 self-stretch w-full grow">
-        <div className="flex flex-col w-[480px] items-center gap-6 relative">
-          {/* Title section */}
-          <div className="flex flex-col items-center justify-center gap-2.5 relative self-stretch w-full">
-            <div className="flex flex-col w-full items-start gap-2.5 relative">
-              <h2 className="text-[30px] font-semibold text-fgtext-contrast tracking-[0.15px] leading-9">
-                Login
-              </h2>
-              <p className="text-base font-medium text-fgtext tracking-[0.08px] leading-6">
-                Sign in to your account using your phone number or email and password.
-              </p>
-            </div>
-          </div>
-
-          {/* Form card */}
-          <Card className="w-full border-[#dfe3e6] shadow-rounded-xl">
-            <CardContent className="flex flex-col gap-6 p-5">
-              <Formik
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ isSubmitting, status }) => (
-                  <Form>
-                    <div className="flex flex-col gap-4">
-                      {/* Display error message if login fails */}
-                      {status && status.error && (
-                        <div className="text-red-500 text-[14px] text-center">
-                          {status.error}
-                        </div>
-                      )}
-
-                      {/* Identifier field */}
-                      <div className="flex flex-col gap-2">
-                        <label
-                          htmlFor="identifier"
-                          className="text-[14px] font-semibold text-fgtext-contrast tracking-[0.07px]"
-                        >
-                          Phone Number or Email
-                        </label>
-                        <Field
-                          name="identifier"
-                          as={Input}
-                          id="identifier"
-                          className="h-12 px-4 py-3.5 text-[15px] font-medium text-fgsolid tracking-[0.075px] border-[#d7dbdf]"
-                          placeholder="Enter phone number or email"
-                        />
-                        <ErrorMessage
-                          name="identifier"
-                          component="div"
-                          className="text-red-500 text-[12px]"
-                        />
-                      </div>
-
-                      {/* Password field */}
-                      <div className="flex flex-col gap-2">
-                        <label
-                          htmlFor="password"
-                          className="text-[14px] font-semibold text-fgtext-contrast tracking-[0.07px]"
-                        >
-                          Password
-                        </label>
-                        <Field
-                          name="password"
-                          type="password"
-                          as={Input}
-                          id="password"
-                          className="h-12 px-4 py-3.5 text-[15px] font-medium text-fgsolid tracking-[0.075px] border-[#d7dbdf]"
-                          placeholder="Enter password"
-                        />
-                        <ErrorMessage
-                          name="password"
-                          component="div"
-                          className="text-red-500 text-[12px]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Forgot Password link */}
-                    <div className="flex justify-end mt-2">
-                      <Link
-                        to="/forgot-password"
-                        className="text-[14px] font-medium text-primarysolid hover:underline"
-                      >
-                        Forgot Password?
-                      </Link>
-                    </div>
-
-                    {/* Submit button */}
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="h-12 w-full bg-primarysolid text-primaryon-primary rounded-xl hover:bg-primarysolid/90 mt-4"
-                    >
-                      <span className="text-[15px] font-semibold tracking-[0.075px]">
-                        {isSubmitting ? "Logging in..." : "Login"}
-                      </span>
-                    </Button>
-                  </Form>
-                )}
-              </Formik>
-            </CardContent>
-          </Card>
+        
         </div>
       </div>
-    </main>
+
+      {/* Right Form Section */}
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          {/* Title */}
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Sign In</h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              Sign in using your phone number or email
+            </p>
+          </div>
+
+          {/* Formik Form */}
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting, status }) => (
+              <Form className="space-y-6">
+                {/* Error Message */}
+                {status?.error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {status.error}
+                  </div>
+                )}
+
+                {/* Identifier Field */}
+                <div>
+                  <label
+                    htmlFor="identifier"
+                    className="block text-sm sm:text-base font-medium text-gray-700"
+                  >
+                    Phone or Email
+                  </label>
+                  <Field
+                    name="identifier"
+                    as={Input}
+                    id="identifier"
+                    className="mt-2 w-full h-12 px-4 text-base sm:text-[17px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primarysolid"
+                    placeholder="Enter phone or email"
+                  />
+                  <ErrorMessage
+                    name="identifier"
+                    component="div"
+                    className="text-red-500 text-xs mt-1"
+                  />
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm sm:text-base font-medium text-gray-700"
+                  >
+                    Password
+                  </label>
+                  <Field
+                    name="password"
+                    type="password"
+                    as={Input}
+                    id="password"
+                    className="mt-2 w-full h-12 px-4 text-base sm:text-[17px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primarysolid"
+                    placeholder="Enter password"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-500 text-xs mt-1"
+                  />
+                </div>
+
+                {/* Forgot Password */}
+                <div className="flex justify-end">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-primarysolid hover:underline"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
+                >
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </Button>
+              </Form>
+            )}
+          </Formik>
+
+          {/* Create Account */}
+          <div className="text-center">
+            <p className="text-sm sm:text-base text-gray-600">
+              Don’t have an account?{" "}
+              <Link
+                to="/"
+                className="text-primarysolid font-medium hover:underline"
+              >
+                Create Account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

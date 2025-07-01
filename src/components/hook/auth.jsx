@@ -8,6 +8,15 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [facilityType, setFacilityType] = useState(localStorage.getItem('facilityType') || 'Hospital');
 
+  const [isPharmacy, setIsPharmacy] = useState(false);
+  const [isAmbulance, setIsAmbulance] = useState(false);
+
+
+  const updateIsAmbulance = (value) => {
+    setIsAmbulance(value);
+  }
+
+
   // Fetch auth data on mount if token exists
 
   const fetchAuthData = async () => {
@@ -36,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Debug authData changes (optional, remove in production)
- 
+
   const login = (data) => {
     setAuthData(data);
     setToken(localStorage.getItem('token') || '');
@@ -52,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ authData, login, logout, facilityType, fetchAuthData ,setAuthData}}>
+    <AuthContext.Provider value={{ authData, login, logout, facilityType, fetchAuthData, setAuthData, updateIsAmbulance,isAmbulance }}>
       {children}
     </AuthContext.Provider>
   );

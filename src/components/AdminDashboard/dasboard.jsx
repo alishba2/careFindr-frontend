@@ -34,7 +34,9 @@ import car from "../../components/asstes/car.png";
 import register from "../../components/asstes/register.png";
 import color from "../../components/asstes/color.png";
 import time from "../../components/asstes/time.png";
-
+import Users from "./users";
+import { User } from "lucide-react";
+import Referrals from "./referrals";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
@@ -130,11 +132,14 @@ const AdminDashboard = () => {
         "Pharmacy",
         "Ambulance",
         "Insurance",
+        "Other",
       ].includes(key)
     ) {
       navigate("/admin-dashboard/facilities?type=" + key);
     }
     if (key === "4") navigate("/admin-dashboard/admins");
+    if (key === "5") navigate("/admin-dashboard/users");
+    if (key === "6") navigate("/admin-dashboard/referrals");
   };
 
   return (
@@ -144,7 +149,6 @@ const AdminDashboard = () => {
         <Sider
           width={320}
           className="bg-white shadow-md mt-6 mx-6 rounded-xl p-4"
-          // style={{ height: "800px" }}
           collapsible
           collapsed={collapsed}
           trigger={null}
@@ -173,13 +177,15 @@ const AdminDashboard = () => {
               icon={<img src={falities} alt="falities" />}
               title={!collapsed && "All Facilities"}
             >
+              <Menu.Item key="all" icon={<FileSearchOutlined />}>
+                All
+              </Menu.Item>
               <Menu.Item key="Hospital" icon={<BankOutlined />}>
                 Hospital
               </Menu.Item>
               <Menu.Item key="Laboratory" icon={<ExperimentOutlined />}>
                 Laboratory
               </Menu.Item>
-
               <Menu.Item key="Pharmacy" icon={<MedicineBoxOutlined />}>
                 Pharmacy
               </Menu.Item>
@@ -189,6 +195,7 @@ const AdminDashboard = () => {
               <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>
                 Insurance
               </Menu.Item>
+
             </SubMenu>
             <Menu.Item key="4" icon={<img src={doucment} alt="doucment" />}>
               {!collapsed && "Document Review"}
@@ -196,7 +203,7 @@ const AdminDashboard = () => {
             <Menu.Item key="5" icon={<img src={users} alt="users" />}>
               {!collapsed && "Users"}
             </Menu.Item>
-            <Menu.Item key="7" icon={<img src={referrels} alt="referrels" />}>
+            <Menu.Item key="6" icon={<img src={referrels} alt="referrels" />}>
               {!collapsed && "Referrals"}
             </Menu.Item>
             <Menu.Item key="8" icon={<img src={message} alt="message" />}>
@@ -213,10 +220,10 @@ const AdminDashboard = () => {
             </Menu.Item>
             <Menu.Item key="11" icon={<img src={Analytics} alt="Analytics" />}>
               {!collapsed && "Analytics"}
-            </Menu.Item>{" "}
-            <Menu.Item key="12" icon={<img src={Vector} alt="Vector" />}>
+            </Menu.Item>
+            <Menu.Item key="4" icon={<img src={Vector} alt="Vector" />}>
               {!collapsed && "Admins & Roles"}
-            </Menu.Item>{" "}
+            </Menu.Item>
             <Menu.Item key="13" icon={<SettingOutlined />}>
               {!collapsed && "Settings"}
             </Menu.Item>
@@ -233,7 +240,6 @@ const AdminDashboard = () => {
                     <h2 className="text-4xl font-bold mb-2">
                       Dashboard Overview
                     </h2>
-                    {/* Add your stat cards or summary here */}
                     <p className="text-gray-500 text-xl mb-8">
                       Welcome back! Here's what's happening with your facility
                       today.
@@ -279,6 +285,9 @@ const AdminDashboard = () => {
               <Route path="/facilities" element={<AllFacilities />} />
               <Route path="/facilities/:id" element={<FacilityDetail />} />
               <Route path="/admins" element={<AdminList />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/referrals" element={<Referrals />} />
+
             </Routes>
           </Content>
         </Layout>

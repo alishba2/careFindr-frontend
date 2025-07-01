@@ -1,12 +1,16 @@
 // components/Navbar.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Layout, Badge } from "antd";
 import { BellOutlined } from "@ant-design/icons";
 import { LogOutIcon } from "lucide-react";
 
+import { useAuth } from "../hook/auth";
+
 const { Header } = Layout;
 
 const Navbar = ({type}) => {
+
+  const {authData} = useAuth();
   return (
     <Header className="bg-white shadow px-6 flex justify-between items-center">
       <div className="flex items-center gap-6 px-8">

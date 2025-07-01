@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from "react";
-import { Table, Select, Button, DatePicker } from "antd";
+import { Input, Table, Select, Button } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
 
 const { Option } = Select;
 
 const Referrals = () => {
   const navigate = useNavigate();
 
-  // Dummy data with date field
+  // Dummy data
   const initialData = [
     {
       key: "1",
@@ -18,7 +17,7 @@ const Referrals = () => {
       sex: "Male",
       phoneNumber: "0000000000",
       differentialDiagnosis: "Fever",
-      date: "2025-06-15",
+      facilityReferred: "Yes / Company name",
       referralAmount: 5,
     },
     {
@@ -28,7 +27,7 @@ const Referrals = () => {
       sex: "Female",
       phoneNumber: "1111111111",
       differentialDiagnosis: "Cold",
-      date: "2025-06-20",
+      facilityReferred: "No",
       referralAmount: 3,
     },
     {
@@ -38,16 +37,17 @@ const Referrals = () => {
       sex: "Female",
       phoneNumber: "2222222222",
       differentialDiagnosis: "Injury",
-      date: "2025-07-01",
+      facilityReferred: "Yes / Health Inc",
       referralAmount: 2,
     },
   ];
 
   const [data, setData] = useState(initialData);
   const [filteredData, setFilteredData] = useState(initialData);
+  const [searchText, setSearchText] = useState("");
   const [filterAge, setFilterAge] = useState("");
   const [filterSex, setFilterSex] = useState("");
-  const [filterDate, setFilterDate] = useState(null);
+  const [filterFacility, setFilterFacility] = useState("");
 
   const totalReferrals = data.length;
   const totalAmount = data.reduce((sum, record) => sum + record.referralAmount, 0);
@@ -55,6 +55,12 @@ const Referrals = () => {
   // Filter logic
   useEffect(() => {
     let filtered = [...data];
+
+    if (searchText) {
+      filtered = filtered.filter((item) =>
+        item.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
 
     if (filterAge) {
       filtered = filtered.filter((item) => item.age === parseInt(filterAge));
@@ -64,18 +70,20 @@ const Referrals = () => {
       filtered = filtered.filter((item) => item.sex === filterSex);
     }
 
-    if (filterDate) {
-      const selectedDate = moment(filterDate).format("YYYY-MM-DD");
-      filtered = filtered.filter((item) => item.date === selectedDate);
+    if (filterFacility) {
+      filtered = filtered.filter((item) =>
+        item.facilityReferred.toLowerCase().includes(filterFacility.toLowerCase())
+      );
     }
 
     setFilteredData(filtered);
-  }, [data, filterAge, filterSex, filterDate]);
+  }, [data, searchText, filterAge, filterSex, filterFacility]);
 
   const handleClearFilters = () => {
+    setSearchText("");
     setFilterAge("");
     setFilterSex("");
-    setFilterDate(null);
+    setFilterFacility("");
   };
 
   const columns = [
@@ -84,15 +92,23 @@ const Referrals = () => {
     { title: "Sex", dataIndex: "sex", key: "sex" },
     { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
     { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-    { title: "Date", dataIndex: "date", key: "date" },
+    { title: "Facility Referred", dataIndex: "facilityReferred", key: "facilityReferred" },
     { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
   ];
 
   return (
-    <div className="py-6">
+    <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Referrals</h2>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Search by Name"
+          className="h-10 rounded-md border border-gray-300 md:w-80"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <Select
             placeholder="Filter by Age"
@@ -101,7 +117,7 @@ const Referrals = () => {
             onChange={(value) => setFilterAge(value)}
             allowClear
           >
-            <Option value="">All </Option>
+            <Option value="">All Ages</Option>
             <Option value="25">25</Option>
             <Option value="30">30</Option>
             <Option value="35">35</Option>
@@ -114,19 +130,25 @@ const Referrals = () => {
             onChange={(value) => setFilterSex(value)}
             allowClear
           >
-            <Option value="">All </Option>
+            <Option value="">All Sexes</Option>
             <Option value="Male">Male</Option>
             <Option value="Female">Female</Option>
           </Select>
 
-          <DatePicker
-            placeholder="Filter by Date"
+          <Select
+            placeholder="Filter by Facility Referred"
             className="h-10 w-full md:w-48 rounded-md border border-gray-300"
-            value={filterDate}
-            onChange={(date) => setFilterDate(date)}
-            format="YYYY-MM-DD"
+            value={filterFacility}
+            onChange={(value) => setFilterFacility(value)}
+            showSearch
             allowClear
-          />
+          >
+            <Option value="">All Facilities</Option>
+            <Option value="yes">Yes</Option>
+            <Option value="no">No</Option>
+            <Option value="company">Company name</Option>
+            <Option value="health">Health Inc</Option>
+          </Select>
 
           <Button
             type="default"
@@ -151,9 +173,8 @@ const Referrals = () => {
         />
       </div>
 
-      <div className="flex mt-4 justify-between text-gray-600">
-        <span> Total Referrals: <strong>{totalReferrals}</strong></span>
-
+      <div className="mt-4 text-gray-600">
+        Total Referrals: <strong>{totalReferrals}</strong>
         <span className="ml-4">Total Amount: <strong>{totalAmount}</strong></span>
       </div>
     </div>

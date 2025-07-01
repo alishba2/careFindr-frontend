@@ -1,17 +1,43 @@
-import React, { useState } from "react";
-import { LogoutOutlined, HeartOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import {
+  LogoutOutlined,
+  HeartOutlined,
+  MenuOutlined,
+  CloseOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Avatar, Dropdown, Menu } from "antd";
 import { useAuth } from "../hook/auth";
 import { useNavigate } from "react-router-dom";
-
+const backendUrl = import.meta.env.VITE_APP_BASE_URL;
+import { Button } from "../button";
 const Header = () => {
-  const { logout } = useAuth();
+  const { logout, authData } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
+
   };
+
+  const [imageUrl, setImageUrl] = useState("");
+  useEffect(() => {
+    if (authData?.profileImage) {
+      setImageUrl(`${backendUrl}/${authData.profileImage}`);
+    } else {
+      setImageUrl("");
+    }
+  }, [authData, backendUrl]);
+
+  const profileMenu = (
+    <Menu>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+        Logout
+      </Menu.Item>
+    </Menu>
+  );
 
   return (
     <header className="relative w-full h-20 flex items-center justify-around px-4 md:px-10 bg-white border-b border-gray-200 z-50">
@@ -42,14 +68,27 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Logout Button */}
+      {/* Profile Dropdown */}
       <div className="hidden md:flex items-center">
-        <button
-          className="bg-[#05A2C2] hover:bg-[#147bcc] text-white rounded-md px-4 py-2 flex items-center justify-center"
-          onClick={handleLogout}
-        >
-          <LogoutOutlined className="text-lg" />
-        </button>
+        {
+          authData ? (
+            <Dropdown overlay={profileMenu} placement="bottomRight" arrow>
+              <Avatar
+                // src={authData?.profileImage || null}
+                icon={<UserOutlined />}
+                className="cursor-pointer"
+                size="large"
+              />
+            </Dropdown>
+          ) : (
+
+            <Button className="bg-primarysolid">
+              Get Started
+            </Button>
+
+          )
+        }
+
       </div>
 
       {/* Mobile Dropdown Menu */}
@@ -59,15 +98,26 @@ const Header = () => {
           <a href="#benefits" className="text-black hover:text-blue-500" onClick={() => setIsMobileMenuOpen(false)}>Benefits</a>
           <a href="#hospitals" className="text-black hover:text-blue-500" onClick={() => setIsMobileMenuOpen(false)}>Hospitals</a>
           <a href="#faq" className="text-black hover:text-blue-500" onClick={() => setIsMobileMenuOpen(false)}>FAQ</a>
-          <button
-            className="bg-[#05A2C2] hover:bg-[#147bcc] text-white rounded-md px-4 py-2 flex items-center justify-center"
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              handleLogout();
-            }}
-          >
-            <LogoutOutlined className="text-lg" />
-          </button>
+
+          {/* Mobile Avatar & Logout */}
+          {
+            authData ? (
+              <Dropdown overlay={profileMenu} placement="bottomRight" arrow>
+                <Avatar
+                  // src={authData?.profileImage || null}
+                  icon={<UserOutlined />}
+                  className="cursor-pointer"
+                  size="large"
+                />
+              </Dropdown>
+            ) : (
+
+              <Button className="bg-primarysolid">
+                Get Started
+              </Button>
+
+            )
+          }
         </div>
       )}
     </header>

@@ -25,6 +25,7 @@ import { FacilityInformation } from "./components/FacilityDashboard/facilityInfo
 import { DocumentUpload } from "./components/FacilityDashboard/documentUpload";
 import Notifications from "./components/FacilityDashboard/notification";
 
+import Users from "./components/AdminDashboard/users";
 export const App = () => {
   return (
     <AuthProvider>

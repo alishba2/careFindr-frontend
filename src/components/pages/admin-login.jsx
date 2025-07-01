@@ -46,6 +46,8 @@ export const AdminLogin = () => {
         };
         try {
             const response = await adminLogin(loginData);
+
+            console.log(response.token,"admin toke is here");
             // Store token in localStorage (or use context/auth provider)
             localStorage.setItem("token", response.token);
             localStorage.setItem("adminData", response.data)
