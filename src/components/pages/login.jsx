@@ -204,6 +204,7 @@ export const Login = () => {
                   </p>
 
                   <Button
+                    onClick={() => navigate("/register")}
                     className="order-1 mt-2 w-full h-12 text-[16px] bg-transparent  border-[3px] border-primarysolid text-primarysolid font-semibold rounded-md hover:bg-primarysolid/10 hover:bg-primarysolid hover:text-white"
                   >
                     Create Account
