@@ -55,6 +55,7 @@ const validationSchema = Yup.object({
       then: (schema) => schema.required("LCDA is required"),
       otherwise: (schema) => schema.nullable(),
     }),
+  address: Yup.string().required("Address is required"),
   registration: Yup.string().required("Registration number is required"),
   website: Yup.string()
     .url("Invalid URL")
@@ -123,6 +124,7 @@ export const RegistrationStep = () => {
     state: "",
     lga: "",
     lcda: "",
+    address: "",
     registration: "",
     website: "",
     password: "",
@@ -204,6 +206,7 @@ export const RegistrationStep = () => {
       whatsapp: formatPhoneNumber(values.whatsapp) || null,
       registrationNumber: values.registration,
       country: values.country,
+      address: values.address,
       state: values.state,
       lga: values.lga,
       lcda: values.lcda || null,
@@ -279,7 +282,7 @@ export const RegistrationStep = () => {
                           {({ field }) => (
                             <Select
                               value={field.value}
-                            onValueChange={(val) => {
+                              onValueChange={(val) => {
                                 setFieldValue("facilityType", val);
                                 setFieldValue("hospitalType", null);
                                 setFieldValue("insuranceType", null);
@@ -646,6 +649,26 @@ export const RegistrationStep = () => {
                         </Field>
                         <ErrorMessage
                           name="state"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+
+                    </div>
+
+                    <div>
+                      <div className="mt-4">
+                        <label className="text-sm font-semibold">
+                          Address
+                        </label>
+                        <Field
+                          as={Input}
+                          name="address"
+                          placeholder="Enter your address "
+                          className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
+                        />
+                        <ErrorMessage
+                          name="address"
                           component="div"
                           className="text-red-500 text-sm"
                         />
