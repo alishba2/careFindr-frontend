@@ -23,7 +23,7 @@ import Header from "./header.jsx";
 import PhoneInput from "react-phone-input-2";
 import { CheckCircle, Info } from "lucide-react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-
+import Navbar from "./navbar.jsx";
 const validationSchema = Yup.object({
   facilityType: Yup.string().required("Facility type is required"),
   facilityName: Yup.string().required("Facility name is required"),
@@ -240,596 +240,634 @@ export const RegistrationStep = () => {
   };
 
   return (
-    <main className="flex flex-col min-h-screen items-center pb-20 bg-[#F8F9FA]">
-      <Header />
-      <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 md:bg-white rounded-[15px] border-none shadow-none md:shadow-[0px_0px_4px_rgba(0,_0,_0,_0.25)] md:border">
 
-       <div className="mb-6 py-4 rounded-[5px] flex flex-col items-center justify-center text-center">
-          <h2 className="text-[24px] md:text-[30px] font-semibold text-fgtext-contrast">
-            Create Your Account
-          </h2>
-          <p className="text-sm md:text-base font-medium text-fgtext">
-            Join hundreds of verified healthcare providers
-          </p>
-        </div>
-        <Card className="border-none shadow-none">
-          <CardContent className="p-6">
-            {error && (
-              <div className="mb-4 text-red-500 text-sm text-center">
-                {error}
-              </div>
-            )}
-            <Formik
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ isSubmitting, values, setFieldValue }) => (
-<Form className="space-y-6 w-full">
-                  {/* Row 1: Facility Type and Name */}
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Facility Type <span className="text-red-600">*</span>
-                      </label>
-                      <Field name="facilityType">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => {
-                              setFieldValue("facilityType", val);
-                              setFieldValue("hospitalType", null);
-                              setFieldValue("insuranceType", null);
-                            }}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Choose facility type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "Hospital",
-                                "Laboratory",
-                                "Specialist Clinic",
-                                "Pharmacy",
-                                "Ambulance",
-                                "Insurance",
-                              ].map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="facilityType"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                    {/* Conditional Hospital Type */}
-                    {values.facilityType === "Hospital" && (
-                      <div className="flex-1">
-                        <label className="text-sm font-semibold">
-                          Hospital Type <span className="text-red-600">*</span>
-                        </label>
-                        <Field name="hospitalType">
-                          {({ field }) => (
-                            <Select
-                              value={field.value}
-                              onValueChange={(val) => setFieldValue("hospitalType", val)}
-                            >
-                              <SelectTrigger className="h-12 border-[#d7dbdf]">
-                                <SelectValue placeholder="Select hospital type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Primary">Primary</SelectItem>
-                                <SelectItem value="Secondary">Secondary</SelectItem>
-                                <SelectItem value="Tertiary">Tertiary</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </Field>
-                        <ErrorMessage
-                          name="hospitalType"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
-                    )}
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main className="flex flex-col min-h-screen items-center pb-20 bg-[#F8F9FA]">
 
-                    {/* Conditional Insurance Type */}
-                    {values.facilityType === "Insurance" && (
-                      <div className="flex-1">
-                        <label className="text-sm font-semibold">
-                          Insurance Type <span className="text-red-600">*</span>
-                        </label>
-                        <Field name="insuranceType">
-                          {({ field }) => (
-                            <Select
-                              value={field.value}
-                              onValueChange={(val) => setFieldValue("insuranceType", val)}
-                            >
-                              <SelectTrigger className="h-12 border-[#d7dbdf]">
-                                <SelectValue placeholder="Select insurance type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="HMO">HMO (Health Maintenance Organization)</SelectItem>
-                                <SelectItem value="PPO">PPO (Preferred Provider Organization)</SelectItem>
-                                <SelectItem value="NHIA">NHIA (Government-backed)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </Field>
-                        <ErrorMessage
-                          name="insuranceType"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
+        <div className="flex flex-col w-full max-w-[768px] mt-10 px-4 md:bg-white rounded-[15px] border-none shadow-none md:shadow-[0px_0px_4px_rgba(0,_0,_0,_0.25)] md:border">
 
-                  {/* Facility Name */}
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm font-semibold">
-                        Facility Name <span className="text-red-600">*</span>
-                      </label>
-                      <span
-                        data-tooltip-id="facility-name-tooltip"
-                        data-tooltip-content="If your facility has more than one branch, name it as: Facility Name (Branch Location)."
-                        className="text-blue-500 cursor-pointer"
-                      >
-                        <Info className="h-4 w-4 text-gray-500" />
-                      </span>
-                      <ReactTooltip
-                        id="facility-name-tooltip"
-                        place="right"
-                        effect="solid"
-                        className="max-w-xs bg-gray-800 text-white text-xs rounded py-1 px-2"
-                      />
-                    </div>
-                    <Field
-                      as={Input}
-                      name="facilityName"
-                      placeholder="Enter facility name"
-                      className="h-12 border-[#d7dbdf]"
-                    />
-                    <ErrorMessage
-                      name="facilityName"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-
-
-                  {/* Row 2: Email + Phone */}
-                  <div className="flex flex-wrap gap-4 md:flex-row flex-col">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Contact Email <span className="text-red-600">*</span>
-                      </label>
-                      <Field
-                        as={Input}
-                        name="contactEmail"
-                        placeholder="johndoe@mail.com"
-                        className="h-12 border-[#d7dbdf]"
-                      />
-                      <ErrorMessage
-                        name="contactEmail"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Phone Number <span className="text-red-600">*</span>
-                      </label>
-                      <div className="relative">
-                        <Field name="phoneNumber">
-                          {({ field }) => (
-                            <div className="flex items-center">
-                              <PhoneInput
-                                country={"ng"}
-                                value={phoneNumber}
-                                onChange={(val) => {
-                                  setPhoneNumber(val);
-                                  setFieldValue("phoneNumber", val);
-                                  setPhoneVerified(false);
-                                  setShowPhoneOtp(false);
-                                }}
-                                inputClass="!h-12 !border !border-[#d7dbdf] !rounded !pr-24"
-                                inputStyle={{ width: "100%" }}
-                                countryCodeEditable={false}
-                              />
-                              {phoneVerified ? (
-                                <div className="absolute px-2 right-2 flex items-center h-6 text-green-600 rounded-full border bg-[#E4FAEF]">
-                                  <span className="text-xs">Verified</span>
-                                </div>
-                              ) : (
-                                phoneNumber && (
-                                  <Button
-                                    type="button"
-                                    onClick={() => handleSendOtp(phoneNumber, "phone")}
-                                    className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
-                                  >
-                                    Verify
-                                  </Button>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </Field>
-                        {showPhoneOtp && (
-                          <div className="mt-2">
-                            <label className="text-sm font-medium">Enter OTP</label>
-                            <OtpInput
-                              otp={phoneOtp}
-                              setOtp={setPhoneOtp}
-                              onVerify={(otp) => handleVerifyOtp(otp, phoneNumber, "phone")}
-                            />
-                            <div className="text-sm mt-1">
-                              Didn’t receive?{" "}
-                              <button
-                                type="button"
-                                onClick={() => handleSendOtp(phoneNumber, "phone")}
-                                className="text-blue-600"
-                              >
-                                Send again
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        <ErrorMessage
-                          name="phoneNumber"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* Row 3: Facility Director/Manager's number + WhatsApp */}
-                  <div className="flex gap-4 md:flex-row flex-col">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Facility Director/Manager's number
-                      </label>
-                      <div className="relative">
-                        <Field name="secondaryPhone">
-                          {({ field }) => (
-                            <PhoneInput
-                              country={"ng"}
-                              value={secondaryPhone}
-                              onChange={(val) => {
-                                setSecondaryPhone(val);
-                                setFieldValue("secondaryPhone", val);
-                              }}
-                              inputClass="!h-12 !border !border-[#d7dbdf] !rounded"
-                              inputStyle={{ width: "100%" }}
-                              countryCodeEditable={false}
-                            />
-                          )}
-                        </Field>
-                        <ErrorMessage
-                          name="secondaryPhone"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        WhatsApp Number <span className="text-red-600">*</span>
-                      </label>
-                      <div className="relative">
-                        <Field name="whatsapp">
-                          {({ field }) => (
-                            <div className="flex items-center">
-                              <PhoneInput
-                                country={"ng"}
-                                value={whatsapp}
-                                onChange={(val) => {
-                                  setWhatsapp(val);
-                                  setFieldValue("whatsapp", val);
-                                  setWhatsappVerified(false);
-                                  setShowWhatsappOtp(false);
-                                }}
-                                inputClass="!h-12 !border !border-[#d7dbdf] !rounded !pr-24"
-                                inputStyle={{ width: "100%" }}
-                                countryCodeEditable={false}
-                              />
-                              {whatsappVerified ? (
-                                <div className="absolute px-2 right-2 flex items-center h-6 text-green-600 rounded-full border bg-[#E4FAEF]">
-                                  <span className="text-xs">Verified</span>
-                                </div>
-                              ) : (
-                                whatsapp && (
-                                  <Button
-                                    type="button"
-                                    onClick={() => handleSendOtp(whatsapp, "whatsapp")}
-                                    className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
-                                  >
-                                    Verify
-                                  </Button>
-                                )
-                              )}
-                            </div>
-                          )}
-                        </Field>
-                        {showWhatsappOtp && (
-                          <div className="mt-2">
-                            <label className="text-sm font-medium">Enter OTP</label>
-                            <OtpInput
-                              otp={whatsappOtp}
-                              setOtp={setWhatsappOtp}
-                              onVerify={(otp) => handleVerifyOtp(otp, whatsapp, "whatsapp")}
-                            />
-                            <div className="text-sm mt-1">
-                              Didn’t receive?{" "}
-                              <button
-                                type="button"
-                                onClick={() => handleSendOtp(whatsapp, "whatsapp")}
-                                className="text-blue-600"
-                              >
-                                Send again
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        <ErrorMessage
-                          name="whatsapp"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* Row 4: Country + State */}
-                  <div className="flex gap-4 md:flex-row flex-col">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Country <span className="text-red-600">*</span>
-                      </label>
-                      <Field name="country">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => setFieldValue("country", val)}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Nigeria" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Nigeria">Nigeria</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="country"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        State <span className="text-red-600">*</span>
-                      </label>
-                      <Field name="state">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => {
-                              setFieldValue("state", val);
-                              setFieldValue("lga", "");
-                              setFieldValue("lcda", "");
-                              setSelectedState(val);
-                            }}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Select your state" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {states.map((state) => (
-                                <SelectItem key={state} value={state}>
-                                  {state}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="state"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                  </div>
-                  {/* Row 5: Facility Registration Number + Local Government Area */}
-                  <div className="flex gap-4 md:flex-row flex-col">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Facility Registration Number
-                      </label>
-                      <Field
-                        as={Input}
-                        name="registration"
-                        placeholder="Enter your registration number"
-                        className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
-                      />
-                      <ErrorMessage
-                        name="registration"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Local Government Area
-                      </label>
-                      <Field name="lga">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => {
-                              setFieldValue("lga", val);
-                              setFieldValue("lcda", "");
-                            }}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Select your LGA" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(lgas[selectedState] || []).map((lga) => (
-                                <SelectItem key={lga} value={lga}>
-                                  {lga}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="lga"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                  </div>
-                  {/* Row 6: LCDA (if Lagos) */}
-                  {values.state === "Lagos" && (
-                    <div>
-                      <label className="text-sm font-semibold">LCDA</label>
-                      <Field name="lcda">
-                        {({ field }) => (
-                          <Select
-                            value={field.value}
-                            onValueChange={(val) => setFieldValue("lcda", val)}
-                          >
-                            <SelectTrigger className="h-12 border-[#d7dbdf]">
-                              <SelectValue placeholder="Select LCDA" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {(lcdas[values.lga] || []).map((lcda) => (
-                                <SelectItem key={lcda} value={lcda}>
-                                  {lcda}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </Field>
-                      <ErrorMessage
-                        name="lcda"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                  )}
-                  {/* Row 7: Passwords */}
-                  <div className="flex gap-4 md:flex-row flex-col">
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Password <span className="text-red-600">*</span>
-                      </label>
-                      <Field
-                        as={Input}
-                        type="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        className="h-12 border-[#d7dbdf]"
-                      />
-                      <ErrorMessage
-                        name="password"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-sm font-semibold">
-                        Confirm Password <span className="text-red-600">*</span>
-                      </label>
-                      <Field
-                        as={Input}
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="Confirm your password"
-                        className="h-12 border-[#d7dbdf]"
-                      />
-                      <ErrorMessage
-                        name="confirmPassword"
-                        component="div"
-                        className="text-red-500 text-sm"
-                      />
-                    </div>
-                  </div>
-                  {/* Row 8: Website URL */}
-                  <div>
-                    <label className="text-sm font-semibold">Website URL</label>
-                    <Field
-                      as={Input}
-                      name="website"
-                      placeholder="https://hospital.com"
-                      className="h-12 border-[#d7dbdf] w-2/4"
-                    />
-                    <ErrorMessage
-                      name="website"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-                  {/* Terms and Conditions Checkbox */}
-                  <div className="flex items-start space-x-2">
-                    <Field name="termsAccepted">
-                      {({ field }) => (
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            setFieldValue("termsAccepted", checked)
-                          }
-                          className="mt-1"
-                        />
-                      )}
-                    </Field>
-                    <div className="text-base">
-                      By registering, you agree to our{" "}
-                      <a href="#" className="text-[#05A2C2]">
-                        Terms of Services
-                      </a>{" "}
-                      and{" "}
-                      <a href="#" className="text-[#05A2C2]">
-                        Privacy Policy
-                      </a>
-                    </div>
-                  </div>
-                  <ErrorMessage
-                    name="termsAccepted"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || !phoneVerified || !whatsappVerified}
-
-                    className="w-full h-12 bg-primarysolid text-white rounded-xl"
-                  >
-                    {isSubmitting ? "Registering..." : "Create Hospital Account"}
-                  </Button>
-                </Form>
+          <div className="mb-6 py-4 rounded-[5px] flex flex-col items-center justify-center text-center">
+            <h2 className="text-[24px] md:text-[30px] font-semibold text-fgtext-contrast">
+              Create Your Account
+            </h2>
+            <p className="text-sm md:text-base font-medium text-fgtext">
+              Join hundreds of verified healthcare providers
+            </p>
+          </div>
+          <Card className="border-none shadow-none">
+            <CardContent className="p-6">
+              {error && (
+                <div className="mb-4 text-red-500 text-sm text-center">
+                  {error}
+                </div>
               )}
-            </Formik>
-            <div className="text-center mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-primarysolid font-medium">
-                Sign in here
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting, values, setFieldValue }) => (
+                  <Form className="space-y-6 w-full">
+                    {/* Row 1: Facility Type and Name */}
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Facility Type <span className="text-red-600">*</span>
+                        </label>
+                        <Field name="facilityType">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                            onValueChange={(val) => {
+                                setFieldValue("facilityType", val);
+                                setFieldValue("hospitalType", null);
+                                setFieldValue("insuranceType", null);
+                              }}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Choose facility type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[
+                                  "Hospital",
+                                  "Laboratory",
+                                  "Specialist Clinic",
+                                  "Pharmacy",
+                                  "Ambulance",
+                                  "Insurance",
+                                ].map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="facilityType"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                      {/* Conditional Hospital Type */}
+                      {values.facilityType === "Hospital" && (
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold">
+                            Hospital Type <span className="text-red-600">*</span>
+                          </label>
+                          <Field name="hospitalType">
+                            {({ field }) => (
+                              <Select
+                                value={field.value}
+                                onChange={(val) => setFieldValue("hospitalType", val)}
+                              >
+                                <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                  <SelectValue placeholder="Select hospital type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Primary">Primary</SelectItem>
+                                  <SelectItem value="Secondary">Secondary</SelectItem>
+                                  <SelectItem value="Tertiary">Tertiary</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </Field>
+                          <ErrorMessage
+                            name="hospitalType"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      )}
+                      {/* Conditional Insurance Type */}
+                      {values.facilityType === "Insurance" && (
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold">
+                            Insurance Type <span className="text-red-600">*</span>
+                          </label>
+                          <Field name="insuranceType">
+                            {({ field }) => (
+                              <Select
+                                value={field.value}
+                                onChange={(val) => setFieldValue("insuranceType", val)}
+                              >
+                                <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                  <SelectValue placeholder="Select insurance type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="HMO">HMO (Health Maintenance Organization)</SelectItem>
+                                  <SelectItem value="PPO">PPO (Preferred Provider Organization)</SelectItem>
+                                  <SelectItem value="NHIA">NHIA (Government-backed)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </Field>
+                          <ErrorMessage
+                            name="insuranceType"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Facility Name */}
+                    <div className="mt-4">
+                      <div className="flex items-center">
+                        <label className="text-sm font-semibold">
+                          Facility Name <span className="text-red-600">*</span>
+                        </label>
+                        <span
+                          data-tooltip-id="facility-name-tooltip"
+                          data-tooltip-content="If your facility has more than one branch, name it as: Facility Name (Branch Location)."
+                          className="text-blue-500 cursor-pointer"
+                        >
+                          <Info className="h-4 w-4 text-gray-500" />
+                        </span>
+                        <ReactTooltip
+                          id="facility-name-tooltip"
+                          place="right"
+                          effect="solid"
+                          className="max-w-xs bg-gray-800 text-white text-xs rounded py-1 px-2"
+                        />
+                      </div>
+                      <Field
+                        as={Input}
+                        name="facilityName"
+                        placeholder="Enter facility name"
+                        className="h-12 border-[#d7dbdf]"
+                      />
+                      <ErrorMessage
+                        name="facilityName"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
+                    </div>
+
+                    {/* Row 2: Email + Phone */}
+                    <div className="flex flex-wrap gap-4 md:flex-row flex-col">
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Contact Email <span className="text-red-600">*</span>
+                        </label>
+                        <Field
+                          as={Input}
+                          name="contactEmail"
+                          placeholder="johndoe@mail.com"
+                          className="h-12 border-[#d7dbdf]"
+                        />
+                        <ErrorMessage
+                          name="contactEmail"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Facility Phone Number <span className="text-red-600">*</span>
+                        </label>
+                        <div className="relative">
+                          <Field name="phoneNumber">
+                            {({ field }) => (
+                              <div className="flex items-center">
+                                <PhoneInput
+                                  country={"ng"}
+                                  value={phoneNumber}
+                                  onChange={(val) => {
+                                    setPhoneNumber(val);
+                                    setFieldValue("phoneNumber", val);
+                                    setPhoneVerified(false);
+                                    setShowPhoneOtp(false);
+                                  }}
+                                  inputClass="!h-12 !border !border-[#d7dbdf] !rounded !pr-24"
+                                  inputStyle={{ width: "100%" }}
+                                  countryCodeEditable={false}
+                                />
+                                {phoneVerified ? (
+                                  <div className="absolute px-2 right-2 flex items-center h-6 text-green-600 rounded-full border bg-[#E4FAEF]">
+                                    <span className="text-xs">Verified</span>
+                                  </div>
+                                ) : (
+                                  phoneNumber && (
+                                    <Button
+                                      type="button"
+                                      onClick={() => handleSendOtp(phoneNumber, "phone")}
+                                      className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
+                                    >
+                                      Verify
+                                    </Button>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </Field>
+                          {showPhoneOtp && (
+                            <div className="mt-2">
+                              <label className="text-sm font-medium">Enter OTP</label>
+                              <OtpInput
+                                otp={phoneOtp}
+                                setOtp={setPhoneOtp}
+                                onVerify={(otp) => handleVerifyOtp(otp, phoneNumber, "phone")}
+                              />
+                              <div className="text-sm mt-1">
+                                Didn’t receive?{" "}
+                                <button
+                                  type="button"
+                                  onClick={() => handleSendOtp(phoneNumber, "phone")}
+                                  className="text-blue-600"
+                                >
+                                  Send again
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          <ErrorMessage
+                            name="phoneNumber"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Facility Director/Manager's number + WhatsApp */}
+                    <div className="flex gap-4 md:flex-row flex-col">
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Facility Director/Manager's number
+                        </label>
+                        <div className="relative">
+                          <Field name="secondaryPhone">
+                            {({ field }) => (
+                              <PhoneInput
+                                country={"ng"}
+                                value={secondaryPhone}
+                                onChange={(val) => {
+                                  setSecondaryPhone(val);
+                                  setFieldValue("secondaryPhone", val);
+                                }}
+                                inputClass="!h-12 !border !border-[#d7dbdf] !rounded"
+                                inputStyle={{ width: "100%" }}
+                                countryCodeEditable={false}
+                              />
+                            )}
+                          </Field>
+                          <ErrorMessage
+                            name="secondaryPhone"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Facility WhatsApp Number <span className="text-red-600">*</span>
+                        </label>
+                        <div className="relative">
+                          <Field name="whatsapp">
+                            {({ field }) => (
+                              <div className="flex items-center">
+                                <PhoneInput
+                                  country={"ng"}
+                                  value={whatsapp}
+                                  onChange={(val) => {
+                                    setWhatsapp(val);
+                                    setFieldValue("whatsapp", val);
+                                    setWhatsappVerified(false);
+                                    setShowWhatsappOtp(false);
+                                  }}
+                                  inputClass="!h-12 !border !border-[#d7dbdf] !rounded !pr-24"
+                                  inputStyle={{ width: "100%" }}
+                                  countryCodeEditable={false}
+                                />
+                                {whatsappVerified ? (
+                                  <div className="absolute px-2 right-2 flex items-center h-6 text-green-600 rounded-full border bg-[#E4FAEF]">
+                                    <span className="text-xs">Verified</span>
+                                  </div>
+                                ) : (
+                                  whatsapp && (
+                                    <Button
+                                      type="button"
+                                      onClick={() => handleSendOtp(whatsapp, "whatsapp")}
+                                      className="absolute right-2 h-8 bg-primarysolid text-white px-3 text-sm"
+                                    >
+                                      Verify
+                                    </Button>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </Field>
+                          {showWhatsappOtp && (
+                            <div className="mt-2">
+                              <label className="text-sm font-medium">Enter OTP</label>
+                              <OtpInput
+                                otp={whatsappOtp}
+                                setOtp={setWhatsappOtp}
+                                onVerify={(otp) => handleVerifyOtp(otp, whatsapp, "whatsapp")}
+                              />
+                              <div className="text-sm mt-1">
+                                Didn’t receive?{" "}
+                                <button
+                                  type="button"
+                                  onClick={() => handleSendOtp(whatsapp, "whatsapp")}
+                                  className="text-blue-600"
+                                >
+                                  Send again
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          <ErrorMessage
+                            name="whatsapp"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 4: Country + State + LGA */}
+                    <div className="flex gap-4 md:flex-row flex-col">
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Country <span className="text-red-600">*</span>
+                        </label>
+                        <Field name="country">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(val) => setFieldValue("country", val)}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Nigeria" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Nigeria">Nigeria</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="country"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          State <span className="text-red-600">*</span>
+                        </label>
+                        <Field name="state">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(val) => {
+                                setFieldValue("state", val);
+                                setFieldValue("lga", "");
+                                setFieldValue("lcda", "");
+                                setSelectedState(val);
+                              }}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Select your state" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {states.map((state) => (
+                                  <SelectItem key={state} value={state}>
+                                    {state}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="state"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+
+                    </div>
+
+
+                    <div className="flex gap-4 md:flex-row flex-col">
+                      {/* LGA */}
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Local Government Area <span className="text-red-600">*</span>
+                        </label>
+                        <Field name="lga">
+                          {({ field }) => (
+                            <Select
+                              value={field.value}
+                              onValueChange={(val) => {
+                                setFieldValue("lga", val);
+                                setFieldValue("lcda", "");
+                              }}
+                            >
+                              <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                <SelectValue placeholder="Select your LGA" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(lgas[selectedState] || []).map((lga) => (
+                                  <SelectItem key={lga} value={lga}>
+                                    {lga}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="lga"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+
+                      {/* LCDA - only if Lagos */}
+                      {values.state === "Lagos" && (
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold">
+                            LCDA <span className="text-red-600">*</span>
+                          </label>
+                          <Field name="lcda">
+                            {({ field }) => (
+                              <Select
+                                value={field.value}
+                                onValueChange={(val) => setFieldValue("lcda", val)}
+                              >
+                                <SelectTrigger className="h-12 border-[#d7dbdf]">
+                                  <SelectValue placeholder="Select LCDA" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {(lcdas[values.lga] || []).map((lcda) => (
+                                    <SelectItem key={lcda} value={lcda}>
+                                      {lcda}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </Field>
+                          <ErrorMessage
+                            name="lcda"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {/* Registration - only inline if NOT Lagos */}
+                      {values.state !== "Lagos" && (
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold">
+                            Facility Registration Number
+                          </label>
+                          <Field
+                            as={Input}
+                            name="registration"
+                            placeholder="Enter your registration number"
+                            className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
+                          />
+                          <ErrorMessage
+                            name="registration"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Registration - new row if Lagos */}
+                    {values.state === "Lagos" && (
+                      <div className="mt-4">
+                        <label className="text-sm font-semibold">
+                          Facility Registration Number
+                        </label>
+                        <Field
+                          as={Input}
+                          name="registration"
+                          placeholder="Enter your registration number"
+                          className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
+                        />
+                        <ErrorMessage
+                          name="registration"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                    )}
+
+
+
+                    {/* Row 7: Passwords */}
+                    <div className="flex gap-4 md:flex-row flex-col">
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Password <span className="text-red-600">*</span>
+                        </label>
+                        <Field
+                          as={Input}
+                          type="password"
+                          name="password"
+                          placeholder="Enter your password"
+                          className="h-12 border-[#d7dbdf]"
+                        />
+                        <ErrorMessage
+                          name="password"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold">
+                          Confirm Password <span className="text-red-600">*</span>
+                        </label>
+                        <Field
+                          as={Input}
+                          type="password"
+                          name="confirmPassword"
+                          placeholder="Confirm your password"
+                          className="h-12 border-[#d7dbdf]"
+                        />
+                        <ErrorMessage
+                          name="confirmPassword"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Row 8: Website URL */}
+                    <div>
+                      <label className="text-sm font-semibold">Website URL</label>
+                      <Field
+                        as={Input}
+                        name="website"
+                        placeholder="https://hospital.com"
+                        className="h-12 border-[#d7dbdf] w-full"
+                      />
+                      <ErrorMessage
+                        name="website"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
+                    </div>
+
+                    {/* Terms and Conditions Checkbox */}
+                    <div className="flex items-start space-x-2">
+                      <Field name="termsAccepted">
+                        {({ field }) => (
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={(checked) =>
+                              setFieldValue("termsAccepted", checked)
+                            }
+                            className="mt-1"
+                          />
+                        )}
+                      </Field>
+                      <div className="text-base">
+                        By registering, you agree to our{" "}
+                        <a href="#" className="text-[#05A2C2]">
+                          Terms of Services
+                        </a>{" "}
+                        and{" "}
+                        <a href="#" className="text-[#05A2C2]">
+                          Privacy Policy
+                        </a>
+                      </div>
+                    </div>
+                    <ErrorMessage
+                      name="termsAccepted"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !phoneVerified || !whatsappVerified}
+                      className="w-full h-12 bg-primarysolid text-white rounded-xl"
+                    >
+                      {isSubmitting ? "Registering..." : "Create Hospital Account"}
+                    </Button>
+                  </Form>
+                )}
+              </Formik>
+              <div className="text-center mt-4">
+                Already have an account?{" "}
+                <a href="/login" className="text-primarysolid font-medium">
+                  Sign in here
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main >
+    </div >
   );
 };

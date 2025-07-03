@@ -127,7 +127,7 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
 
   return (
     <div className="w-full mx-auto p-1 bg-white">
-      <h1 className="text-lg font-semibold text-gray-900 mb-4">
+      <h1 className="text-sm font-semibold text-gray-900 mb-4">
         Subspecialties and Fields of Medicine
       </h1>
 

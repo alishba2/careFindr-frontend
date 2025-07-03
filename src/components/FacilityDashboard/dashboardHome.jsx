@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Progress, Card, Row, Col, message } from "antd";
+import { Progress, Card, Row, Col, message, Skeleton } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { useAuth } from "../hook/auth";
 import { Subspecialties } from "./subspecialities .jsx";
@@ -10,56 +10,63 @@ import Totalreferral from "../../components/asstes/TotalReferrals.png";
 import { Button } from "../button.jsx";
 import { updateFacility } from "../../services/auth.js";
 import { FacilityServices, GetFacilityService } from "../../services/service.js";
-const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_APP_BASE_URL;
+
 export default function DashboardHome() {
   const { facilityType, authData, updateIsAmbulance } = useAuth();
+
   const [subSpecialities, setSubspecialities] = useState([]);
   const [loadingService, setLoadingService] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [recentActivity, setRecentActivity] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+
   const getNotificationMessage = (action) => {
     switch (action) {
       case "ACCOUNT_CREATED":
-        return "👋 Welcome to the careFindr! Please complete your onboarding process.";
+        return "Your account has been successfully created. Let’s complete your onboarding to get started!";
       case "RESET_PASSWORD":
-        return "🔐 Your password has been reset.";
+        return "Your password has been reset. If this wasn’t you, please secure your account immediately.";
       case "FACILITY_INFO_UPDATED":
-        return "🏥 Facility information updated.";
+        return "Your facility information has been successfully updated.";
       case "SERVICES_UPDATE":
-        return "🛠️ Services & capacity updated.";
+        return "Your service offerings and capacity have been updated successfully.";
       case "DOCUMENT_UPDATE":
-        return "📄 Documents updated successfully!";
+        return "Your facility documents were uploaded/updated successfully.";
       case "UPDATED_PROFILE_PROGRESS":
-        return "📈 Profile progress updated.";
+        return "Your profile setup is progressing. Keep going to complete it!";
       case "ONBOARDING_COMPLETED":
-        return "✅ Onboarding process completed.";
+        return "Congratulations! You’ve successfully completed your onboarding process.";
       case "PROFILE_IMAGE_UPDATED":
-        return "🖼️ Profile image updated.";
+        return "Your profile picture has been updated.";
       default:
-        return "🔔 New notification.";
+        return "You have a new update or activity in your account.";
     }
   };
 
+
   const fetchNotifications = async () => {
+    setLoadingNotifications(true);
     try {
       const res = await axios.get(
         `${backendUrl}/api/notifications/${authData?._id}?page=1&limit=5`
       );
-
-      console.log(res, "response hre");
       setRecentActivity(res.data.notifications?.slice(0, 5) || []);
     } catch (err) {
-      setError("Failed to load notifications.");
+      message.error("Failed to load notifications.");
     } finally {
-      setLoading(false);
+      setLoadingNotifications(false);
     }
   };
 
   useEffect(() => {
-    fetchNotifications();
-  }, [authData?._id])
+    if (authData?._id) {
+      fetchNotifications();
+    }
+  }, [authData?._id]);
 
   useEffect(() => {
     const getFacilityServices = async () => {
@@ -69,11 +76,10 @@ export default function DashboardHome() {
           const response = await GetFacilityService();
           const serviceData = response?.service;
 
-          console.log(serviceData, "service data is here")
-
-          console.log(Array.isArray(serviceData?.hospitalDetails?.facilityFeatures), "facility feature array");
-          if (serviceData?.hospitalDetails?.facilityFeatures?.includes('ambulance')) {
-            console.log("yes has ambulanceeeeeeee");
+          if (
+            Array.isArray(serviceData?.hospitalDetails?.facilityFeatures) &&
+            serviceData.hospitalDetails.facilityFeatures.includes("ambulance")
+          ) {
             updateIsAmbulance(true);
           }
 
@@ -163,43 +169,46 @@ export default function DashboardHome() {
       <Row gutter={[16, 16]}>
         <Col xs={24}>
           <Card className="mt-6 rounded-xl shadow border-none h-full">
-            <Content className="p-6 flex flex-col">
+            <Content className="p-4 flex flex-col">
               <h2 className="font-inter font-semibold text-2xl leading-[24px] tracking-[0.5%] text-[#1f2937] mb-4">
                 Recent Activity
               </h2>
 
-              {recentActivity.length > 0 ? (
-                <ul className="space-y-3">
-                  {recentActivity.map((notification) => (
-                    <li
-                      key={notification._id}
-                      className="bg-gray-100 p-4 rounded-lg shadow-sm"
-                    >
-                      <p className="text-base text-gray-800 font-medium">
-                        {getNotificationMessage(notification.action)}
+              <Skeleton loading={loadingNotifications} active paragraph={{ rows: 4 }}>
+                {recentActivity.length > 0 ? (
+                  <ul className="space-y-3">
+                    {recentActivity.map((notification) => (
+                      <li
+                        key={notification._id}
+                        className="bg-[#E7F9FB] p-4 rounded-lg shadow-sm border-[#AADEE6"
+                      >
+                        <p className="text-base text-gray-800 font-medium">
+                          {getNotificationMessage(notification.action)}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(notification.createdAt).toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  !loadingNotifications && (
+                    <div className="flex-1 flex items-center justify-center">
+                      <p className="font-inter font-normal text-lg tracking-[0.5%] text-gray-600">
+                        No recent activity
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(notification.createdAt).toLocaleString("en-US", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="font-inter font-normal text-lg tracking-[0.5%] text-gray-600">
-                    No recent activity
-                  </p>
-                </div>
-              )}
+                    </div>
+                  )
+                )}
+              </Skeleton>
             </Content>
           </Card>
         </Col>
 
-
-        {facilityType === "Hospital" && (
+        {facilityType === "Hospital" && authData?._id && (
           <Col xs={24} md={24} className="mt-6">
             <Card className="rounded-xl shadow border-none">
               <Subspecialties
@@ -208,7 +217,9 @@ export default function DashboardHome() {
                 loading={loadingService}
               />
               <div className="flex justify-end">
-                <Button onClick={handleSave} loading={saving} disabled={saving || loadingService}>
+                <Button
+                  className="h-12 mt-3 px-6 bg-primarysolid text-white rounded-md"
+                  onClick={handleSave} loading={saving} disabled={saving || loadingService}>
                   {saving ? "Saving..." : "Save changes"}
                 </Button>
               </div>

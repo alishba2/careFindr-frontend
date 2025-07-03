@@ -1,15 +1,13 @@
-
 import React, { useState, useEffect } from "react";
-import { Table, Select, Button, DatePicker } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Table, Select, Button, DatePicker, Input } from "antd";
 import moment from "moment";
+import funnel from "../../assets/FunnelSimple.png"; // your custom funnel icon
+import { SearchIcon } from "lucide-react";
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const Referrals = () => {
-  const navigate = useNavigate();
-
-  // Dummy data with date field
   const initialData = [
     {
       key: "1",
@@ -19,7 +17,7 @@ const Referrals = () => {
       phoneNumber: "0000000000",
       differentialDiagnosis: "Fever",
       date: "2025-06-15",
-      referralAmount: 5,
+      referralAmount: "5 ₦",
     },
     {
       key: "2",
@@ -29,7 +27,7 @@ const Referrals = () => {
       phoneNumber: "1111111111",
       differentialDiagnosis: "Cold",
       date: "2025-06-20",
-      referralAmount: 3,
+      referralAmount: "3 ₦",
     },
     {
       key: "3",
@@ -39,20 +37,23 @@ const Referrals = () => {
       phoneNumber: "2222222222",
       differentialDiagnosis: "Injury",
       date: "2025-07-01",
-      referralAmount: 2,
+      referralAmount: "2 ₦",
     },
   ];
 
-  const [data, setData] = useState(initialData);
+  const [data] = useState(initialData);
   const [filteredData, setFilteredData] = useState(initialData);
   const [filterAge, setFilterAge] = useState("");
   const [filterSex, setFilterSex] = useState("");
-  const [filterDate, setFilterDate] = useState(null);
+  const [filterDateRange, setFilterDateRange] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
-  const totalReferrals = data.length;
-  const totalAmount = data.reduce((sum, record) => sum + record.referralAmount, 0);
+  const totalReferrals = filteredData.length;
+  const totalAmount = filteredData.reduce((sum, record) => {
+    const numericValue = parseFloat(record.referralAmount.toString().replace(/[^\d.]/g, ""));
+    return sum + numericValue;
+  }, 0);
 
-  // Filter logic
   useEffect(() => {
     let filtered = [...data];
 
@@ -64,19 +65,41 @@ const Referrals = () => {
       filtered = filtered.filter((item) => item.sex === filterSex);
     }
 
-    if (filterDate) {
-      const selectedDate = moment(filterDate).format("YYYY-MM-DD");
-      filtered = filtered.filter((item) => item.date === selectedDate);
+    if (filterDateRange && filterDateRange.length === 2) {
+      const [fromDate, toDate] = filterDateRange;
+      filtered = filtered.filter((item) => {
+        const itemDate = moment(item.date, "YYYY-MM-DD");
+        return itemDate.isSameOrAfter(fromDate, "day") && itemDate.isSameOrBefore(toDate, "day");
+      });
+    }
+
+    if (searchText) {
+      const lowerSearch = searchText.toLowerCase();
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(lowerSearch) ||
+          item.phoneNumber.includes(lowerSearch) ||
+          item.differentialDiagnosis.toLowerCase().includes(lowerSearch)
+      );
     }
 
     setFilteredData(filtered);
-  }, [data, filterAge, filterSex, filterDate]);
+  }, [data, filterAge, filterSex, filterDateRange, searchText]);
 
   const handleClearFilters = () => {
     setFilterAge("");
     setFilterSex("");
-    setFilterDate(null);
+    setFilterDateRange([]);
+    setSearchText("");
   };
+
+  const FunnelIcon = () => (
+    <img
+      src={funnel}
+      alt="filter"
+      className="w-4 h-4 absolute right-3 top-3 pointer-events-none"
+    />
+  );
 
   const columns = [
     { title: "Name", dataIndex: "name", key: "name" },
@@ -89,72 +112,104 @@ const Referrals = () => {
   ];
 
   return (
-    <div className="py-6">
+    <div className="py-6 px-4 sm:px-6">
       <h2 className="text-2xl font-bold mb-4">Referrals</h2>
 
+      {/* Search + Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          <Select
-            placeholder="Filter by Age"
-            className="h-10 w-full md:w-40 rounded-md border border-gray-300"
-            value={filterAge}
-            onChange={(value) => setFilterAge(value)}
-            allowClear
-          >
-            <Option value="">All </Option>
-            <Option value="25">25</Option>
-            <Option value="30">30</Option>
-            <Option value="35">35</Option>
-          </Select>
-
-          <Select
-            placeholder="Filter by Sex"
-            className="h-10 w-full md:w-40 rounded-md border border-gray-300"
-            value={filterSex}
-            onChange={(value) => setFilterSex(value)}
-            allowClear
-          >
-            <Option value="">All </Option>
-            <Option value="Male">Male</Option>
-            <Option value="Female">Female</Option>
-          </Select>
-
-          <DatePicker
-            placeholder="Filter by Date"
-            className="h-10 w-full md:w-48 rounded-md border border-gray-300"
-            value={filterDate}
-            onChange={(date) => setFilterDate(date)}
-            format="YYYY-MM-DD"
-            allowClear
+        {/* Search */}
+        <div className="relative w-full md:max-w-sm border border-gray-300 rounded-lg">
+          <Input
+            placeholder="Search"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="h-10 pl-10 pr-4 rounded-xl bg-white border-[3px] border-gray-700 shadow-none focus:ring-0"
+            bordered={false}
           />
+          <SearchIcon className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2" />
+        </div>
 
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          {/* Age Filter */}
+          <div className="relative w-full md:w-40">
+            <Select
+              placeholder="Filter by Age"
+              value={filterAge || ""}
+              onChange={(value) => setFilterAge(value)}
+              allowClear
+              showArrow={false}
+              className="w-full h-10 rounded-xl border-gray-300 border focus:!shadow-none"
+              dropdownClassName="bg-white"
+            >
+              <Option value="" disabled hidden>
+                Filter by Age
+              </Option>
+              <Option value="25">25</Option>
+              <Option value="30">30</Option>
+              <Option value="35">35</Option>
+            </Select>
+            <FunnelIcon />
+          </div>
+
+          {/* Sex Filter */}
+          <div className="relative w-full md:w-40">
+            <Select
+              placeholder="Filter by Sex"
+              value={filterSex || ""}
+              onChange={(value) => setFilterSex(value)}
+              allowClear
+              showArrow={false}
+              className="w-full h-10 rounded-xl border-gray-300 border focus:!shadow-none"
+              dropdownClassName="bg-white"
+            >
+              <Option value="" disabled hidden>
+                Filter by Sex
+              </Option>
+              <Option value="Male">Male</Option>
+              <Option value="Female">Female</Option>
+            </Select>
+            <FunnelIcon />
+          </div>
+
+          {/* Date Range Filter */}
+          <div className="relative w- md:w-64">
+            <RangePicker
+              placeholder={["From", "To"]}
+              className="w-full h-10 rounded-md bg-gray-100 border-gray-300 pl-3 pr-10"
+              value={filterDateRange}
+              onChange={(dates) => setFilterDateRange(dates)}
+              format="YYYY-MM-DD"
+              allowClear
+              style={{ backgroundColor: "#f3f4f6", width: "100%" }}
+            />
+          </div>
+
+          {/* Clear Button */}
           <Button
             type="default"
-            className="h-10 px-4 rounded-md border border-gray-300 hover:bg-gray-100"
+            className="h-10 px-4 rounded-md bg-white border border-gray-300 hover:bg-gray-100"
             onClick={handleClearFilters}
           >
-            Clear Filters
+            Clear
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow">
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
         <Table
           columns={columns}
           dataSource={filteredData}
           pagination={false}
-          className="overflow-x-auto rounded-xl"
-          onRow={(record) => ({
-            onClick: () => navigate(`/admin-dashboard/referrals/${record.key}`),
-            style: { cursor: "pointer" },
-          })}
+          className="rounded-xl"
         />
       </div>
 
+      {/* Totals */}
       <div className="flex mt-4 justify-between text-gray-600">
-        <span> Total Referrals: <strong>{totalReferrals}</strong></span>
-
-        <span className="ml-4">Total Amount: <strong>{totalAmount}</strong></span>
+        <span>Total Referrals: <strong>{totalReferrals}</strong></span>
+        <span>Total Amount: <strong>₦{totalAmount}</strong></span>
       </div>
     </div>
   );

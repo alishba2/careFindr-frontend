@@ -8,7 +8,7 @@ import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
 const { Dragger } = Upload;
 
 export const DocumentUpload = () => {
-  const { facilityType, authData ,fetchAuthData} = useAuth();
+  const { facilityType, authData, fetchAuthData } = useAuth();
 
   const [fileList, setFileList] = useState({
     facilityPhotos: [],
@@ -204,7 +204,7 @@ export const DocumentUpload = () => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
+    <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border ">
       <StepProgress currentStep={authData?.onBoardingStep} />
 
       <div className="p-6 h-24 flex flex-col gap-2">
@@ -215,21 +215,22 @@ export const DocumentUpload = () => {
           Upload necessary documents for facility verification.
         </p>
       </div>
-
       <Card className="border-none shadow-none">
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {/* Facility Photos */}
           <div className="space-y-2">
             <h1 className="text-sm font-bold text-gray-900 mb-2">Upload Facility Photos</h1>
             <Dragger {...uploadProps("facilityPhotos")}>
-              <p className="ant-upload-drag-icon"><UploadOutlined /></p>
+              <p className="ant-upload-drag-icon">
+                <UploadOutlined />
+              </p>
               <p className="ant-upload-text">Drag and Drop files here or Click to Upload</p>
               <p className="ant-upload-hint text-gray-500">Accepts .jpg, .png, .pdf (max 100MB)</p>
             </Dragger>
           </div>
 
           {/* Other Files */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="flex flex-wrap gap-6">
             {[
               { field: "facilityDetails", label: "Upload Documents with Details about your Facility" },
               { field: "licenseRegistration", label: "License and Registration Certificates" },
@@ -238,14 +239,17 @@ export const DocumentUpload = () => {
                 : []),
               { field: "priceList", label: "Upload Price List (NGN)" },
             ].map(({ field, label }) => (
-              <div key={field} className="space-y-2 w-full">
+              <div
+                key={field}
+                className="w-full md:basis-[48%] lg:basis-[47%] flex-grow space-y-2"
+              >
                 <h1 className="text-sm font-semibold text-gray-900">{label}</h1>
                 <Upload {...uploadProps(field)} className="w-full">
                   <Button
                     icon={<UploadOutlined className="ml-auto text-gray-500 text-[20px]" />}
-                    className="w-[500px] h-11 my-3 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
+                    className="w-full h-11 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
                   >
-                    <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096]">
+                    <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate">
                       {fileList[field]?.[0]?.name || "Accepts DOC, PDF, XLS"}
                     </p>
                   </Button>
@@ -253,6 +257,7 @@ export const DocumentUpload = () => {
               </div>
             ))}
           </div>
+
 
           {/* Additional Info */}
           <div className="space-y-2">
@@ -267,9 +272,12 @@ export const DocumentUpload = () => {
         </div>
       </Card>
 
+
+
+
       <div className="flex justify-end p-4">
         <Button
-          className="h-12 px-6 bg-cyan-500 text-white rounded-md"
+          className="h-12 px-6 bg-cyan-500 text-white rounded-md bg-primarySold"
           onClick={handleSubmit}
           disabled={saving || !hasChanges}
         >

@@ -58,6 +58,9 @@
   --primarybg-active: rgba(196, 234, 239, 1);
   --primaryon-primary: rgba(255, 255, 255, 1);
   --primarysolid: rgba(5, 162, 194, 1);
+  --primarysolidHover: rgb(16, 73, 85);
+
+  
 }
 
 @tailwind base;
@@ -164,5 +167,21 @@
 
   .tooltip-custom[data-placement^='right']::after {
     @apply border-r-gray-800;
+  }
+}
+/* tailwind.css or global.css */
+
+@layer components {
+  /* Override Ant Design Select border radius */
+  .ant-select-selector {
+    @apply rounded-xl !important;
+    height: 40px !important;
+    border: none !important;
+    background-color: transparent !important;
+  }
+
+  /* Optional: override dropdown as well */
+  .ant-select-dropdown {
+    @apply rounded-xl;
   }
 }

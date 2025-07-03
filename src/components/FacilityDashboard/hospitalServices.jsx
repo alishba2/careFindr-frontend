@@ -555,6 +555,8 @@ export const HospitalServices = () => {
                     {facility === "Hospital" ? (
                         <>
                             <div className="space-y-2">
+
+
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Core Clinical Specialities
                                 </h1>
@@ -577,7 +579,7 @@ export const HospitalServices = () => {
                             <Subspecialties subSpecialities={subSpecialities} setSubspecialities={setSubspecialities} />
 
                             <div className="space-y-2">
-                                <h1 className="text-sm font-bold text-gray-900 mb-2">Facility Features</h1>
+                                <h1 className="text-sm font-bold text-gray-900 mb-3">Facility Features</h1>
                                 <div className="flex flex-wrap gap-4">
                                     {facilityFeatures.map((feature) => (
                                         <label
@@ -607,7 +609,7 @@ export const HospitalServices = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <h1 className="text-sm font-bold text-gray-900 mb-2">
+                                <h1 className="text-sm font-bold text-gray-900 mt-3">
                                     Weekly Operating Days
                                 </h1>
                                 <div className="flex flex-wrap gap-4">
@@ -631,7 +633,7 @@ export const HospitalServices = () => {
 
                             <div className="flex gap-4">
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Opening Time
                                     </label>
                                     <Input
@@ -642,7 +644,7 @@ export const HospitalServices = () => {
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Closing Time
                                     </label>
                                     <Input
@@ -659,7 +661,7 @@ export const HospitalServices = () => {
 
                             <div className="flex gap-4">
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Admission Fee (₦)
                                     </label>
                                     <div className="relative">
@@ -681,7 +683,7 @@ export const HospitalServices = () => {
                                     </div>
                                 </div>
                                 <div className="flex-1">
-                                    <label className="text-sm font-medium text-gray-800">
+                                    <label className="text-sm font-bold text-gray-800">
                                         Consultation Fee (₦)
                                     </label>
                                     <div className="relative">
@@ -705,7 +707,7 @@ export const HospitalServices = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
+                                <label className="text-sm font-bold text-gray-800">
                                     Total Bed Space
                                 </label>
                                 <Input
@@ -723,8 +725,9 @@ export const HospitalServices = () => {
                             </div>
 
                             {type !== "ambulance" && <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
-                                    Other Branches
+                                <label className="text-sm font-bold text-gray-800">
+                                    Branch Full Address (Specify the floor if the building has multiple levels)
+
                                 </label>
                                 <Select
                                     className="h-12 w-full"
@@ -775,7 +778,7 @@ export const HospitalServices = () => {
                             </div>}
 
                             {type !== "ambulance" && <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-800">
+                                <label className="text-sm font-bold text-gray-800">
                                     Additional Information
                                 </label>
                                 <textarea
@@ -866,7 +869,8 @@ export const HospitalServices = () => {
                                 <div className="flex-1">
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-gray-800">
-                                            Other Branches
+                                            Branch Full Address (Specify the floor if the building has multiple levels)
+
                                         </label>
                                         <Select
                                             className="h-12 w-full"
@@ -1134,7 +1138,8 @@ export const HospitalServices = () => {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
-                                    Other Branches
+                                    Branch Full Address (Specify the floor if the building has multiple levels)
+
                                 </label>
                                 <Select
                                     className="h-12 w-full"

@@ -6,6 +6,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { loginFacility } from "../../services/auth.js";
 import bgimg from "../../assets/medical.jpg";
+import { Heart, Menu, X } from "lucide-react";
 
 const validationSchema = Yup.object({
   identifier: Yup.string()
@@ -69,27 +70,36 @@ export const Login = () => {
           </p>
 
           <div className="flex flex-row items-center justify-center gap-10 text-xl sm:text-2xl font-semibold">
-            <div className="flex flex-col items-center">
-              <span className="text-3xl sm:text-5xl">500+</span> <br />
-              <span className="text-base sm:text-lg font-normal">Facilities Registered</span>
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-3xl sm:text-5xl">500+</span>
+              <span className="text-base sm:text-lg font-normal mt-2">Facilities Registered</span>
             </div>
-            <div className="flex flex-col items-center">
-              <span className="text-3xl sm:text-5xl">94%</span> <br />
-              <span className="text-base sm:text-lg font-normal">Success Rate</span>
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-3xl sm:text-5xl">94%</span>
+              <span className="text-base sm:text-lg font-normal  mt-2">Success Rate</span>
             </div>
           </div>
-        
+
         </div>
       </div>
 
       {/* Right Form Section */}
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
+          <div className="flex items-center justify-center">
+            <div
+              className="md:text-[27px] text-[22px] font-bold text-primarysolid cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              <Heart className="md:w-[31px] md:h-[31px] w-[24px] h-[24px] inline mr-2" />
+              CareFindr
+            </div>
+          </div>
           {/* Title */}
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Sign In</h2>
             <p className="mt-2 text-sm sm:text-base text-gray-600">
-              Sign in using your phone number or email
+              Access your CareFindr account
             </p>
           </div>
 
@@ -154,7 +164,24 @@ export const Login = () => {
                 </div>
 
                 {/* Forgot Password */}
-                <div className="flex justify-end">
+                <div className="flex items-center justify-between">
+
+                  <div className="flex items-center">
+                    <Field
+                      type="checkbox"
+                      name="remember"
+                      id="remember"
+                      className="h-4 w-4 text-primarysolid focus:ring-primarysolid"
+                    />
+                    <label
+                      htmlFor="remember"
+                      className="ml-2 text-sm text-gray-700"
+                    >
+                      Remember me
+                    </label>
+                  </div>
+
+
                   <Link
                     to="/forgot-password"
                     className="text-sm text-primarysolid hover:underline"
@@ -169,24 +196,27 @@ export const Login = () => {
                   disabled={isSubmitting}
                   className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
                 >
-                  {isSubmitting ? "Logging in..." : "Login"}
+                  {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
+                <div className="text-center">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Don’t have an account?{" "}
+                  </p>
+
+                  <Button
+                    className="order-1 mt-2 w-full h-12 text-[16px] bg-transparent  border-[3px] border-primarysolid text-primarysolid font-semibold rounded-md hover:bg-primarysolid/10 hover:bg-primarysolid hover:text-white"
+                  >
+                    Create Account
+                  </Button>
+
+
+                </div>
               </Form>
             )}
           </Formik>
 
           {/* Create Account */}
-          <div className="text-center">
-            <p className="text-sm sm:text-base text-gray-600">
-              Don’t have an account?{" "}
-              <Link
-                to="/"
-                className="text-primarysolid font-medium hover:underline"
-              >
-                Create Account
-              </Link>
-            </p>
-          </div>
+
         </div>
       </div>
     </div>

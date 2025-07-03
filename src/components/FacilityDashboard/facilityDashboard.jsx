@@ -15,7 +15,7 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, Button } from "antd";
 import { Outlet } from "react-router-dom";
-import Header from "../pages/header";
+import Navbar from "../pages/navbar";
 import { useAuth } from "../hook/auth";
 import { uploadImage } from "../../services/auth";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
@@ -117,17 +117,18 @@ const FacilityDashboard = () => {
 
   return (
     <>
-      <Header />
-      <Layout className="py-4 min-h-[calc(100vh-64px)]">
+      <Navbar />
+      <Layout   >
         <Sider
           width={380}
           collapsible
           collapsed={collapsed}
           trigger={null}
-          className="bg-white shadow-md mt-6 mx-2 sm:mx-4 md:mx-6 rounded-xl px-4 py-6"
+          className="bg-white shadow-md mt-6 mx-2 sm:mx-4 md:mx-6 rounded-xl px-4 pt-6"
           breakpoint="md"
           collapsedWidth={80}
           onBreakpoint={(broken) => setCollapsed(broken)}
+          style={{ height: "calc(100vh - 6rem)" }}
         >
           <div className="flex justify-end mb-4">
             <Button
@@ -287,9 +288,10 @@ const FacilityDashboard = () => {
           <Content
             className="p-4 sm:p-6 md:p-8"
             style={{
-              overflowY: "auto",
               height: "100%",
+              overflowY: "scroll",
               backgroundColor: "#f5f5f5",
+              maxHeight: "93vh",
             }}
           >
             <Outlet />

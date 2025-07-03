@@ -26,6 +26,7 @@ import { DocumentUpload } from "./components/FacilityDashboard/documentUpload";
 import Notifications from "./components/FacilityDashboard/notification";
 
 import Users from "./components/AdminDashboard/users";
+import Landing from "./components/pages/home";
 export const App = () => {
   return (
     <AuthProvider>
@@ -46,6 +47,14 @@ export const App = () => {
           {/* Public routes with redirect if already logged in */}
           <Route
             path="/"
+            element={
+              <RedirectIfAuthenticated>
+                <Landing />
+              </RedirectIfAuthenticated>
+            }
+          />
+          <Route
+            path="/register"
             element={
               <RedirectIfAuthenticated>
                 <RegistrationStep />
@@ -91,7 +100,7 @@ export const App = () => {
           <Route
             path="/admin-dashboard/*"
             element={
-                <AdminDashboard />
+              <AdminDashboard />
             }
           />
 
@@ -110,7 +119,7 @@ export const App = () => {
             <Route path="service-capacity" element={<Services />} />
             <Route path="document-upload" element={<DocumentUpload />} />
             <Route path="referrals" element={<Referrals />} />
-            <Route path="notifications" element={<Notifications/>}/>
+            <Route path="notifications" element={<Notifications />} />
             <Route path="support" element={<Feedback />} />
             <Route path="*" element={<Navigate to="home" replace />} />
           </Route>

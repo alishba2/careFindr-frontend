@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../../components/button.jsx";
-import { Card, CardContent } from "../../components/card.jsx";
 import { Input } from "../../components/input.jsx";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { verifyOtp, sendOtp } from "../../services/auth.js";
 import { toast } from "react-toastify";
+import bgimg from "../../assets/medical.jpg";
+import { Heart } from "lucide-react";
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -49,7 +49,7 @@ export const VerifyOtp = () => {
         position: "top-right",
         autoClose: 3000,
       });
-      navigate("/login")
+      navigate("/login");
     } catch (error) {
       setSubmitting(false);
       toast.error(error.response?.data?.message || "Failed to verify OTP. Please try again.", {
@@ -92,118 +92,129 @@ export const VerifyOtp = () => {
   };
 
   return (
-    <main
-      className="flex flex-col min-h-screen items-center relative bg-white"
-      data-model-id="2:1264"
-    >
-      <header className="flex w-full h-20 items-center justify-around px-20 py-0 relative bg-bgdefault-bg">
-        <div className="flex items-center gap-[775px] relative flex-1 grow">
-          <div className="inline-flex items-center gap-10 relative flex-[0_0_auto]">
-            <div className="relative w-[83px] h-9">
-              <h1 className="text-4xl font-bold text-primarysolid tracking-[-0.36px]">
-                Logo
-              </h1>
+    <div className="flex min-h-screen">
+      {/* Left Image Section (hidden on small screens) */}
+      <div
+        className="w-1/2 relative hidden md:flex items-center justify-center bg-cover bg-center"
+        style={{ backgroundImage: `url(${bgimg})` }}
+      >
+        <div className="absolute inset-0 bg-black opacity-50"></div> {/* dark overlay */}
+        <div className="relative z-10 text-white text-center px-8 py-12">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4">Verify Your OTP</h2>
+          <p className="text-lg sm:text-xl mb-8 max-w-md mx-auto">
+            Enter the OTP sent to your phone to complete your registration with CareFindr.
+          </p>
+          <div className="flex flex-row items-center justify-center gap-10 text-xl sm:text-2xl font-semibold">
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-3xl sm:text-5xl">500+</span>
+              <span className="text-base sm:text-lg font-normal mt-2">Facilities Registered</span>
+            </div>
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-3xl sm:text-5xl">94%</span>
+              <span className="text-base sm:text-lg font-normal mt-2">Success Rate</span>
             </div>
           </div>
-        </div>
-      </header>
-
-      <div className="flex flex-col items-center gap-10 pt-10 pb-0 px-0 relative flex-1 self-stretch w-full grow">
-        <div className="flex flex-col w-[768px] items-center gap-10 relative">
-          <div className="flex flex-col items-center justify-center gap-2.5 relative self-stretch w-full">
-            <div className="flex flex-col w-full items-start gap-2.5 relative">
-              <h2 className="text-[30px] font-semibold text-fgtext-contrast tracking-[0.15px] leading-9">
-                {isOtpVerified ? "Facility Registration Successful" : "Verify OTP"}
-              </h2>
-              <p className="text-base font-medium text-fgtext tracking-[0.08px] leading-6">
-                {isOtpVerified
-                  ? "Your facility has been successfully registered."
-                  : `Enter the 6-digit OTP sent to your registered phone number${phoneNumber ? ` (${phoneNumber})` : ""}.`}
-              </p>
-            </div>
-          </div>
-
-          <Card className="w-full border-[#dfe3e6] shadow-box-shadow-shadow">
-            <CardContent className="flex flex-col gap-6 p-5">
-              {isOtpVerified ? (
-                <div className="flex flex-col items-center gap-6">
-                  <p className="text-[18px] font-medium text-fgtext-contrast tracking-[0.09px] leading-7">
-                    Thank you for registering your facility!
-                  </p>
-                  <Button
-                    onClick={handleOnboardNavigation}
-                    className="h-12 w-full bg-primarysolid text-primaryon-primary rounded-xl hover:bg-primarysolid/90"
-                  >
-                    <span className="text-[15px] font-semibold tracking-[0.075px]">
-                      Complete the Onboarding Process
-                    </span>
-                  </Button>
-                </div>
-              ) : (
-                <Formik
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={handleSubmit}
-                >
-                  {({ isSubmitting }) => (
-                    <Form>
-                      <div className="flex flex-col gap-2.5">
-                        <label
-                          htmlFor="otp"
-                          className="text-[14px] font-semibold text-fgtext-contrast tracking-[0.07px]"
-                        >
-                          OTP
-                        </label>
-                        <Field
-                          name="otp"
-                          as={Input}
-                          id="otp"
-                          className="h-12 px-4 py-3.5 text-[15px] font-medium text-fgsolid tracking-[0.075px] border-[#d7dbdf]"
-                          placeholder="Enter 6-digit OTP"
-                        />
-                        <ErrorMessage
-                          name="otp"
-                          component="div"
-                          className="text-red-500 text-[12px]"
-                        />
-                      </div>
-
-                      <div className="flex justify-center items-center mt-4">
-                        {countdown > 0 ? (
-                          <p className="text-base font-medium text-fgtext tracking-[0.08px] leading-6">
-                            Resend OTP in {countdown} seconds
-                          </p>
-                        ) : (
-                          <Button
-                            type="button"
-                            onClick={handleResendOtp}
-                            disabled={isResending}
-                            className="h-12 w-full bg-primarysolid text-primaryon-primary rounded-xl hover:bg-primarysolid/90"
-                          >
-                            <span className="text-[15px] font-semibold tracking-[0.075px]">
-                              {isResending ? "Resending..." : "Resend OTP"}
-                            </span>
-                          </Button>
-                        )}
-                      </div>
-
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="mt-4 h-12 w-full bg-primarysolid text-primaryon-primary rounded-xl hover:bg-primarysolid/90"
-                      >
-                        <span className="text-[15px] font-semibold tracking-[0.075px]">
-                          {isSubmitting ? "Verifying..." : "Verify OTP"}
-                        </span>
-                      </Button>
-                    </Form>
-                  )}
-                </Formik>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
-    </main>
+
+      {/* Right Form Section */}
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          {/* Logo */}
+          <div className="flex items-center justify-center">
+            <div className="md:text-[27px] text-[22px] font-bold text-primarysolid cursor-pointer">
+              <Heart className="md:w-[31px] md:h-[31px] w-[24px] h-[24px] inline mr-2" />
+              CareFindr
+            </div>
+          </div>
+
+          {/* Title */}
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+              {isOtpVerified ? "Facility Registration Successful" : "Verify OTP"}
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              {isOtpVerified
+                ? "Your facility has been successfully registered."
+                : `Enter the 6-digit OTP sent to your registered phone number${phoneNumber ? ` (${phoneNumber})` : ""}.`}
+            </p>
+          </div>
+
+          {/* Formik Form */}
+          {isOtpVerified ? (
+            <div className="space-y-6">
+              <p className="text-base sm:text-[17px] font-medium text-gray-900 text-center">
+                Thank you for registering your facility!
+              </p>
+              <Button
+                onClick={handleOnboardNavigation}
+                className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
+              >
+                Complete the Onboarding Process
+              </Button>
+            </div>
+          ) : (
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting }) => (
+                <Form className="space-y-6">
+                  {/* OTP Field */}
+                  <div>
+                    <label
+                      htmlFor="otp"
+                      className="block text-sm sm:text-base font-medium text-gray-700"
+                    >
+                      OTP
+                    </label>
+                    <Field
+                      name="otp"
+                      as={Input}
+                      id="otp"
+                      className="mt-2 w-full h-12 px-4 text-base sm:text-[17px] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primarysolid"
+                      placeholder="Enter 6-digit OTP"
+                    />
+                    <ErrorMessage
+                      name="otp"
+                      component="div"
+                      className="text-red-500 text-xs mt-1"
+                    />
+                  </div>
+
+                  {/* Resend OTP */}
+                  <div className="flex justify-center items-center">
+                    {countdown > 0 ? (
+                      <p className="text-sm sm:text-base text-gray-600">
+                        Resend OTP in {countdown} seconds
+                      </p>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={isResending}
+                        className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
+                      >
+                        {isResending ? "Resending..." : "Resend OTP"}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
+                  >
+                    {isSubmitting ? "Verifying..." : "Verify OTP"}
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

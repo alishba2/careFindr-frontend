@@ -16,28 +16,30 @@ import { Button } from "../button";
 const { Title, Text } = Typography;
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
+
 const getNotificationMessage = (action) => {
   switch (action) {
     case "ACCOUNT_CREATED":
-      return "👋 Welcome to the careFindr! Please complete your onboarding process.";
+      return "Your account has been successfully created. Let’s complete your onboarding to get started!";
     case "RESET_PASSWORD":
-      return "🔐 Your password has been reset.";
+      return "Your password has been reset. If this wasn’t you, please secure your account immediately.";
     case "FACILITY_INFO_UPDATED":
-      return "🏥 Facility information updated.";
+      return "Your facility information has been successfully updated.";
     case "SERVICES_UPDATE":
-      return "🛠️ Services & capacity updated.";
+      return "Your service offerings and capacity have been updated successfully.";
     case "DOCUMENT_UPDATE":
-      return "📄 Documents updated successfully!";
+      return "Your facility documents were uploaded/updated successfully.";
     case "UPDATED_PROFILE_PROGRESS":
-      return "📈 Profile progress updated.";
+      return "Your profile setup is progressing. Keep going to complete it!";
     case "ONBOARDING_COMPLETED":
-      return "✅ Onboarding process completed.";
+      return "Congratulations! You’ve successfully completed your onboarding process.";
     case "PROFILE_IMAGE_UPDATED":
-      return "🖼️ Profile image updated.";
+      return "Your profile picture has been updated.";
     default:
-      return "🔔 New notification.";
+      return "You have a new update or activity in your account.";
   }
 };
+
 
 /*************  ✨ Windsurf Command ⭐  *************/
 /**
@@ -143,23 +145,15 @@ const getNotificationMessage = (action) => {
           dataSource={notifications}
           renderItem={(item) => (
             <List.Item
+              className="bg-[#E7F9FB] p-4 rounded-lg shadow-sm border border-[#AADEE6]"
+
               style={{
-                backgroundColor: !item.isRead ? "#f0faff" : "transparent",
+                backgroundColor: !item.isRead ? "transparent" : "#E7F9FB",
                 borderRadius: 8,
                 marginBottom: 8,
                 padding: 16,
               }}
-            //   actions={
-            //     item.isRead
-            //       ? [
-            //           <CheckCircleTwoTone
-            //             twoToneColor="#52c41a"
-            //             title="Read"
-            //             key="read-icon"
-            //           />,
-            //         ]
-            //       : []
-            //   }
+
             >
               <List.Item.Meta
                 avatar={
