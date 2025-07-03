@@ -47,7 +47,7 @@ export default function Landing() {
                             <div className="mt-8 flex flex-col sm:flex-row gap-4">
                                 <Button
                                     size="lg"
-                                    className="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                                    className="px-8 py-4 text-lg font-semibold shadow-lg bg-[#359DF4] hover:bg-[#359DF4] hover:shadow-xl transform hover:-translate-y-1 transition-all"
                                     onClick={() => navigate("/register")}
                                 >
                                     Get Started
@@ -63,15 +63,15 @@ export default function Landing() {
                             </div>
                             <div className="mt-8 flex items-center space-x-6 text-sm text-gray-500">
                                 <div className="flex items-center">
-                                    <CheckCircle className="w-4 h-4 text-success mr-2" />
+                                    <CheckCircle className="w-4 h-4 text-success mr-2 text-[#10B77F]" />
                                     Verified Hospitals
                                 </div>
                                 <div className="flex items-center">
-                                    <Shield className="w-4 h-4 text-success mr-2" />
+                                    <Shield className="w-4 h-4 text-success mr-2 text-[#10B77F]" />
                                     Secure Platform
                                 </div>
                                 <div className="flex items-center">
-                                    <Clock className="w-4 h-4 text-success mr-2" />
+                                    <Clock className="w-4 h-4 text-success mr-2 text-[#10B77F]" />
                                     24/7 Support
                                 </div>
                             </div>
@@ -85,7 +85,7 @@ export default function Landing() {
                             <Card className="absolute -bottom-6 -left-6 bg-white shadow-lg">
                                 <CardContent className="p-6">
                                     <div className="flex items-center space-x-3">
-                                        <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
+                                        <div className="w-12 h-12 bg-[#10B77F] rounded-full flex items-center  justify-center">
                                             <Hospital className="w-6 h-6 text-white" />
                                         </div>
                                         <div>
@@ -319,7 +319,7 @@ export default function Landing() {
                                     <div className="text-sm text-gray-600">Verified Hospitals</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-3xl font-bold text-success">10K+</div>
+                                    <div className="text-3xl font-bold text-[#10B77F]">10K+</div>
                                     <div className="text-sm text-gray-600">Successful Referrals</div>
                                 </div>
                             </div>

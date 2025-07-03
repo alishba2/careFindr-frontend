@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hook/auth";
+import icon from "../../assets/Vector.png"
 
 export default function Navbar() {
     const { token } = useAuth();
@@ -33,7 +34,7 @@ export default function Navbar() {
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                <Heart className="md:w-6 md:h-6 w-4 h-4 inline mr-2" />
+                                <img src={icon} className="md:w-6 md:h-6 w-4 h-4 inline mr-2" alt="icon" />
                                 CareFindr
                             </div>
                         </div>
@@ -57,26 +58,26 @@ export default function Navbar() {
                     {/* Right Side Buttons */}
                     {token ? (
                         <div className="flex items-center gap-2">
-                            {location.pathname === "/" ? (
-                                <Button
-                                    onClick={() => navigate("/facility-dashboard/home")}
-                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
-                                >
-                                    Dashboard
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => {
-                                        localStorage.removeItem("token");
-                                        localStorage.clear();
-                                        navigate("/login");
-                                    }}
-                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
-                                >
-                                    Logout
-                                </Button>
-                            )}
+                            <Button
+                                variant="ghost"
+                                onClick={() => {
+                                    localStorage.removeItem("token");
+                                    localStorage.clear();
+                                    navigate("/login");
+                                }}
+                                className="text-primarysolid hover:primarysolid"
+                            >
+                                Logout
+                            </Button>
+
+                            <Button
+                                onClick={() => navigate("/facility-dashboard/home")}
+                                className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
+                            >
+                                Dashboard
+                            </Button>
+
+
                         </div>
                     ) : (
                         <div className="flex items-center gap-2">

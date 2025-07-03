@@ -45,7 +45,7 @@ export const Login = () => {
       localStorage.setItem("facilityType", response.facility.type.toLowerCase());
       setStatus(null);
       setLoginError(null);
-      navigate("/facility-dashboard");
+      window.location.href = "/facility-dashboard"; // hard reload
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Login failed. Please try again.";

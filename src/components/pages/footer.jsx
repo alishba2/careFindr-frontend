@@ -104,7 +104,7 @@ export default function Footer() {
                 placeholder="Enter your email"
                 className="flex-1 rounded-r-none text-gray-900"
               />
-              <Button className="bg-primarysolid hover:bg-blue-700 rounded-l-none">
+              <Button className="bg-primarysolid h-10 hover:bg-blue-700 rounded-l-none">
                 <svg
                   className="w-4 h-4"
                   fill="none"
