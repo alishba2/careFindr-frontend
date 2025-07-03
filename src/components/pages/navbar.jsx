@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hook/auth";
 import icon from "../../assets/Vector.png"
 
 export default function Navbar() {
-    const { token } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [token, setToken] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch token from localStorage on component mount
+    useEffect(() => {
+        const tokenFromStorage = localStorage.getItem("token");
+        setToken(tokenFromStorage);
+        setLoading(false);
+    }, []);
 
     const scrollToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
@@ -24,18 +30,23 @@ export default function Navbar() {
         { label: "FAQ", id: "faq" },
     ];
 
+    if (loading) {
+        // Optionally, render a placeholder or nothing to avoid flickering
+        return null;
+    }
+
     return (
         <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
+                    {/* Logo / Home */}
                     <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <div
-                                className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
-                                onClick={() => navigate("/")}
-                            >
-                                <img src={icon} className="md:w-6 md:h-6 w-4 h-4 inline mr-2" alt="icon" />
-                                CareFindr
+                        <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate("/")}>
+                            <div className="flex items-center space-x-2">
+                                <img src={icon} className="md:w-6 md:h-6 w-4 h-4" alt="icon" />
+                                <div className="md:text-2xl text-lg font-bold text-primarysolid">
+                                    CareFindr
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -63,21 +74,19 @@ export default function Navbar() {
                                 onClick={() => {
                                     localStorage.removeItem("token");
                                     localStorage.clear();
+                                    setToken(null);
                                     navigate("/login");
                                 }}
                                 className="text-primarysolid hover:primarysolid"
                             >
                                 Logout
                             </Button>
-
                             <Button
                                 onClick={() => navigate("/facility-dashboard/home")}
                                 className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
                             >
                                 Dashboard
                             </Button>
-
-
                         </div>
                     ) : (
                         <div className="flex items-center gap-2">
