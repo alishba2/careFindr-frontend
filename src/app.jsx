@@ -48,9 +48,9 @@ export const App = () => {
           <Route
             path="/"
             element={
-              <RedirectIfAuthenticated>
+              // <RedirectIfAuthenticated>
                 <Landing />
-              </RedirectIfAuthenticated>
+              // </RedirectIfAuthenticated>
             }
           />
           <Route

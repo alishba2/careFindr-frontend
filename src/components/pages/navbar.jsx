@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hook/auth";
 
 export default function Navbar() {
     const { token } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const scrollToSection = (sectionId) => {
@@ -21,7 +22,6 @@ export default function Navbar() {
         { label: "Hospitals", id: "hospitals" },
         { label: "FAQ", id: "faq" },
     ];
-
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -56,48 +56,57 @@ export default function Navbar() {
 
                     {/* Right Side Buttons */}
                     {token ? (
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
+                            {location.pathname === "/" ? (
+                                <Button
+                                    onClick={() => navigate("/facility-dashboard/home")}
+                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Dashboard
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        localStorage.removeItem("token");
+                                        localStorage.clear();
+                                        navigate("/login");
+                                    }}
+                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Logout
+                                </Button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
                             <Button
                                 variant="ghost"
-                                onClick={() => {
-                                    localStorage.removeItem("token");
-                                    localStorage.clear();
-                                    navigate("/login");
-                                }}
+                                onClick={() => navigate("/login")}
+                                className="text-primarysolid hover:primarysolid"
+                            >
+                                Login
+                            </Button>
+                            <Button
+                                onClick={() => navigate("/register")}
                                 className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
                             >
-                                Logout
+                                Get Started
                             </Button>
                         </div>
+                    )}
 
-                    ) : (<div className="flex items-center">
+                    {/* Mobile Menu Toggle */}
+                    <div className="md:hidden ml-2">
                         <Button
                             variant="ghost"
-                            onClick={() => navigate("/login")}
-                            className="text-primarysolid hover:primarysolid"
+                            size="sm"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="text-gray-700 hover:primarysolid"
                         >
-                            Login
+                            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </Button>
-                        <Button
-                            onClick={() => navigate("/register")}
-                            className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
-                        >
-                            Get Started
-                        </Button>
-
-                        {/* Mobile Menu Toggle */}
-                        <div className="md:hidden">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="text-gray-700 hover:primarysolid"
-                            >
-                                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                            </Button>
-                        </div>
-                    </div>)
-                    }
+                    </div>
                 </div>
 
                 {/* Mobile Navigation */}
