@@ -236,7 +236,7 @@ const FacilityDashboard = () => {
                         icon={child.icon}
                         className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6"
                         style={{
-                          backgroundColor: child.key === selectedKey ? "#E7F9FB" : "transparent",
+                          backgroundColor: child.key === selectedKey ? "#c1e3ff" : "transparent",
                           color: child.key === selectedKey ? "#359DF4" : "#687076",
                           borderRadius: "8px",
                           marginBottom: "2px",
