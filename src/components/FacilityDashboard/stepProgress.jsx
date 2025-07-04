@@ -9,7 +9,7 @@ const StepProgress = ({ currentStep = 1 }) => {
                 {[1, 2, 3].map((step) => (
                     <div
                         key={step}
-                        className={`flex-1 h-2 rounded ${currentStep >= step ? "bg-[#05A2C2]" : "bg-gray-300"
+                        className={`flex-1 h-2 rounded ${currentStep >= step ? "bg-[#359DF4]" : "bg-gray-300"
                             }`}
                     ></div>
                 ))}

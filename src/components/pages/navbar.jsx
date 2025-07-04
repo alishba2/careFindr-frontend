@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hook/auth";
-import icon from "../../assets/Vector.png"
+import icon from "../../assets/vector2.png"
 
 export default function Navbar() {
     const { token } = useAuth();
@@ -34,7 +34,7 @@ export default function Navbar() {
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                <img src={icon} className="md:w-6 md:h-6 w-4 h-4 inline mr-2" alt="icon" />
+                                <img src={icon} className="md:w-9 md:h-9  w-9 h-9 inline mr-2" alt="icon" />
                                 CareFindr
                             </div>
                         </div>

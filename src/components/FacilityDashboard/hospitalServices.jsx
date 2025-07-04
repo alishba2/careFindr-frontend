@@ -261,6 +261,7 @@ export const HospitalServices = () => {
     }, [authData?._id]);
 
     const weekDays = [
+        "24/7",
         "Monday",
         "Tuesday",
         "Wednesday",
@@ -268,7 +269,6 @@ export const HospitalServices = () => {
         "Friday",
         "Saturday",
         "Sunday",
-        "24/7",
     ];
 
     const facilityFeatures = [
@@ -600,7 +600,7 @@ export const HospitalServices = () => {
                                                         facilityFeatures: updated,
                                                     }));
                                                 }}
-                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#359DF4]focus:ring-[#359DF4] border-gray-300 rounded"
                                             />
                                             {feature.label}
                                         </label>
