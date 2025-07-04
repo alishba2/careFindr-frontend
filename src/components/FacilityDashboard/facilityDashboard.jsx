@@ -226,6 +226,8 @@ const FacilityDashboard = () => {
                   style={{
                     marginBottom: "6px",
                     borderRadius: "10px",
+                    fontSize: "15px",
+
                   }}
                 >
                   {item.children
@@ -240,7 +242,7 @@ const FacilityDashboard = () => {
                           color: child.key === selectedKey ? "#359DF4" : "#687076",
                           borderRadius: "8px",
                           marginBottom: "2px",
-                          fontSize: "14px",
+                          fontSize: "15px",
                         }}
                       >
                         <span

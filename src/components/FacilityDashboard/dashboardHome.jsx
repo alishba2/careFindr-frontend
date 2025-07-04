@@ -135,7 +135,7 @@ export default function DashboardHome() {
           <Card className="rounded-xl shadow border-none relative">
             <p className="text-base text-gray-500">New Referrals</p>
             <p className="text-2xl font-bold text-primary">0</p>
-            <p className="text-base text-[#259678]">+0 this week</p>
+            <p className="text-base text-primarysolid">+0 this week</p>
             <div className="w-14 h-14 bg-[#E5FFD1] rounded-full absolute top-5 right-7 flex items-center justify-center">
               <img src={referral} alt="Referral" />
             </div>
@@ -146,7 +146,7 @@ export default function DashboardHome() {
           <Card className="rounded-xl shadow border-none relative">
             <p className="text-base text-gray-500">Total Referrals</p>
             <p className="text-2xl font-bold text-primary">0</p>
-            <p className="text-base text-[#259678]">+0 this month</p>
+            <p className="text-base text-primarysolid">+0 this month</p>
             <div className="w-14 h-14 bg-[#D1FFFB] rounded-full absolute top-5 right-7 flex items-center justify-center">
               <img src={Totalreferral} alt="Total Referrals" />
             </div>

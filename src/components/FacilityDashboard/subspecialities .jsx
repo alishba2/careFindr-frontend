@@ -130,7 +130,7 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
       </h1>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 justify-center">
+      <div className="flex flex-wrap gap-2 mb-6 justify-betwen">
         {tabs.map((tab) => (
           <button
             key={tab}
