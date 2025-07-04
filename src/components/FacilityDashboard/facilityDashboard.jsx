@@ -16,13 +16,12 @@ import {
 import { Layout, Menu, Button } from "antd";
 import { Outlet } from "react-router-dom";
 import Navbar from "../pages/navbar";
-import { useAuth } from "../hook/auth";
 import { uploadImage } from "../../services/auth";
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "../hook/auth";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
-
 
 const FacilityDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,11 +30,7 @@ const FacilityDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState("home");
-
-
-
-
-
+  const {facilityType} = authData || {};
   useEffect(() => {
     if (authData?.profileImage) {
       setProfileImage(`${import.meta.env.VITE_APP_BASE_URL}/${authData.profileImage}`);
@@ -118,35 +113,41 @@ const FacilityDashboard = () => {
   return (
     <>
       <Navbar />
-      <Layout   >
-        <Sider
-          width={380}
-          collapsible
-          collapsed={collapsed}
-          trigger={null}
-          className="bg-white shadow-md mt-6 mx-2 sm:mx-4 md:mx-6 rounded-xl px-4 pt-6"
-          breakpoint="md"
-          collapsedWidth={80}
-          onBreakpoint={(broken) => setCollapsed(broken)}
-          style={{ height: "calc(100vh - 6rem)" }}
-        >
-          <div className="flex justify-end mb-4">
+      <Layout>
+       <Sider
+  width={collapsed ? 60 : Math.min(350, window.innerWidth - 40)}
+  collapsible
+  collapsed={collapsed}
+  trigger={null}
+  className="bg-white shadow-md mt-6  mx-2 rounded-xl px-4 pt-6"
+  breakpoint="md"
+  collapsedWidth={60}
+  onBreakpoint={(broken) => setCollapsed(broken)}
+  style={{ 
+    height: "calc(100vh - 6rem)",
+    maxWidth: "calc(100vw - 20px)",
+    overflow: "scroll",
+        scrollbarWidth: "none",
+     
+  }}
+>
+          <div className="flex justify-end mb-5 ">
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
-              className="text-lg"
+              className="text-lg px-9"
             />
           </div>
 
           {!collapsed && (
-            <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center mb-6 px-2">
               <div className="relative">
                 <div
                   className="rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
                   style={{
-                    width: 150,
-                    height: 150,
+                    width: 120, // Reduced from 150 for better mobile fit
+                    height: 120, // Reduced from 150 for better mobile fit
                     border: "4px solid #ccc",
                     position: "relative",
                     cursor: "pointer",
@@ -165,7 +166,7 @@ const FacilityDashboard = () => {
                 </div>
                 <CameraOutlined
                   className="absolute bottom-0 right-3 bg-black bg-opacity-40 text-white p-2 rounded-full"
-                  style={{ fontSize: 24 }}
+                  style={{ fontSize: 20 }} // Reduced from 24
                 />
                 {profileImage && (
                   <span
@@ -190,7 +191,7 @@ const FacilityDashboard = () => {
                   }
                 }}
               />
-              <h3 className="mt-3 text-center font-semibold text-[20px] text-gray-800">
+              <h3 className="mt-3 text-center font-semibold text-[18px] sm:text-[20px] text-gray-800 px-2">
                 {authData?.name || "Facility"}
               </h3>
             </div>
@@ -200,7 +201,7 @@ const FacilityDashboard = () => {
             mode="inline"
             defaultOpenKeys={["profile-management"]}
             selectedKeys={[selectedKey]}
-            className="bg-transparent text-[#687076] text-[17px]"
+            className="bg-transparent text-[#687076] text-[15px] sm:text-[17px]"
             inlineCollapsed={collapsed}
             style={{ border: "none" }}
           >
@@ -210,16 +211,16 @@ const FacilityDashboard = () => {
                   key={item.key}
                   title={
                     <span
-                      className="flex items-center gap-3 px-3 py-2"
+                      className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2"
                       style={{
-                        color: item.children.some((child) => child.key === selectedKey) ? "#0C7792" : "#687076",
+                        color: item.children.some((child) => child.key === selectedKey) ? "#359DF4" : "#687076",
                         borderRadius: "10px",
                         position: "relative",
-                        left: "-12px",
+                        left: "-8px",
                       }}
                     >
                       {item.icon}
-                      {!collapsed && item.label}
+                      {!collapsed && <span className="truncate">{item.label}</span>}
                     </span>
                   }
                   style={{
@@ -233,17 +234,17 @@ const FacilityDashboard = () => {
                       <Menu.Item
                         key={child.key}
                         icon={child.icon}
-                        className="flex items-center gap-3 px-6"
+                        className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6"
                         style={{
                           backgroundColor: child.key === selectedKey ? "#E7F9FB" : "transparent",
-                          color: child.key === selectedKey ? "#0C7792" : "#687076",
+                          color: child.key === selectedKey ? "#359DF4" : "#687076",
                           borderRadius: "8px",
                           marginBottom: "2px",
-                          fontSize: "16px",
+                          fontSize: "14px",
                         }}
                       >
                         <span
-                          className="flex-1"
+                          className="flex-1 truncate"
                           onClick={() => {
                             setSelectedKey(child.key);
                             if (child.customNavigate) {
@@ -263,18 +264,18 @@ const FacilityDashboard = () => {
                 <Menu.Item
                   key={item.key}
                   icon={item.icon}
-                  className="flex items-center gap-3 px-3 py-2"
+                  className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2"
                   style={{
                     backgroundColor: item.key === selectedKey ? "#E7F9FB" : "transparent",
-                    color: item.key === selectedKey ? "#0C7792" : "#687076",
+                    color: item.key === selectedKey ? "#359DF4" : "#687076",
                     borderRadius: "10px",
                     marginBottom: "6px",
-                    fontSize: "17px",
+                    fontSize: "15px",
                   }}
                 >
                   <NavLink
                     to={item.path}
-                    className="flex-1"
+                    className="flex-1 truncate"
                     onClick={() => setSelectedKey(item.key)}
                   >
                     {item.label}

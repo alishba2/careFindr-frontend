@@ -216,7 +216,7 @@ const AllFacilities = () => {
           <Input
             prefix={<SearchOutlined className="text-gray-500" />}
             placeholder="Search"
-            className="h-10 w-full md:w-80 rounded-[10px] border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="h-10 w-full md:w-80 rounded-[10px] border border-gray-300 focus:ring-1 focus:ring-[#359DF4] focus:border-[#359DF4]"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
