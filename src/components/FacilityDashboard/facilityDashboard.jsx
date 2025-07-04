@@ -30,7 +30,7 @@ const FacilityDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState("home");
-  const {facilityType} = authData || {};
+  const { facilityType } = authData || {};
   useEffect(() => {
     if (authData?.profileImage) {
       setProfileImage(`${import.meta.env.VITE_APP_BASE_URL}/${authData.profileImage}`);
@@ -114,23 +114,23 @@ const FacilityDashboard = () => {
     <>
       <Navbar />
       <Layout>
-       <Sider
-  width={collapsed ? 60 : Math.min(350, window.innerWidth - 40)}
-  collapsible
-  collapsed={collapsed}
-  trigger={null}
-  className="bg-white shadow-md mt-6  mx-2 rounded-xl px-4 pt-6"
-  breakpoint="md"
-  collapsedWidth={60}
-  onBreakpoint={(broken) => setCollapsed(broken)}
-  style={{ 
-    height: "calc(100vh - 6rem)",
-    maxWidth: "calc(100vw - 20px)",
-    overflow: "scroll",
-        scrollbarWidth: "none",
-     
-  }}
->
+        <Sider
+          width={collapsed ? 60 : Math.min(350, window.innerWidth - 40)}
+          collapsible
+          collapsed={collapsed}
+          trigger={null}
+          className="bg-white shadow-md mt-6  mx-2 rounded-xl px-4 pt-6"
+          breakpoint="md"
+          collapsedWidth={60}
+          onBreakpoint={(broken) => setCollapsed(broken)}
+          style={{
+            height: "calc(100vh - 6rem)",
+            maxWidth: "calc(100vw - 20px)",
+            overflow: "scroll",
+            scrollbarWidth: "none",
+
+          }}
+        >
           <div className="flex justify-end mb-5 ">
             <Button
               type="text"
@@ -266,7 +266,7 @@ const FacilityDashboard = () => {
                   icon={item.icon}
                   className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2"
                   style={{
-                    backgroundColor: item.key === selectedKey ? "#E7F9FB" : "transparent",
+                    backgroundColor: item.key === selectedKey ? "#c1e3ff" : "transparent",
                     color: item.key === selectedKey ? "#359DF4" : "#687076",
                     borderRadius: "10px",
                     marginBottom: "6px",

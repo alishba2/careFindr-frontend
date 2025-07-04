@@ -560,7 +560,7 @@ export const HospitalServices = () => {
                                 <h1 className="text-sm font-bold text-gray-900 mb-2">
                                     Core Clinical Specialities
                                 </h1>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {CoreClinicalSpecialities.map((item) => (
                                         <div
                                             key={item.value}
@@ -631,8 +631,8 @@ export const HospitalServices = () => {
                                 </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <div className="flex-1">
+                            <div className="flex gap-4 md:flex-row flex-col">
+                                <div className="flex-1 md:w-auto w-full">
                                     <label className="text-sm font-bold text-gray-800">
                                         Opening Time
                                     </label>
@@ -643,7 +643,7 @@ export const HospitalServices = () => {
                                         onChange={(e) => handleTimeChange("openingTime", e.target.value)}
                                     />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 md:w-auto w-full">
                                     <label className="text-sm font-bold text-gray-800">
                                         Closing Time
                                     </label>

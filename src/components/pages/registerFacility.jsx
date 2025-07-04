@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "../../components/button.jsx";
 import { Card, CardContent } from "../../components/card.jsx";
@@ -24,43 +25,36 @@ import PhoneInput from "react-phone-input-2";
 import { CheckCircle, Info } from "lucide-react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import Navbar from "./navbar.jsx";
+
 const validationSchema = Yup.object({
   facilityType: Yup.string().required("Facility type is required"),
   facilityName: Yup.string().required("Facility name is required"),
   hospitalType: Yup.string().when("facilityType", {
     is: "Hospital",
     then: (schema) => schema.required("Hospital type is required"),
-    otherwise: (schema) => schema.nullable(),
+    otherwise: (schema) => schema.notRequired(),
   }),
   insuranceType: Yup.string().when("facilityType", {
     is: "Insurance",
     then: (schema) => schema.required("Insurance type is required"),
-    otherwise: (schema) => schema.nullable(),
+    otherwise: (schema) => schema.notRequired(),
   }),
   contactEmail: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
   phoneNumber: Yup.string().required("Phone number is required"),
-  secondaryPhone: Yup.string()
-    .transform((val) => (val === "" ? null : val))
-    .nullable(),
+  secondaryPhone: Yup.string().nullable(),
   whatsapp: Yup.string().required("WhatsApp number is required"),
   state: Yup.string().required("State is required"),
   lga: Yup.string().required("LGA is required"),
-  lcda: Yup.string()
-    .transform((val) => (val === "" ? null : val))
-    .nullable()
-    .when("state", {
-      is: "Lagos",
-      then: (schema) => schema.required("LCDA is required"),
-      otherwise: (schema) => schema.nullable(),
-    }),
+  lcda: Yup.string().when("state", {
+    is: "Lagos",
+    then: (schema) => schema.required("LCDA is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   address: Yup.string().required("Address is required"),
   registration: Yup.string().required("Registration number is required"),
-  website: Yup.string()
-    .url("Invalid URL")
-    .transform((val) => (val === "" ? null : val))
-    .nullable(),
+  website: Yup.string().url("Invalid URL").nullable(),
   password: Yup.string()
     .min(6, "Min 6 characters")
     .required("Password required"),
@@ -114,8 +108,8 @@ export const RegistrationStep = () => {
   const initialValues = {
     facilityType: "",
     facilityName: "",
-    hospitalType: null,
-    insuranceType: null,
+    hospitalType: "",
+    insuranceType: "",
     contactEmail: "",
     phoneNumber: "",
     secondaryPhone: "",
@@ -216,9 +210,7 @@ export const RegistrationStep = () => {
       isWhatsappNumberVerified: whatsappVerified,
     };
 
-
     try {
-
       if (!(phoneVerified && whatsappVerified)) {
         toast.error("Please verify both phone and WhatsApp numbers before submitting.");
         setSubmitting(false);
@@ -241,6 +233,7 @@ export const RegistrationStep = () => {
       );
     }
   };
+
 
   return (
 
@@ -315,6 +308,7 @@ export const RegistrationStep = () => {
                         />
                       </div>
                       {/* Conditional Hospital Type */}
+                      {/* Hospital Type */}
                       {values.facilityType === "Hospital" && (
                         <div className="flex-1">
                           <label className="text-sm font-semibold">
@@ -323,8 +317,9 @@ export const RegistrationStep = () => {
                           <Field name="hospitalType">
                             {({ field }) => (
                               <Select
+                                {...field}
+                                onValueChange={(val) => setFieldValue("hospitalType", val)}
                                 value={field.value}
-                                onChange={(val) => setFieldValue("hospitalType", val)}
                               >
                                 <SelectTrigger className="h-12 border-[#d7dbdf]">
                                   <SelectValue placeholder="Select hospital type" />
@@ -344,6 +339,7 @@ export const RegistrationStep = () => {
                           />
                         </div>
                       )}
+
                       {/* Conditional Insurance Type */}
                       {values.facilityType === "Insurance" && (
                         <div className="flex-1">
@@ -659,7 +655,7 @@ export const RegistrationStep = () => {
                     <div>
                       <div className="mt-4">
                         <label className="text-sm font-semibold">
-                          Address
+                          Facility Address <span className="text-red-600">*</span>
                         </label>
                         <Field
                           as={Input}
@@ -857,11 +853,11 @@ export const RegistrationStep = () => {
                       </Field>
                       <div className="text-base">
                         By registering, you agree to our{" "}
-                        <a href="#" className="text-[#05A2C2]">
+                        <a href="#" className="text-primarysolid">
                           Terms of Services
                         </a>{" "}
                         and{" "}
-                        <a href="#" className="text-[#05A2C2]">
+                        <a href="#" className="text-primarysolid">
                           Privacy Policy
                         </a>
                       </div>

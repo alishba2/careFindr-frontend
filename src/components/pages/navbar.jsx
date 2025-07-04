@@ -43,12 +43,12 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo / Home */}
                     <div className="flex items-center">
-                        <div className="flex-shrink-0">
+                        <div className="flex items-center flex-shrink-0">
+                            <Heart className="md:w-10 md:h-10 w-8 h-8 mr-2 text-primarysolid" />
                             <div
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                <img src={icon} className="md:w-9 md:h-9  w-9 h-9 inline mr-2" alt="icon" />
                                 CareFindr
                             </div>
                         </div>

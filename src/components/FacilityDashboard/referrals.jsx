@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Table, Select, Button, Input } from "antd";
+import { Table, Button, Input } from "antd";
 import moment from "moment";
 import { Search, ChevronLeft, ChevronRight, ChevronDown, Calendar } from "lucide-react";
-
-const { Option } = Select;
-
+import { useAuth } from "../hook/auth";
 // Custom Date Filter Component
 const DateFilter = ({ value, onChange }) => {
   const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
@@ -14,6 +12,7 @@ const DateFilter = ({ value, onChange }) => {
   const [tempEndDate, setTempEndDate] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const {facilityType} = useAuth();
 
   const presetOptions = [
     'Today so far',
@@ -33,6 +32,17 @@ const DateFilter = ({ value, onChange }) => {
 
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
+  // Sync internal state with value prop
+  useEffect(() => {
+    if (!value || value.length === 0) {
+      setSelectedRange({ start: null, end: null });
+      setSelectedPreset('');
+      setTempStartDate(null);
+      setTempEndDate(null);
+      setShowCustomPicker(false);
+    }
+  }, [value]);
+
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -42,15 +52,15 @@ const DateFilter = ({ value, onChange }) => {
     const startDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     for (let i = 0; i < startDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
     return days;
   };
 
@@ -64,9 +74,9 @@ const DateFilter = ({ value, onChange }) => {
 
   const handleDateClick = (day) => {
     if (!day) return;
-    
+
     const clickedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    
+
     if (!tempStartDate || (tempStartDate && tempEndDate)) {
       setTempStartDate(clickedDate);
       setTempEndDate(null);
@@ -83,7 +93,7 @@ const DateFilter = ({ value, onChange }) => {
   const calculatePresetRange = (preset) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     switch (preset) {
       case 'Today so far':
         return [moment(today), moment(now)];
@@ -118,7 +128,7 @@ const DateFilter = ({ value, onChange }) => {
     setShowDropdown(false);
     setTempStartDate(null);
     setTempEndDate(null);
-    
+
     if (preset === 'Custom') {
       setShowCustomPicker(true);
     } else {
@@ -140,29 +150,21 @@ const DateFilter = ({ value, onChange }) => {
     }
   };
 
-  const handleClear = () => {
-    setSelectedRange({ start: null, end: null });
-    setSelectedPreset('');
-    setTempStartDate(null);
-    setTempEndDate(null);
-    onChange([]);
-  };
-
   const isDateInRange = (day) => {
     if (!day || !tempStartDate) return false;
-    
+
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    
+
     if (tempStartDate && tempEndDate) {
       return date >= tempStartDate && date <= tempEndDate;
     }
-    
+
     return date.getTime() === tempStartDate.getTime();
   };
 
   const isDateRangeEnd = (day) => {
     if (!day || !tempStartDate || !tempEndDate) return false;
-    
+
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     return date.getTime() === tempStartDate.getTime() || date.getTime() === tempEndDate.getTime();
   };
@@ -206,22 +208,14 @@ const DateFilter = ({ value, onChange }) => {
               key={preset}
               onClick={() => handlePresetSelect(preset)}
               className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                selectedPreset === preset 
-                  ? 'bg-blue-50 text-blue-600' 
+                selectedPreset === preset
+                  ? 'bg-blue-50 text-blue-600'
                   : 'text-gray-700'
               }`}
             >
               {preset}
             </button>
           ))}
-          <div className="border-t border-gray-200">
-            <button
-              onClick={handleClear}
-              className="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors text-red-600 rounded-b-lg"
-            >
-              Clear
-            </button>
-          </div>
         </div>
       )}
 
@@ -257,8 +251,8 @@ const DateFilter = ({ value, onChange }) => {
                   key={preset}
                   onClick={() => handlePresetSelect(preset)}
                   className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors ${
-                    selectedPreset === preset 
-                      ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' 
+                    selectedPreset === preset
+                      ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
                       : 'text-gray-700'
                   }`}
                 >
@@ -277,11 +271,11 @@ const DateFilter = ({ value, onChange }) => {
                 >
                   <ChevronLeft size={16} className="text-gray-600" />
                 </button>
-                
+
                 <h3 className="text-sm font-medium text-gray-700">
                   {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                 </h3>
-                
+
                 <button
                   onClick={() => navigateMonth(1)}
                   className="p-1 hover:bg-gray-100 rounded"
@@ -307,8 +301,8 @@ const DateFilter = ({ value, onChange }) => {
                     onClick={() => handleDateClick(day)}
                     disabled={!day}
                     className={`h-8 w-8 flex items-center justify-center text-sm rounded transition-colors
-                      ${!day 
-                        ? 'cursor-default' 
+                      ${!day
+                        ? 'cursor-default'
                         : isDateRangeEnd(day)
                           ? 'bg-blue-500 text-white hover:bg-blue-600'
                           : isDateInRange(day)
@@ -338,7 +332,7 @@ const DateFilter = ({ value, onChange }) => {
 
       {/* Click outside to close */}
       {(showDropdown || showCustomPicker) && (
-        <div 
+        <div
           className="fixed inset-0 z-40"
           onClick={() => {
             setShowDropdown(false);
@@ -351,7 +345,10 @@ const DateFilter = ({ value, onChange }) => {
 };
 
 // Main Referrals Component
-const Referrals = () => {
+
+
+// Main Referrals Component
+const Referrals = ({ facilityType }) => {
   const initialData = [
     {
       key: "1",
@@ -359,6 +356,12 @@ const Referrals = () => {
       age: 30,
       sex: "Male",
       phoneNumber: "0000000000",
+      symptoms: "High fever, cough",
+      medicationRequested: "Paracetamol",
+      testRequested: "Blood test",
+      pickUpLocation: "123 Main St",
+      occupation: "Teacher",
+      preferredPlan: "Basic Plan",
       differentialDiagnosis: "Fever",
       date: "2025-06-15",
       referralAmount: "5 ₦",
@@ -369,6 +372,12 @@ const Referrals = () => {
       age: 25,
       sex: "Female",
       phoneNumber: "1111111111",
+      symptoms: "Sore throat, fatigue",
+      medicationRequested: "Antibiotics",
+      testRequested: "Throat swab",
+      pickUpLocation: "456 Oak Ave",
+      occupation: "Nurse",
+      preferredPlan: "Premium Plan",
       differentialDiagnosis: "Cold",
       date: "2025-06-20",
       referralAmount: "3 ₦",
@@ -379,6 +388,12 @@ const Referrals = () => {
       age: 35,
       sex: "Female",
       phoneNumber: "2222222222",
+      symptoms: "Sprained ankle",
+      medicationRequested: "Painkillers",
+      testRequested: "X-ray",
+      pickUpLocation: "789 Pine Rd",
+      occupation: "Engineer",
+      preferredPlan: "Family Plan",
       differentialDiagnosis: "Injury",
       date: "2025-07-01",
       referralAmount: "2 ₦",
@@ -397,6 +412,81 @@ const Referrals = () => {
     const numericValue = parseFloat(record.referralAmount.toString().replace(/[^\d.]/g, ""));
     return sum + numericValue;
   }, 0);
+
+  // Define columns based on facilityType
+  const getColumns = () => {
+    switch (facilityType) {
+      case "Hospital":
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Symptoms", dataIndex: "symptoms", key: "symptoms" },
+          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+      case "Pharmacy":
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Medication Requested", dataIndex: "medicationRequested", key: "medicationRequested" },
+          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+      case "Laboratory":
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Test Requested", dataIndex: "testRequested", key: "testRequested" },
+          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+      case "Ambulance":
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Pick Up Location", dataIndex: "pickUpLocation", key: "pickUpLocation" },
+          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+      case "Insurance":
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Occupation", dataIndex: "occupation", key: "occupation" },
+          { title: "Preferred Plan", dataIndex: "preferredPlan", key: "preferredPlan" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+      default:
+        return [
+          { title: "Name", dataIndex: "name", key: "name" },
+          { title: "Age", dataIndex: "age", key: "age" },
+          { title: "Sex", dataIndex: "sex", key: "sex" },
+          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+          { title: "Symptoms", dataIndex: "symptoms", key: "symptoms" },
+          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+          { title: "Date", dataIndex: "date", key: "date" },
+          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+        ];
+    }
+  };
+
+  // Check if any filter is applied
+  const hasActiveFilters = filterAge || filterSex || (filterDateRange && filterDateRange.length > 0) || searchText;
 
   useEffect(() => {
     let filtered = [...data];
@@ -419,16 +509,24 @@ const Referrals = () => {
 
     if (searchText) {
       const lowerSearch = searchText.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.name.toLowerCase().includes(lowerSearch) ||
-          item.phoneNumber.includes(lowerSearch) ||
-          item.differentialDiagnosis.toLowerCase().includes(lowerSearch)
-      );
+      filtered = filtered.filter((item) => {
+        const fieldsToSearch = [
+          item.name,
+          item.phoneNumber,
+          item.differentialDiagnosis,
+          // Include facility-specific fields in search
+          ...(facilityType === "Hospital" ? [item.symptoms] : []),
+          ...(facilityType === "Pharmacy" ? [item.medicationRequested] : []),
+          ...(facilityType === "Lab" ? [item.testRequested] : []),
+          ...(facilityType === "Ambulance" ? [item.pickUpLocation] : []),
+          ...(facilityType === "Insurance" ? [item.occupation, item.preferredPlan] : []),
+        ].filter(Boolean); // Remove undefined/null values
+        return fieldsToSearch.some((field) => field.toLowerCase().includes(lowerSearch));
+      });
     }
 
     setFilteredData(filtered);
-  }, [data, filterAge, filterSex, filterDateRange, searchText]);
+  }, [data, filterAge, filterSex, filterDateRange, searchText, facilityType]);
 
   const handleClearFilters = () => {
     setFilterAge("");
@@ -437,19 +535,9 @@ const Referrals = () => {
     setSearchText("");
   };
 
-  const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Age", dataIndex: "age", key: "age" },
-    { title: "Sex", dataIndex: "sex", key: "sex" },
-    { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-    { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-    { title: "Date", dataIndex: "date", key: "date" },
-    { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-  ];
-
   return (
     <div className="py-6 px-4 sm:px-6">
-      <h2 className="text-2xl font-bold mb-4">Referrals</h2>
+      <h2 className="text-2xl font-bold mb-4">Referrals - {facilityType || "Hospital"}</h2>
 
       {/* Search + Filters */}
       <div className="flex flex-col md:flex-row md:items-center mb-6 gap-4">
@@ -473,24 +561,26 @@ const Referrals = () => {
             onChange={setFilterDateRange}
           />
 
-          {/* Clear Button */}
-          <Button
-            type="default"
-            className="h-10 px-4 rounded-md bg-white border border-gray-300 hover:bg-gray-100"
-            onClick={handleClearFilters}
-          >
-            Clear
-          </Button>
+          {/* Clear Button (Shown only when filters are applied) */}
+          {hasActiveFilters && (
+            <Button
+              type="default"
+              className="h-10 px-4 rounded-md bg-white border border-gray-300 hover:bg-gray-100"
+              onClick={handleClearFilters}
+            >
+              Clear
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow overflow-x-auto  ">
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
         <Table
-          columns={columns}
+          columns={getColumns()}
           dataSource={filteredData}
           pagination={false}
-          className="rounded-xl  pointer-events: none "
+          className="rounded-xl pointer-events-none"
         />
       </div>
 
@@ -504,3 +594,5 @@ const Referrals = () => {
 };
 
 export default Referrals;
+
+

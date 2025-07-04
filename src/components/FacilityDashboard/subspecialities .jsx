@@ -112,15 +112,13 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
 
   const ToggleSwitch = ({ isOn, onToggle }) => (
     <div
-      className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${
-        isOn ? "bg-cyan-500" : "bg-gray-300"
-      }`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${isOn ? "bg-primarysolid" : "bg-gray-300"
+        }`}
       onClick={onToggle}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-          isOn ? "translate-x-6" : "translate-x-1"
-        }`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isOn ? "translate-x-6" : "translate-x-1"
+          }`}
       />
     </div>
   );
@@ -132,14 +130,14 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
       </h1>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6 justify-center">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-              activeTab === tab ? "bg-[#05A2C2] text-white" : "text-[#05A2C2] hover:bg-[#e6f9fd]"
-            }`}
+            className={`min-w-[100px] px-4 py-2 rounded-md text-sm font-medium text-ve transition-colors duration-200 ${activeTab === tab ? "bg-primarysolid text-white" : "text-primarysolid hover:bg-[#c1e3ff]"
+              } text-center`}
+
           >
             {tab}
           </button>

@@ -181,7 +181,7 @@ export default function DashboardHome() {
                     {recentActivity.map((notification) => (
                       <li
                         key={notification._id}
-                        className="bg-[#E7F9FB] p-4 rounded-lg shadow-sm border-[#AADEE6"
+                        className="bg-[#c1e3ff] p-4 rounded-lg shadow-sm border-[#AADEE6"
                       >
                         <p className="text-base text-gray-800 font-medium">
                           {getNotificationMessage(notification.action)}

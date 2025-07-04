@@ -145,10 +145,10 @@ const getNotificationMessage = (action) => {
           dataSource={notifications}
           renderItem={(item) => (
             <List.Item
-              className="bg-[#E7F9FB] p-4 rounded-lg shadow-sm border border-[#AADEE6]"
+              className="bg-[#c1e3ff] p-4 rounded-lg shadow-sm border border-[#AADEE6]"
 
               style={{
-                backgroundColor: !item.isRead ? "transparent" : "#E7F9FB",
+                backgroundColor: !item.isRead ? "transparent" : "#c1e3ff",
                 borderRadius: 8,
                 marginBottom: 8,
                 padding: 16,

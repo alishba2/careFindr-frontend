@@ -230,7 +230,7 @@ export const DocumentUpload = () => {
           </div>
 
           {/* Other Files */}
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-6 sm:basis-[45%] md:basis-[48%] lg:basis-[47%]">
             {[
               { field: "facilityDetails", label: "Upload Documents with Details about your Facility" },
               { field: "licenseRegistration", label: "License and Registration Certificates" },
@@ -241,15 +241,15 @@ export const DocumentUpload = () => {
             ].map(({ field, label }) => (
               <div
                 key={field}
-                className="w-full md:basis-[48%] lg:basis-[47%] flex-grow space-y-2"
+                className="w-full md:basis-[48%] lg:basis-[47%] flex-grow space-y-2 md:space-x-0 md:flex md:flex-col md:items-start md:w-auto"
               >
                 <h1 className="text-sm font-semibold text-gray-900">{label}</h1>
-                <Upload {...uploadProps(field)} className="w-full">
+                <Upload {...uploadProps(field)} className="w-full md:w-auto">
                   <Button
                     icon={<UploadOutlined className="ml-auto text-gray-500 text-[20px]" />}
                     className="w-full h-11 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
                   >
-                    <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate">
+                    <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate md:text-[13px] md:leading-[1.2] md:tracking-[0.2px]">
                       {fileList[field]?.[0]?.name || "Accepts DOC, PDF, XLS"}
                     </p>
                   </Button>
