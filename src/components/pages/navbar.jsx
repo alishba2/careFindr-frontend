@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import icon from "../../assets/Vector.png"
+import { useAuth } from "../hook/auth";
+import icon from "../../assets/vector2.png";
+import icon2 from "../../assets/Vector.png";
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -41,12 +43,13 @@ export default function Navbar() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo / Home */}
                     <div className="flex items-center">
-                        <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate("/")}>
-                            <div className="flex items-center space-x-2">
-                                <img src={icon} className="md:w-6 md:h-6 w-4 h-4" alt="icon" />
-                                <div className="md:text-2xl text-lg font-bold text-primarysolid">
-                                    CareFindr
-                                </div>
+                        <div className="flex-shrink-0">
+                            <div
+                                className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
+                                onClick={() => navigate("/")}
+                            >
+                                <img src={icon} className="md:w-9 md:h-9  w-9 h-9 inline mr-2" alt="icon" />
+                                CareFindr
                             </div>
                         </div>
                     </div>
@@ -139,3 +142,4 @@ export default function Navbar() {
         </nav>
     );
 }
+
