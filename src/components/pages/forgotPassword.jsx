@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { sendOtp } from "../../services/auth.js";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -27,6 +28,8 @@ const validationSchema = Yup.object({
 });
 
 export const ForgotPassword = () => {
+
+  const navigate = useNavigate();
   // Initial form values
   const initialValues = {
     identifier: "",
@@ -70,7 +73,7 @@ export const ForgotPassword = () => {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
             <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
 
           </div>

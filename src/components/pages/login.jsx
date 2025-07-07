@@ -86,7 +86,7 @@ export const Login = () => {
       {/* Right Form Section */}
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
             <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
 
           </div>
