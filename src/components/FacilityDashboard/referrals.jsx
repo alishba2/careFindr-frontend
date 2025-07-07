@@ -3,6 +3,7 @@ import { Table, Button, Input } from "antd";
 import moment from "moment";
 import { Search, ChevronLeft, ChevronRight, ChevronDown, Calendar } from "lucide-react";
 import { useAuth } from "../hook/auth";
+
 // Custom Date Filter Component
 const DateFilter = ({ value, onChange }) => {
   const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
@@ -12,7 +13,7 @@ const DateFilter = ({ value, onChange }) => {
   const [tempEndDate, setTempEndDate] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
-  const {facilityType} = useAuth();
+  const { facilityType } = useAuth();
 
   const presetOptions = [
     'Today so far',
@@ -345,10 +346,9 @@ const DateFilter = ({ value, onChange }) => {
 };
 
 // Main Referrals Component
+const Referrals = () => {
+  const { facilityType } = useAuth();
 
-
-// Main Referrals Component
-const Referrals = ({ facilityType }) => {
   const initialData = [
     {
       key: "1",
@@ -364,7 +364,7 @@ const Referrals = ({ facilityType }) => {
       preferredPlan: "Basic Plan",
       differentialDiagnosis: "Fever",
       date: "2025-06-15",
-      referralAmount: "5 ₦",
+      referralAmount: "₦5,000",
     },
     {
       key: "2",
@@ -380,7 +380,7 @@ const Referrals = ({ facilityType }) => {
       preferredPlan: "Premium Plan",
       differentialDiagnosis: "Cold",
       date: "2025-06-20",
-      referralAmount: "3 ₦",
+      referralAmount: "₦3,000",
     },
     {
       key: "3",
@@ -396,7 +396,7 @@ const Referrals = ({ facilityType }) => {
       preferredPlan: "Family Plan",
       differentialDiagnosis: "Injury",
       date: "2025-07-01",
-      referralAmount: "2 ₦",
+      referralAmount: "₦2,000",
     },
   ];
 
@@ -409,7 +409,7 @@ const Referrals = ({ facilityType }) => {
 
   const totalReferrals = filteredData.length;
   const totalAmount = filteredData.reduce((sum, record) => {
-    const numericValue = parseFloat(record.referralAmount.toString().replace(/[^\d.]/g, ""));
+    const numericValue = parseFloat(record.referralAmount.replace(/[^\d.]/g, ""));
     return sum + numericValue;
   }, 0);
 
@@ -514,13 +514,12 @@ const Referrals = ({ facilityType }) => {
           item.name,
           item.phoneNumber,
           item.differentialDiagnosis,
-          // Include facility-specific fields in search
           ...(facilityType === "Hospital" ? [item.symptoms] : []),
           ...(facilityType === "Pharmacy" ? [item.medicationRequested] : []),
-          ...(facilityType === "Lab" ? [item.testRequested] : []),
+          ...(facilityType === "Laboratory" ? [item.testRequested] : []),
           ...(facilityType === "Ambulance" ? [item.pickUpLocation] : []),
           ...(facilityType === "Insurance" ? [item.occupation, item.preferredPlan] : []),
-        ].filter(Boolean); // Remove undefined/null values
+        ].filter(Boolean);
         return fieldsToSearch.some((field) => field.toLowerCase().includes(lowerSearch));
       });
     }
@@ -535,9 +534,15 @@ const Referrals = ({ facilityType }) => {
     setSearchText("");
   };
 
+
+  useEffect(()=>{
+
+
+    console.log(filteredData,"filteredData")
+  },[filteredData])
   return (
     <div className="py-6 px-4 sm:px-6">
-      <h2 className="text-2xl font-bold mb-4">Referrals - {facilityType || "Hospital"}</h2>
+      <h2 className="text-4xl font-bold mb-4">Referrals</h2>
 
       {/* Search + Filters */}
       <div className="flex flex-col md:flex-row md:items-center mb-6 gap-4">
@@ -587,12 +592,10 @@ const Referrals = ({ facilityType }) => {
       {/* Totals */}
       <div className="flex mt-4 justify-between text-gray-600">
         <span>Total Referrals: <strong>{totalReferrals}</strong></span>
-        <span>Total Amount: <strong>₦{totalAmount}</strong></span>
+        <span>Total Amount: <strong>₦{totalAmount.toLocaleString()}</strong></span>
       </div>
     </div>
   );
 };
 
 export default Referrals;
-
-

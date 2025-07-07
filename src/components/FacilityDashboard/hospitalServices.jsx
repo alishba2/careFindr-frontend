@@ -11,6 +11,9 @@ import { FacilityServices, GetFacilityService } from "../../services/service";
 import { message } from 'antd';
 const { Option } = Select;
 import { useLocation } from "react-router-dom";
+import TextArea from "antd/es/input/TextArea";
+
+import { useNavigate } from "react-router-dom";
 
 export const HospitalServices = () => {
     const { authData, facilityType, fetchAuthData } = useAuth();
@@ -24,9 +27,9 @@ export const HospitalServices = () => {
     const [timeError, setTimeError] = useState("");
     const location = useLocation();
     const type = location.state?.type;
-
     const [typeFacility, setTypeFacility] = useState(null);
 
+    const navigate = useNavigate();
 
     const [capabilities, setCapabilities] = useState({
         operatingDays: [],
@@ -41,8 +44,8 @@ export const HospitalServices = () => {
         hasPharmacy: "",
         hasLaboratory: "",
         acceptExternalPatients: "",
-        hasOtherBranches: "", // Default to "No"
-        branchAddresses: [""],
+        hasOtherBranches: "",
+        branchAddresses: [" "],
         additionalInformation: "",
         accreditationStatus: "",
         homeSampleCollection: "",
@@ -62,13 +65,23 @@ export const HospitalServices = () => {
         payPerTrip: "",
         nhisInsuranceAccepted: "",
         registeredWithFMOH: "",
+        coveredServices: [],
+        exclusions: [],
+        preExistingConditions: "No",
+        emergencyCoverage: "",
+        accreditedHospitals: [""],
+        outOfNetworkReimbursement: "No",
+        preAuthorization: "",
+        waitingPeriods: [],
+        premiumsCopayments: "",
+        preAuthRequired: null
     });
 
     useEffect(() => {
-        console.log(type, "type i shere");
+        console.log(type, "type is here");
         setFacility(null);
         if (type === "ambulance") {
-            setFacility("Ambulance")
+            setFacility("Ambulance");
             return;
         } else {
             setFacility(facilityType);
@@ -77,15 +90,12 @@ export const HospitalServices = () => {
 
     useEffect(() => {
         console.log(facility, "facility");
+    }, [facility]);
 
-    }, [facility])
-
-    // Deep comparison function
     const areStatesEqual = (state1, state2) => {
         return JSON.stringify(state1) === JSON.stringify(state2);
     };
 
-    // Validate time difference (at least 30 minutes)
     const validateOperatingHours = () => {
         if (!capabilities.openingTime || !capabilities.closingTime) {
             setTimeError("");
@@ -113,7 +123,6 @@ export const HospitalServices = () => {
         return true;
     };
 
-    // Memoized hasChanges
     const hasChanges = useMemo(() => {
         if (!initialCapabilities || !initialSubSpecialities) return false;
         return (
@@ -122,7 +131,6 @@ export const HospitalServices = () => {
         ) && validateOperatingHours();
     }, [capabilities, subSpecialities, initialCapabilities, initialSubSpecialities]);
 
-    // Fetch existing service data
     useEffect(() => {
         const getFacilityServices = async () => {
             if (authData?._id) {
@@ -131,12 +139,11 @@ export const HospitalServices = () => {
                     if (response?.service) {
                         const serviceData = response.service;
                         setProgress(2);
-
                         setIsServiceSaved(true);
-
                         let newCapabilities = { ...capabilities };
 
-                        setTypeFacility(serviceData?.facilityType)
+                        console.log(serviceData, "service data is here");
+                        setTypeFacility(serviceData?.facilityType);
 
                         switch (serviceData.facilityType) {
                             case "Hospital":
@@ -157,7 +164,6 @@ export const HospitalServices = () => {
                                     branchAddresses: serviceData.hospitalDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.hospitalDetails.additionalInfo || "",
                                 };
-
                                 if (serviceData?.ambulanceDetails) {
                                     newCapabilities = {
                                         ...newCapabilities,
@@ -174,7 +180,6 @@ export const HospitalServices = () => {
                                         registeredWithFMOH: serviceData.ambulanceDetails.registeredWithFederalHealth ? "Yes" : "No",
                                     };
                                 }
-
                                 setSubspecialities(serviceData.hospitalDetails.subSpecialities || []);
                                 setInitialSubSpecialities(serviceData.hospitalDetails.subSpecialities || []);
                                 break;
@@ -197,9 +202,7 @@ export const HospitalServices = () => {
                             case "Pharmacy":
                                 newCapabilities = {
                                     ...newCapabilities,
-                                    hasLicensedPharmacist: serviceData.pharmacyDetails.hasLicensedPharmacistOnSite
-                                        ? "Yes"
-                                        : "No",
+                                    hasLicensedPharmacist: serviceData.pharmacyDetails.hasLicensedPharmacistOnSite ? "Yes" : "No",
                                     offersDelivery: serviceData.pharmacyDetails.deliveryAvailable ? "Yes" : "No",
                                     complianceDocuments: serviceData.pharmacyDetails.complianceDocuments || [],
                                     acceptedPayments: serviceData.pharmacyDetails.acceptedPayments || [],
@@ -218,24 +221,41 @@ export const HospitalServices = () => {
                                     ambulanceTypes: serviceData.ambulanceDetails.ambulanceTypes || [],
                                     vehicleEquipment: serviceData.ambulanceDetails.vehicleEquipment || [],
                                     typicalCrew: serviceData.ambulanceDetails.typicalCrew || [],
-                                    averageResponseMin: serviceData.ambulanceDetails.avgResponseTime
-                                        ?.split(":")[0] || "",
-                                    averageResponseSec: serviceData.ambulanceDetails.avgResponseTime
-                                        ?.split(":")[1] || "",
-                                    noRoadworthyAmbulances:
-                                        serviceData.ambulanceDetails.numRoadWorthyAmbulances?.toString() || "",
+                                    averageResponseMin: serviceData.ambulanceDetails.avgResponseTime?.split(":")[0] || "",
+                                    averageResponseSec: serviceData.ambulanceDetails.avgResponseTime?.split(":")[1] || "",
+                                    noRoadworthyAmbulances: serviceData.ambulanceDetails.numRoadWorthyAmbulances?.toString() || "",
                                     maxDailyTrips: serviceData.ambulanceDetails.maxTripsDaily?.toString() || "",
                                     hasBackupVehicles: serviceData.ambulanceDetails.backupVehicles ? "Yes" : "No",
                                     payPerTrip: serviceData.ambulanceDetails.payPerTrip?.toString() || "",
                                     nhisInsuranceAccepted: serviceData.ambulanceDetails.insuranceAccepted ? "Yes" : "No",
-                                    registeredWithFMOH:
-                                        serviceData.ambulanceDetails.registeredWithFederalHealth ? "Yes" : "No",
+                                    registeredWithFMOH: serviceData.ambulanceDetails.registeredWithFederalHealth ? "Yes" : "No",
                                     openingTime: serviceData.ambulanceDetails.operatingHours.openingTime || "",
                                     closingTime: serviceData.ambulanceDetails.operatingHours.closingTime || "",
                                     hasOtherBranches: serviceData.ambulanceDetails.branches.length > 0 ? "Yes" : "No",
                                     branchAddresses: serviceData.ambulanceDetails.branches.map((b) => b.address) || [""],
                                     additionalInformation: serviceData.ambulanceDetails.additionalInfo || "",
                                     operatingDays: [],
+                                };
+                                break;
+
+                            case "Insurance":
+                                newCapabilities = {
+                                    ...newCapabilities,
+                                    coveredServices: serviceData.insuranceDetails.coveredServices || [],
+                                    exclusions: serviceData.insuranceDetails.exclusions || [],
+                                    preExistingConditions: serviceData.insuranceDetails.preExistingConditions ? "Yes" : "No",
+                                    emergencyCoverage: serviceData.insuranceDetails.emergencyCoverage || "",
+                                    accreditedHospitals: serviceData.insuranceDetails.accreditedHospitals?.map((h) => h.address) || [""],
+                                    outOfNetworkReimbursement: serviceData.insuranceDetails.outOfNetworkReimbursement ? "Yes" : "No",
+                                    preAuthorization: serviceData.insuranceDetails.preAuthorization || "",
+                                    waitingPeriods: serviceData.insuranceDetails.waitingPeriods || [],
+                                    premiumsCopayments: serviceData.insuranceDetails.premiumsCopayments || "",
+                                    operatingDays: [],
+                                    openingTime: serviceData.insuranceDetails.operatingHours?.openingTime || "",
+                                    closingTime: serviceData.insuranceDetails.operatingHours?.closingTime || "",
+                                    hasOtherBranches: serviceData.insuranceDetails.branches?.length > 0 ? "Yes" : "No",
+                                    branchAddresses: serviceData.insuranceDetails.branches?.map((b) => b.address) || [""],
+                                    additionalInformation: serviceData.insuranceDetails.additionalInfo || "",
                                 };
                                 break;
 
@@ -255,8 +275,8 @@ export const HospitalServices = () => {
                     setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
                     setInitialSubSpecialities([]);
                 }
-            };
-        }
+            }
+        };
         getFacilityServices();
     }, [authData?._id]);
 
@@ -290,22 +310,41 @@ export const HospitalServices = () => {
             return { ...prev, coreClinicalSpecialities: updated };
         });
     };
-
     const handleDayToggle = (day) => {
         setCapabilities((prev) => {
             let updatedDays = [...prev.operatingDays];
+            let newOpeningTime = prev.openingTime;
+            let newClosingTime = prev.closingTime;
+
             if (day === "24/7") {
-                updatedDays = updatedDays.includes("24/7")
-                    ? [] // Deselect all
-                    : weekDays.filter((d) => d !== "24/7").concat("24/7"); // Select all days including 24/7
+                if (updatedDays.includes("24/7")) {
+                    updatedDays = [];
+                    newOpeningTime = "";
+                    newClosingTime = "";
+                } else {
+                    updatedDays = weekDays.filter((d) => d !== "24/7").concat("24/7");
+                    newOpeningTime = "00:00";
+                    newClosingTime = "23:59";
+                }
             } else {
                 if (updatedDays.includes(day)) {
                     updatedDays = updatedDays.filter((d) => d !== day && d !== "24/7");
                 } else {
                     updatedDays = [...updatedDays, day].filter((d) => d !== "24/7");
                 }
+                if (updatedDays.includes("24/7")) {
+                    updatedDays = updatedDays.filter((d) => d !== "24/7");
+                    newOpeningTime = "";
+                    newClosingTime = "";
+                }
             }
-            return { ...prev, operatingDays: updatedDays };
+
+            return {
+                ...prev,
+                operatingDays: updatedDays,
+                openingTime: newOpeningTime,
+                closingTime: newClosingTime,
+            };
         });
     };
 
@@ -394,15 +433,75 @@ export const HospitalServices = () => {
         }));
     };
 
+    const handleToggleCoveredService = (value) => {
+        setCapabilities((prev) => {
+            const updated = prev.coveredServices.includes(value)
+                ? prev.coveredServices.filter((item) => item !== value)
+                : [...prev.coveredServices, value];
+            return { ...prev, coveredServices: updated };
+        });
+    };
+
+    const handleToggleExclusion = (value) => {
+        setCapabilities((prev) => {
+            const updated = prev.exclusions.includes(value)
+                ? prev.exclusions.filter((item) => item !== value)
+                : [...prev.exclusions, value];
+            return { ...prev, exclusions: updated };
+        });
+    };
+
+    const addAccreditedHospital = () => {
+        setCapabilities((prev) => ({
+            ...prev,
+            accreditedHospitals: [...prev.accreditedHospitals, ""],
+        }));
+    };
+
+    const updateAccreditedHospital = (index, value) => {
+        setCapabilities((prev) => {
+            const updatedHospitals = [...prev.accreditedHospitals];
+            updatedHospitals[index] = value;
+            return { ...prev, accreditedHospitals: updatedHospitals };
+        });
+    };
+
+    const deleteAccreditedHospital = (index) => {
+        setCapabilities((prev) => {
+            const updatedHospitals = prev.accreditedHospitals.filter((_, i) => i !== index);
+            return { ...prev, accreditedHospitals: updatedHospitals };
+        });
+    };
+
+    const addWaitingPeriod = () => {
+        setCapabilities((prev) => ({
+            ...prev,
+            waitingPeriods: [...prev.waitingPeriods, { service: "", duration: "", unit: "months" }],
+        }));
+    };
+
+    const updateWaitingPeriod = (index, field, value) => {
+        setCapabilities((prev) => {
+            const updatedPeriods = [...prev.waitingPeriods];
+            updatedPeriods[index] = { ...updatedPeriods[index], [field]: value };
+            return { ...prev, waitingPeriods: updatedPeriods };
+        });
+    };
+
+    const deleteWaitingPeriod = (index) => {
+        setCapabilities((prev) => {
+            const updatedPeriods = prev.waitingPeriods.filter((_, i) => i !== index);
+            return { ...prev, waitingPeriods: updatedPeriods };
+        });
+    };
 
     const prepareServiceData = () => {
         const serviceData = {
             facilityId: authData?._id,
-            facilityType: facilityType, // Use the auth facilityType
+            facilityType: facilityType,
             type: "full",
         };
 
-        // Always include hospital details if they exist and were previously saved
         if (initialCapabilities?.coreClinicalSpecialities?.length > 0) {
             serviceData.hospitalDetails = {
                 coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
@@ -425,7 +524,6 @@ export const HospitalServices = () => {
             };
         }
 
-        // Include data based on the current facility
         switch (facility) {
             case "Laboratory":
                 serviceData.labDetails = {
@@ -478,8 +576,27 @@ export const HospitalServices = () => {
                 };
                 break;
 
+            case "Insurance":
+                serviceData.insuranceDetails = {
+                    coveredServices: capabilities.coveredServices,
+                    exclusions: capabilities.exclusions,
+                    preExistingConditions: capabilities.preExistingConditions === "Yes",
+                    emergencyCoverage: capabilities.emergencyCoverage,
+                    accreditedHospitals: capabilities.accreditedHospitals.map((address) => ({ address })),
+                    outOfNetworkReimbursement: capabilities.outOfNetworkReimbursement === "Yes",
+                    preAuthorization: capabilities.preAuthorization,
+                    waitingPeriods: capabilities.waitingPeriods,
+                    premiumsCopayments: capabilities.premiumsCopayments,
+                    operatingHours: {
+                        openingTime: capabilities.openingTime,
+                        closingTime: capabilities.closingTime,
+                    },
+                    branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
+                    additionalInfo: capabilities.additionalInformation,
+                };
+                break;
+
             default:
-                // If facility is Hospital, only include hospitalDetails if not already included
                 if (!serviceData.hospitalDetails) {
                     serviceData.hospitalDetails = {
                         coreClinicalSpecialities: capabilities.coreClinicalSpecialities,
@@ -514,7 +631,7 @@ export const HospitalServices = () => {
         }
         try {
             const serviceData = prepareServiceData();
-            console.log(serviceData, "service data ishere");
+            console.log(serviceData, "service data is here");
             setSaving(true);
             const response = await FacilityServices(serviceData);
             setIsServiceSaved(true);
@@ -529,6 +646,28 @@ export const HospitalServices = () => {
             message.error("Failed to update service. Please try again.");
         }
     };
+
+    useEffect(() => {
+        console.log(typeFacility, "type of facility is here");
+    }, [typeFacility]);
+
+    const coveredOptions = [
+        "Consultation",
+        "Maternity",
+        "Dental",
+        "Eye Care",
+        "Chronic Illness",
+        "Surgery",
+        "Diagnostics",
+        "Emergencies",
+    ];
+    const exclusionOptions = [
+        "IVF",
+        "Cosmetic Surgery",
+        "Mental Health",
+        "Chronic Conditions",
+    ];
+
 
     return (
         <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
@@ -726,7 +865,8 @@ export const HospitalServices = () => {
 
                             {type !== "ambulance" && <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-800">
-                                    Branch Full Address (Specify the floor if the building has multiple levels)
+                                    Do have other branches?
+
 
                                 </label>
                                 <Select
@@ -749,6 +889,11 @@ export const HospitalServices = () => {
                                 </Select>
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
+                                        <label className="text-sm font-bold text-gray-800">
+
+                                            Branch Full Address (Specify the floor if the building has multiple levels)
+
+                                        </label>
                                         {capabilities.branchAddresses.map((address, index) => (
                                             <div key={index} className="flex gap-4 items-center">
                                                 <Input
@@ -768,7 +913,7 @@ export const HospitalServices = () => {
                                             </div>
                                         ))}
                                         <Button
-                                            className="h-10 px-4 bg-cyan-500 text-white rounded-md"
+                                            className="h-10 px-4 bg-primarysolid text-white rounded-md"
                                             onClick={addBranchAddress}
                                         >
                                             + Add another branch
@@ -1503,7 +1648,7 @@ export const HospitalServices = () => {
 
                             {typeFacility === "Ambulance" && <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
-                                    Other Branches
+                                    Do you have other Branches?
                                 </label>
                                 <Select
                                     className="h-12 w-full"
@@ -1522,7 +1667,13 @@ export const HospitalServices = () => {
                                 </Select>
                                 {capabilities.hasOtherBranches === "Yes" && (
                                     <div className="space-y-4 mt-4">
+                                        <label className="text-sm font-bold text-gray-800">
+
+                                            Branch Full Address (Specify the floor if the building has multiple levels)
+
+                                        </label>
                                         {capabilities.branchAddresses.map((address, index) => (
+
                                             <div key={index} className="flex gap-4 items-center">
                                                 <Input
                                                     type="text"
@@ -1550,6 +1701,10 @@ export const HospitalServices = () => {
                                 )}
                             </div>}
 
+
+
+
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-800">
                                     Additional Information
@@ -1568,12 +1723,414 @@ export const HospitalServices = () => {
                             </div>
                         </>
                     ) : null}
+
+                    {
+                        facility === "Insurance" &&
+                        <div className="space-y-6">
+                            {/* Coverage Details */}
+                            <div className="space-y-4">
+                                <label className="text-lg font-semibold text-gray-900">Coverage Details</label>
+
+                                {/* What's Covered */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">What’s Covered</label>
+                                    <Input
+                                        type="text"
+                                        className="h-12 border-gray-300 rounded-md"
+                                        value={capabilities.coveredServices}
+                                        onChange={(e) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                coveredServices: e.target.value,
+                                            }))
+                                        }
+                                        placeholder="Enter covered services (e.g., Consultation, Surgery)"
+                                    />
+                                </div>
+
+                                {/* What's Not Covered */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">What’s Not Covered (Exclusions)</label>
+                                    <Input
+                                        type="text"
+                                        className="h-12 border-gray-300 rounded-md"
+                                        value={capabilities.exclusions}
+                                        onChange={(e) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                exclusions: e.target.value,
+                                            }))
+                                        }
+                                        placeholder="Enter exclusions (e.g., Cosmetic procedures)"
+                                    />
+                                </div>
+
+                                {/* Pre-existing Conditions */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">Are Pre-existing Conditions Covered?</label>
+                                    <Select
+                                        className="h-12 w-full"
+                                        style={{ height: "48px" }}
+                                        value={capabilities.preExistingConditions}
+                                        onChange={(value) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                preExistingConditions: value,
+                                            }))
+                                        }
+                                    >
+                                        <Option value="Yes">Yes</Option>
+                                        <Option value="No">No</Option>
+                                    </Select>
+                                </div>
+
+                                {/* Emergency Coverage */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">
+                                        Coverage for Emergency Services and Ambulance Transport
+                                    </label>
+                                    <Select
+                                        className="h-12 w-full"
+                                        style={{ height: "48px" }}
+                                        value={capabilities.emergencyCoverage}
+                                        onChange={(value) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                emergencyCoverage: value,
+                                            }))
+                                        }
+                                    >
+                                        <Option value="Yes">Yes</Option>
+                                        <Option value="No">No</Option>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {/* Hospital Network */}
+                            <div className="space-y-4">
+                                <label className="text-lg font-semibold text-gray-900">Hospital Network</label>
+
+                                {/* Accredited Hospitals */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">
+                                        List of Accredited Hospitals
+                                    </label>
+                                    {capabilities.accreditedHospitals.map((hospital, index) => (
+                                        <div key={index} className="flex gap-4 items-center">
+                                            <Input
+                                                type="text"
+                                                className="h-12 border-gray-300 rounded-md flex-1"
+                                                value={hospital}
+                                                onChange={(e) => updateAccreditedHospital(index, e.target.value)}
+                                                placeholder={`Hospital ${index + 1} Name`}
+                                            />
+                                            <Button
+                                                className="h-12 px-4 bg-red-500 text-white rounded-md"
+                                                onClick={() => deleteAccreditedHospital(index)}
+                                                disabled={capabilities.accreditedHospitals.length === 1}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button
+                                        className="h-10 px-4 bg-primarysolid text-white rounded-md"
+                                        onClick={addAccreditedHospital}
+                                    >
+                                        + Add another hospital
+                                    </Button>
+                                </div>
+
+                                {/* Out-of-Network Reimbursement */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">
+                                        Are Out-of-Network Treatments Reimbursable?
+                                    </label>
+                                    <Select
+                                        className="h-12 w-full"
+                                        style={{ height: "48px" }}
+                                        value={capabilities.outOfNetworkReimbursement}
+                                        onChange={(value) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                outOfNetworkReimbursement: value,
+                                            }))
+                                        }
+                                    >
+                                        <Option value="Yes">Yes</Option>
+                                        <Option value="No">No</Option>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {/* Pre-authorization Requirements */}
+                            <div className="space-y-4">
+                                <label className="text-lg font-semibold text-gray-900">Pre-authorization Requirements</label>
+
+                                {/* Pre-authorization Required */}
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">Is Pre-authorization Required?</label>
+                                    <Select
+                                        className="h-12 w-full"
+                                        style={{ height: "48px" }}
+                                        value={capabilities.preAuthRequired}
+                                        onChange={(value) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                preAuthRequired: value,
+                                                preAuthorization: value === "No" ? "" : prev.preAuthorization,
+                                            }))
+                                        }
+                                    >
+                                        <Option value="Yes">Yes</Option>
+                                        <Option value="No">No</Option>
+                                    </Select>
+                                </div>
+
+                                {capabilities.preAuthRequired === "Yes" && (
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-gray-800">
+                                                Which Treatments Require Pre-authorization?
+                                            </label>
+                                            <Input
+                                                type="text"
+                                                className="h-12 border-gray-300 rounded-md"
+                                                value={capabilities.preAuthorization}
+                                                onChange={(e) =>
+                                                    setCapabilities((prev) => ({
+                                                        ...prev,
+                                                        preAuthorization: e.target.value,
+                                                    }))
+                                                }
+                                                placeholder="e.g., Surgery, Chemotherapy"
+                                            />
+                                        </div>
+
+                                        {/* Waiting Periods */}
+                                        <div className="space-y-4">
+                                            <label className="text-lg font-semibold text-gray-900">Waiting Periods</label>
+                                            {capabilities.waitingPeriods.map((item, index) => (
+                                                <div key={index} className="flex gap-4 items-center">
+                                                    <Input
+                                                        type="text"
+                                                        className="h-12 border-gray-300 rounded-md flex-1"
+                                                        value={item.service}
+                                                        onChange={(e) => updateWaitingPeriod(index, "service", e.target.value)}
+                                                        placeholder="Service (e.g., Surgery)"
+                                                    />
+                                                    <Input
+                                                        type="number"
+                                                        className="h-12 border-gray-300 rounded-md w-20"
+                                                        value={item.duration}
+                                                        onChange={(e) => updateWaitingPeriod(index, "duration", e.target.value)}
+                                                        placeholder="Duration"
+                                                    />
+                                                    <Select
+                                                        className="h-12 w-32"
+                                                        style={{ height: "48px" }}
+                                                        value={item.unit}
+                                                        onChange={(value) => updateWaitingPeriod(index, "unit", value)}
+                                                    >
+                                                        <Option value="days">Days</Option>
+                                                        <Option value="weeks">Weeks</Option>
+                                                        <Option value="months">Months</Option>
+                                                    </Select>
+                                                    <Button
+                                                        className="h-12 px-4 bg-red-500 text-white rounded-md"
+                                                        onClick={() => deleteWaitingPeriod(index)}
+                                                        disabled={capabilities.waitingPeriods.length === 1}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            <Button
+                                                className="h-10 px-4 bg-cyan-500 text-white rounded-md"
+                                                onClick={addWaitingPeriod}
+                                            >
+                                                + Add Service
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Premiums & Co-payments */}
+                            <div className="space-y-4">
+                                <label className="text-lg font-semibold text-gray-900">Premiums & Co-payments</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-800">Premiums and Co-payments Structure</label>
+                                    <Select
+                                        className="h-12 w-full"
+                                        style={{ height: "48px" }}
+                                        value={capabilities.premiumsCopayments}
+                                        onChange={(value) =>
+                                            setCapabilities((prev) => ({
+                                                ...prev,
+                                                premiumsCopayments: value,
+                                            }))
+                                        }
+                                        placeholder="Select premium and co-payment structure"
+                                    >
+                                        <Option value="">Select</Option>
+                                        <Option value="Monthly premium of ₦5000, 20% co-pay on medicines">Monthly premium of ₦5000, 20% co-pay on medicines</Option>
+                                        <Option value="Annual premium of ₦50,000, 10% co-pay on all services">Annual premium of ₦50,000, 10% co-pay on all services</Option>
+                                        <Option value="Monthly premium of ₦10,000, no co-pay">Monthly premium of ₦10,000, no co-pay</Option>
+                                        <Option value="Quarterly premium of ₦15,000, 15% co-pay on diagnostics">Quarterly premium of ₦15,000, 15% co-pay on diagnostics</Option>
+                                        <Option value="No premium, 30% co-pay on all services">No premium, 30% co-pay on all services</Option>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {/* Operating Days */}
+                            <div className="space-y-2">
+                                <h1 className="text-sm font-bold text-gray-900 mb-2">
+                                    Weekly Operating Days
+                                </h1>
+                                <div className="flex flex-wrap gap-4">
+                                    {weekDays.map((day) => (
+                                        <label
+                                            key={day}
+                                            className="text-sm text-gray-700 flex items-center gap-2"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                value={day}
+                                                checked={capabilities.operatingDays.includes(day)}
+                                                onChange={() => handleDayToggle(day)}
+                                                className="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-300 rounded"
+                                            />
+                                            {day}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Operating Hours */}
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="text-sm font-bold text-gray-800">
+                                        Opening Time
+                                    </label>
+                                    <Input
+                                        type="time"
+                                        className="h-12 border-gray-300 rounded-md"
+                                        value={capabilities.openingTime}
+                                        onChange={(e) => handleTimeChange("openingTime", e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label className="text-sm font-bold text-gray-800">
+                                        Closing Time
+                                    </label>
+                                    <Input
+                                        type="time"
+                                        className="h-12 border-gray-300 rounded-md"
+                                        value={capabilities.closingTime}
+                                        onChange={(e) => handleTimeChange("closingTime", e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            {timeError && (
+                                <p className="text-red-500 text-sm">{timeError}</p>
+                            )}
+
+                            {/* Branch Addresses */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you have other Branches?
+
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    style={{ height: "48px" }}
+                                    value={capabilities.hasOtherBranches}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            hasOtherBranches: value,
+                                            branchAddresses: value === "Yes" ? prev.branchAddresses : [""],
+                                        }))
+                                    }
+                                >
+                                    <Option value="No">No</Option>
+                                    <Option value="Yes">Yes</Option>
+                                </Select>
+                                {capabilities.hasOtherBranches === "Yes" && (
+                                    <div className="space-y-4 mt-4">
+                                        <label className="text-sm font-bold text-gray-800">
+
+                                            Branch Full Address (Specify the floor if the building has multiple levels)
+
+                                        </label>
+                                        {capabilities.branchAddresses.map((address, index) => (
+                                            <div key={index} className="flex gap-4 items-center">
+                                                <Input
+                                                    type="text"
+                                                    className="h-12 border-gray-300 rounded-md flex-1"
+                                                    value={address}
+                                                    onChange={(e) => updateBranchAddress(index, e.target.value)}
+                                                    placeholder={`Branch ${index + 1} Address`}
+                                                />
+                                                <Button
+                                                    className="h-12 px-4 bg-red-500 text-white rounded-md"
+                                                    onClick={() => deleteBranchAddress(index)}
+                                                    disabled={capabilities.branchAddresses.length === 1}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <Button
+                                            className="h-10 px-4 bg-cyan-500 text-white rounded-md"
+                                            onClick={addBranchAddress}
+                                        >
+                                            + Add another branch
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Additional Information */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Additional Information
+                                </label>
+                                <TextArea
+                                    rows={4}
+                                    className="border-gray-300 rounded-md"
+                                    value={capabilities.additionalInformation}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            additionalInformation: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter any additional information"
+                                />
+                            </div>
+                        </div>
+                    }
                 </div>
+
+
+
+
+
             </Card>
 
-            <div className="flex justify-end p-4">
+            <div className="flex my-3 mb-8 gap-5 p-6 ">
+
                 <Button
-                    className="h-12 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
+                    className="h-12 flex-1 px-6 bg-gray-300  font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
+                    onClick={() => navigate("/facility-dashboard/facility-info")}
+
+                >
+                    Back
+                </Button>
+                <Button
+                    className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
                     onClick={handleSubmit}
                     disabled={saving || !hasChanges}
                 >
@@ -1582,7 +2139,7 @@ export const HospitalServices = () => {
                             <span className="loader mr-2" /> Saving...
                         </>
                     ) : (
-                        "Save Changes"
+                        "Update & Next"
                     )}
                 </Button>
             </div>

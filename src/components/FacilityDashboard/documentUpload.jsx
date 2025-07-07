@@ -4,8 +4,9 @@ import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import StepProgress from "./stepProgress";
 import { useAuth } from "../hook/auth";
 import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
-
+import { useNavigate } from "react-router-dom";
 const { Dragger } = Upload;
+
 
 export const DocumentUpload = () => {
   const { facilityType, authData, fetchAuthData } = useAuth();
@@ -22,6 +23,7 @@ export const DocumentUpload = () => {
   const [initialFiles, setInitialFiles] = useState(null);
   const [initialAdditionalInfo, setInitialAdditionalInfo] = useState("");
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
 
   // Deep comparison function for file lists
   const areFileListsEqual = (current, initial) => {
@@ -273,11 +275,17 @@ export const DocumentUpload = () => {
       </Card>
 
 
+      <div className="flex my-3 mb-8 gap-5 p-6 ">
 
-
-      <div className="flex justify-end p-4">
         <Button
-          className="h-12 px-6 bg-cyan-500 text-white rounded-md bg-primarySold"
+          className="h-12 flex-1 px-6 bg-gray-300  font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
+          onClick={() => navigate("/facility-dashboard/service-capacity")}
+
+        >
+          Back
+        </Button>
+        <Button
+          className="h-12 px-6 flex-1 bg-primarysolid text-white rounded-md bg-primarySold"
           onClick={handleSubmit}
           disabled={saving || !hasChanges}
         >
@@ -286,10 +294,14 @@ export const DocumentUpload = () => {
               <span className="loader mr-2" /> Saving...
             </>
           ) : (
-            "Save Changes"
+            "Update & End "
           )}
         </Button>
       </div>
+
+
+
+
     </div>
   );
 };

@@ -350,7 +350,7 @@ export const RegistrationStep = () => {
                             {({ field }) => (
                               <Select
                                 value={field.value}
-                                onChange={(val) => setFieldValue("insuranceType", val)}
+                                onValueChange={(val) => setFieldValue("insuranceType", val)} // Use onValueChange
                               >
                                 <SelectTrigger className="h-12 border-[#d7dbdf]">
                                   <SelectValue placeholder="Select insurance type" />

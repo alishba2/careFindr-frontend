@@ -13,7 +13,7 @@ import PhoneInput from "react-phone-input-2";
 import { useAuth } from "../hook/auth.jsx";
 import StepProgress from "./stepProgress.jsx";
 import { updateFacility, sendOtp, verifyOtp } from "../../services/auth.js";
-
+import { useNavigate } from "react-router-dom";
 const validationSchema = Yup.object({
     facilityType: Yup.string().required("Facility type is required"),
     facilityName: Yup.string().required("Facility name is required"),
@@ -92,6 +92,8 @@ export const FacilityInformation = () => {
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
     const [isWhatsappVerified, setIsWhatsappVerified] = useState(false);
 
+    const navigate = useNavigate();
+
     const [initialValues, setInitialValues] = useState({
         facilityType: "Hospital",
         facilityName: "",
@@ -102,11 +104,13 @@ export const FacilityInformation = () => {
         secondaryPhone: "",
         whatsapp: "",
         country: "Nigeria",
+        address: "",
         state: "",
         lga: "",
         registrationNumber: "",
         lcda: "",
         website: "",
+        address: ""
     });
 
     useEffect(() => {
@@ -127,6 +131,7 @@ export const FacilityInformation = () => {
                 secondaryPhone: authData?.secondaryPhone || "",
                 whatsapp: authData?.whatsapp || "",
                 country: "Nigeria",
+                address: authData?.address || "",
                 state: authData?.state || "",
                 lga: authData?.lga || "",
                 registrationNumber: authData?.registrationNumber || "",
@@ -210,6 +215,7 @@ export const FacilityInformation = () => {
             secondaryPhone: formatPhoneNumber(values.secondaryPhone) || null,
             whatsapp: formatPhoneNumber(values.whatsapp) || null,
             country: values.country,
+            address: values.address,
             state: values.state,
             lga: values.lga,
             registrationNumber: values.registrationNumber,
@@ -223,6 +229,8 @@ export const FacilityInformation = () => {
             await updateFacility(facilityData);
             setSubmitting(false);
             fetchAuthData();
+            navigate('/service-capacity')
+
             toast.success("Facility information updated successfully!", {
                 position: "top-right",
                 autoClose: 3000,
@@ -556,6 +564,23 @@ export const FacilityInformation = () => {
                                         )}
                                     </div>
                                 </div>
+
+                                <div>
+                                    <label className="text-sm font-semibold">
+                                        Facility Address <span className="text-red-600">*</span>
+                                    </label>
+                                    <Field
+                                        as={Input}
+                                        name="address"
+                                        placeholder="Enter your address"
+                                        className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
+                                    />
+                                    <ErrorMessage
+                                        name="address"
+                                        component="div"
+                                        className="text-red-500 text-sm"
+                                    />
+                                </div>
                                 {/* Row 4: Country + State */}
                                 <div className="flex flex-col gap-4 md:flex-row md:gap-4">
                                     <div className="flex-1 w-full">
@@ -721,13 +746,13 @@ export const FacilityInformation = () => {
                                     disabled={isSubmitting || !isPhoneVerified || !isWhatsappVerified || !dirty}
                                     className="w-full h-12 bg-primarysolid text-white rounded-xl"
                                 >
-                                    {isSubmitting ? "Updating..." : "Update Facility Information"}
+                                    {isSubmitting ? "Updating..." : "Update & Next"}
                                 </Button>
                             </Form>
                         )}
                     </Formik>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 };

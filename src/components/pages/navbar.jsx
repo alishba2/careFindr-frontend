@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hook/auth";
 import icon from "../../assets/vector2.png";
 import icon2 from "../../assets/Vector.png";
+import logo from "../../assets/logo.png";
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -44,12 +45,11 @@ export default function Navbar() {
                     {/* Logo / Home */}
                     <div className="flex items-center">
                         <div className="flex items-center flex-shrink-0">
-                            <Heart className="md:w-10 md:h-10 w-8 h-8 mr-2 text-primarysolid" />
                             <div
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                CareFindr
+                                <img src={logo} className="h-10 mr-2" alt="CareFindr Logo" />
                             </div>
                         </div>
                     </div>

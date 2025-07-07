@@ -49,9 +49,10 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
     "Digestive System",
     "Immune & Blood",
     "Sensory, Skin & Others",
-    "Pediatric Subspecialties",
+    "Pediatric",
     "Public Health and Administrative",
     "Bones & Muscles",
+    "Rehabilitation & Allied Health Specialties"
   ];
 
   const specialtyData = {
@@ -59,7 +60,7 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
     "Brain & Nervous system": ["Neurology", "Neurosurgery", "Psychiatry"],
     "Bones & Muscles": ["Orthopedic Surgery", "Rheumatology"],
     "Endocrine, Metabolism": ["Endocrinology", "Diabetes & Metabolism", "Thyroid Disorders"],
-    "Digestive System": ["Gastroenterology", "Hepatology"],
+    "Digestive System": ["Gastroenterology", "Hepatology", "General surgery"],
     "Immune & Blood": ["Hematology", "Immunology", "Infectious Diseases"],
     "Sensory, Skin & Others": [
       "Dermatology",
@@ -73,7 +74,14 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
       "Physical Medicine & Rehabilitation",
       "Pain Medicine",
     ],
-    "Pediatric Subspecialties": ["Pediatric Cardiology", "Pediatric Neurology", "Pediatric Surgery"],
+    "Pediatric": [
+      "Pediatric Respiratory",
+      "Pediatric Oncology",
+      "Pediatric Hematology",
+      "Pediatric Nephrology",
+      "Pediatric Gastroenterology",
+      "Neonatology"
+    ],
     "Public Health and Administrative": [
       "Public Health",
       "Health Administration",
@@ -82,92 +90,101 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
       "Medical Genetics",
       "Geriatrics",
       "Forensic Medicine",
-      "Health Policy",
+      "Hospital Administration/Health Policy",
     ],
+    "Rehabilitation & Allied Health Specialties": [
+      "Physiotherapist",
+      "Occupational Therapy",
+      "Speech and Language Therapy",
+      "Psychology (Clinical & Rehabilitation)",
+      "Chiropractic",
+      "Pain Management (Non-Surgical)"
+
+    ]
   };
 
-  // Synchronize toggleStates with subSpecialities prop
-  useEffect(() => {
-    const newToggleStates = { ...toggleStates };
-    Object.keys(newToggleStates).forEach((specialty) => {
-      newToggleStates[specialty] = subSpecialities?.includes(specialty);
-    });
-    setToggleStates(newToggleStates);
-  }, [subSpecialities]);
+// Synchronize toggleStates with subSpecialities prop
+useEffect(() => {
+  const newToggleStates = { ...toggleStates };
+  Object.keys(newToggleStates).forEach((specialty) => {
+    newToggleStates[specialty] = subSpecialities?.includes(specialty);
+  });
+  setToggleStates(newToggleStates);
+}, [subSpecialities]);
 
-  const handleToggle = (specialty) => {
-    setToggleStates((prev) => {
-      const newState = {
-        ...prev,
-        [specialty]: !prev[specialty],
-      };
+const handleToggle = (specialty) => {
+  setToggleStates((prev) => {
+    const newState = {
+      ...prev,
+      [specialty]: !prev[specialty],
+    };
 
-      // Update setSubspecialities with the list of selected subspecialties
-      const selectedSubspecialties = Object.keys(newState).filter((key) => newState[key]);
-      setSubspecialities(selectedSubspecialties);
+    // Update setSubspecialities with the list of selected subspecialties
+    const selectedSubspecialties = Object.keys(newState).filter((key) => newState[key]);
+    setSubspecialities(selectedSubspecialties);
 
-      return newState;
-    });
-  };
+    return newState;
+  });
+};
 
-  const ToggleSwitch = ({ isOn, onToggle }) => (
-    <div
-      className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${isOn ? "bg-primarysolid" : "bg-gray-300"
+const ToggleSwitch = ({ isOn, onToggle }) => (
+  <div
+    className={`relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-300 ${isOn ? "bg-primarysolid" : "bg-gray-300"
+      }`}
+    onClick={onToggle}
+  >
+    <span
+      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isOn ? "translate-x-6" : "translate-x-1"
         }`}
-      onClick={onToggle}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isOn ? "translate-x-6" : "translate-x-1"
-          }`}
-      />
+    />
+  </div>
+);
+
+return (
+  <div className="w-full mx-auto p-1 bg-white">
+    <h1 className="text-sm font-semibold text-gray-900 mb-4">
+      Subspecialties and Fields of Medicine
+    </h1>
+
+    {/* Tabs */}
+    <div className="flex flex-wrap gap-2 mb-6 justify-betwen">
+      {tabs.map((tab) => (
+        <button
+          key={tab}
+          onClick={() => setActiveTab(tab)}
+          className={`min-w-[100px] px-4 py-2 rounded-md text-sm font-medium text-ve transition-colors duration-200 ${activeTab === tab ? "bg-primarysolid text-white" : "text-primarysolid hover:bg-[#c1e3ff]"
+            } text-center`}
+
+        >
+          {tab}
+        </button>
+      ))}
     </div>
-  );
 
-  return (
-    <div className="w-full mx-auto p-1 bg-white">
-      <h1 className="text-sm font-semibold text-gray-900 mb-4">
-        Subspecialties and Fields of Medicine
-      </h1>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6 justify-betwen">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`min-w-[100px] px-4 py-2 rounded-md text-sm font-medium text-ve transition-colors duration-200 ${activeTab === tab ? "bg-primarysolid text-white" : "text-primarysolid hover:bg-[#c1e3ff]"
-              } text-center`}
-
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid of specialties */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {specialtyData[activeTab]?.map((specialty) => (
-          <div
-            key={specialty}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-          >
-            <span className="text-gray-800 text-sm">{specialty}</span>
-            <ToggleSwitch
-              isOn={toggleStates[specialty]}
-              onToggle={() => handleToggle(specialty)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Empty fallback */}
-      {!specialtyData[activeTab]?.length && (
-        <div className="text-center text-gray-500 py-12">
-          No specialties available for this category.
+    {/* Grid of specialties */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {specialtyData[activeTab]?.map((specialty) => (
+        <div
+          key={specialty}
+          className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+        >
+          <span className="text-gray-800 text-sm">{specialty}</span>
+          <ToggleSwitch
+            isOn={toggleStates[specialty]}
+            onToggle={() => handleToggle(specialty)}
+          />
         </div>
-      )}
+      ))}
     </div>
-  );
+
+    {/* Empty fallback */}
+    {!specialtyData[activeTab]?.length && (
+      <div className="text-center text-gray-500 py-12">
+        No specialties available for this category.
+      </div>
+    )}
+  </div>
+);
 };
 
 export default Subspecialties;

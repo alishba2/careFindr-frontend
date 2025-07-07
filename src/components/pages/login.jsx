@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import { loginFacility } from "../../services/auth.js";
 import bgimg from "../../assets/medical.jpg";
 import { Heart, Menu, X } from "lucide-react";
-
+import logo from "../../assets/logo.png";
 const validationSchema = Yup.object({
   identifier: Yup.string()
     .test(
@@ -87,13 +87,8 @@ export const Login = () => {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-6 md:px-12 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="flex items-center justify-center">
-            <div
-              className="md:text-[27px] text-[22px] font-bold text-primarysolid cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              <Heart className="md:w-[31px] md:h-[31px] w-[24px] h-[24px] inline mr-2" />
-              CareFindr
-            </div>
+            <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
+
           </div>
           {/* Title */}
           <div className="text-center">
@@ -205,7 +200,7 @@ export const Login = () => {
 
                   <Button
                     onClick={() => navigate("/register")}
-                    className="order-1 mt-2 w-full h-12 text-[16px] bg-transparent  border-[3px] border-primarysolid text-primarysolid font-semibold rounded-md hover:bg-primarysolid/10 hover:bg-primarysolid hover:text-white"
+                    className="order-1 mt-2 w-full h-12 text-[16px] bg-transparent  border-[2px] border-primarysolid text-primarysolid font-semibold rounded-md hover:bg-primarysolid/10 hover:bg-primarysolid hover:text-white"
                   >
                     Create Account
                   </Button>

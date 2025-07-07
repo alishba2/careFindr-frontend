@@ -7,6 +7,8 @@ import bgimg from "../../assets/medical.jpg";
 import { Heart } from "lucide-react";
 import { toast } from "react-toastify";
 import { sendOtp } from "../../services/auth.js";
+import { Link } from "react-router-dom";
+import logo from "../../assets/logo.png";
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -34,7 +36,7 @@ export const ForgotPassword = () => {
   const handleSubmit = (values, { setSubmitting }) => {
     console.log("Forgot Password submitted:", values);
     setSubmitting(false);
-    
+
     toast.success("OTP sent to your phone number or email!");
   };
 
@@ -69,17 +71,15 @@ export const ForgotPassword = () => {
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
           <div className="flex items-center justify-center">
-            <div className="md:text-[27px] text-[22px] font-bold text-primarysolid cursor-pointer">
-              <Heart className="md:w-[31px] md:h-[31px] w-[24px] h-[24px] inline mr-2" />
-              CareFindr
-            </div>
+            <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
+
           </div>
 
           {/* Title */}
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Forgot Password</h2>
             <p className="mt-2 text-sm sm:text-base text-gray-600">
-              Enter your phone number or email to receive an OTP for password reset.
+              Enter your email to reset your password
             </p>
           </div>
 
@@ -120,6 +120,18 @@ export const ForgotPassword = () => {
                   className="w-full h-12 text-[16px] bg-primarysolid text-white font-semibold rounded-md hover:bg-primarysolid/90"
                 >
                   {isSubmitting ? "Sending OTP..." : "Send OTP"}
+                </Button>
+
+                <p className="mt-2 text-sm sm:text-base text-center text-gray-600">
+                  Remember your password? <Link to="/login" className="text-primarysolid hover:underline">Login</Link>
+                </p>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-12 text-[16px] bg-white text-primarysolid border-[2px] border-primarysolid font-semibold rounded-md hover:bg-primarysolid/90"
+                >
+                  Back to Sign In
                 </Button>
               </Form>
             )}

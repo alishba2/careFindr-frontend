@@ -25,7 +25,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const res = await getFacility();
         setAuthData(res.facility);
-        setFacilityType(res.facility.type); // Update facilityType from response
+        setFacilityType(res.facility.type); // Update facilityType from responsec
+        console.log(res.facility.type, "facility type is here");
         localStorage.setItem('facilityType', res.facility.type); // Sync with localStorage
       } catch (err) {
         console.error('Failed to fetch facility data:', err);
