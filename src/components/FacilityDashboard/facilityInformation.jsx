@@ -144,7 +144,7 @@ export const FacilityInformation = () => {
     const handleSendOtp = async (number, type) => {
         try {
             let phone = number;
-            await sendOtp({ phone });
+            await sendOtp({ phone, type });
             toast.success(`OTP sent to ${type === "phone" ? "phone" : "WhatsApp"} number`, {
                 position: "top-right",
                 autoClose: 3000,

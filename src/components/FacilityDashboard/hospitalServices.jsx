@@ -74,8 +74,26 @@ export const HospitalServices = () => {
         preAuthorization: "",
         waitingPeriods: [],
         premiumsCopayments: "",
-        preAuthRequired: null
+        preAuthRequired: null,
+
+        // 🆕 Specialist Clinic Fields
+        coreServices: "", // What are the core and specialized medical services?
+        careType: "", // Inpatient / Outpatient / Both
+        onSiteDoctor: "", // Is doctor/specialist on-site?
+        emergencyResponsePlan: "", // Do you have emergency response plan?
+        criticalCare: "", // Equipped for critical care?
+        multidisciplinaryCare: "", // e.g., Dieticians, Mental Health, etc.
+        bedCapacity: "", // Number of beds (if applicable)
+        homeServices: "", // Can you offer home/mobile services?
+        onlineBooking: "", // Do you support online pre-booking?
+        is24Hour: "", // Are services available 24/7?
+        patientLimit: "", // Daily patient limit (if any)
+        publicHolidayWork: "", // Do you work on public holidays?
+        collaboratesWithOthers: "", // Do you work with other hospitals/clinics?
+        worksWithHMOs: "", // Do you work with HMOs?
+        acceptsInsurance: "" // Accepts NHIS/private insurance?
     });
+
 
     useEffect(() => {
         console.log(type, "type is here");
@@ -258,6 +276,40 @@ export const HospitalServices = () => {
                                     additionalInformation: serviceData.insuranceDetails.additionalInfo || "",
                                 };
                                 break;
+                                switch (serviceData.facilityType) {
+                                    // ... other cases
+
+                                    case "SpecialistClinic":
+                                        newCapabilities = {
+                                            ...newCapabilities,
+                                            coreServices: serviceData.specialistClinicDetails.coreServices || "",
+                                            careType: serviceData.specialistClinicDetails.careType || "", // Inpatient/Outpatient/Both
+                                            onSiteDoctor: serviceData.specialistClinicDetails.onSiteDoctor ? "Yes" : "No",
+                                            emergencyResponsePlan: serviceData.specialistClinicDetails.emergencyResponsePlan ? "Yes" : "No",
+                                            criticalCare: serviceData.specialistClinicDetails.criticalCare ? "Yes" : "No",
+                                            multidisciplinaryCare: serviceData.specialistClinicDetails.multidisciplinaryCare || "",
+                                            bedCapacity: serviceData.specialistClinicDetails.bedCapacity?.toString() || "",
+                                            homeServices: serviceData.specialistClinicDetails.homeServices ? "Yes" : "No",
+                                            onlineBooking: serviceData.specialistClinicDetails.onlineBooking ? "Yes" : "No",
+                                            is24Hour: serviceData.specialistClinicDetails.is24Hour ? "Yes" : "No",
+                                            patientLimit: serviceData.specialistClinicDetails.patientLimit?.toString() || "",
+                                            publicHolidayWork: serviceData.specialistClinicDetails.publicHolidayWork ? "Yes" : "No",
+                                            collaboratesWithOthers: serviceData.specialistClinicDetails.collaboratesWithOthers ? "Yes" : "No",
+                                            worksWithHMOs: serviceData.specialistClinicDetails.worksWithHMOs ? "Yes" : "No",
+                                            acceptsInsurance: serviceData.specialistClinicDetails.acceptsInsurance ? "Yes" : "No",
+                                            openingTime: serviceData.specialistClinicDetails.operatingHours?.openingTime || "",
+                                            closingTime: serviceData.specialistClinicDetails.operatingHours?.closingTime || "",
+                                            operatingDays: serviceData.specialistClinicDetails.operatingDays || [],
+                                            hasOtherBranches: serviceData.specialistClinicDetails.branches?.length > 0 ? "Yes" : "No",
+                                            branchAddresses: serviceData.specialistClinicDetails.branches?.map((b) => b.address) || [""],
+                                            additionalInformation: serviceData.specialistClinicDetails.additionalInfo || "",
+                                        };
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+
 
                             default:
                                 break;
@@ -619,6 +671,34 @@ export const HospitalServices = () => {
                     };
                 }
                 break;
+            case "SpecialistClinic":
+                serviceData.specialistClinicDetails = {
+                    coreServices: capabilities.coreServices,
+                    careType: capabilities.careType,
+                    onSiteDoctor: capabilities.onSiteDoctor === "Yes",
+                    emergencyResponsePlan: capabilities.emergencyResponsePlan === "Yes",
+                    criticalCare: capabilities.criticalCare === "Yes",
+                    multidisciplinaryCare: capabilities.multidisciplinaryCare,
+                    bedCapacity: Number(capabilities.bedCapacity) || 0,
+                    homeServices: capabilities.homeServices === "Yes",
+                    onlineBooking: capabilities.onlineBooking === "Yes",
+                    is24Hour: capabilities.is24Hour === "Yes",
+                    patientLimit: Number(capabilities.patientLimit) || 0,
+                    publicHolidayWork: capabilities.publicHolidayWork === "Yes",
+                    collaboratesWithOthers: capabilities.collaboratesWithOthers === "Yes",
+                    worksWithHMOs: capabilities.worksWithHMOs === "Yes",
+                    acceptsInsurance: capabilities.acceptsInsurance === "Yes",
+                    operatingHours: {
+                        openingTime: capabilities.openingTime,
+                        closingTime: capabilities.closingTime,
+                    },
+                    operatingDays: capabilities.operatingDays || [],
+                    branches: capabilities.hasOtherBranches === "Yes"
+                        ? capabilities.branchAddresses.map((address) => ({ address }))
+                        : [],
+                    additionalInfo: capabilities.additionalInformation,
+                };
+                break;
         }
 
         return serviceData;
@@ -640,7 +720,7 @@ export const HospitalServices = () => {
             setSaving(false);
             fetchAuthData();
             message.success("Service Updated Successfully!");
-             navigate("/facility-dashboard/document-upload")
+            navigate("/facility-dashboard/document-upload")
         } catch (error) {
             console.error("Error submitting service:", error);
             setSaving(false);
@@ -942,52 +1022,52 @@ export const HospitalServices = () => {
                         </>
                     ) : facility === "Laboratory" ? (
                         <>
-                           <div className="flex flex-col sm:flex-row gap-4">
-    <div className="flex-1 min-w-0">
-        <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-800">
-                Accreditation Status
-            </label>
-            <Select
-                className="h-12 w-full"
-                style={{ height: "48px" }}
-                value={capabilities.accreditationStatus}
-                onChange={(value) =>
-                    setCapabilities((prev) => ({
-                        ...prev,
-                        accreditationStatus: value,
-                    }))
-                }
-            >
-                <Option value="">Select</Option>
-                <Option value="Approved">Approved</Option>
-                <Option value="Rejected">Rejected</Option>
-            </Select>
-        </div>
-    </div>
-    <div className="flex-1 min-w-0">
-        <div className="space-y-2">
-            <label className="block text-sm font-bold text-gray-800">
-                Home Sample Collection
-            </label>
-            <Select
-                className="h-12 w-full"
-                style={{ height: "48px" }}
-                value={capabilities.homeSampleCollection}
-                onChange={(value) =>
-                    setCapabilities((prev) => ({
-                        ...prev,
-                        homeSampleCollection: value,
-                    }))
-                }
-            >
-                <Option value="">Select</Option>
-                <Option value="Yes">Yes</Option>
-                <Option value="No">No</Option>
-            </Select>
-        </div>
-    </div>
-</div>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-gray-800">
+                                            Accreditation Status
+                                        </label>
+                                        <Select
+                                            className="h-12 w-full"
+                                            style={{ height: "48px" }}
+                                            value={capabilities.accreditationStatus}
+                                            onChange={(value) =>
+                                                setCapabilities((prev) => ({
+                                                    ...prev,
+                                                    accreditationStatus: value,
+                                                }))
+                                            }
+                                        >
+                                            <Option value="">Select</Option>
+                                            <Option value="Approved">Approved</Option>
+                                            <Option value="Rejected">Rejected</Option>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-gray-800">
+                                            Home Sample Collection
+                                        </label>
+                                        <Select
+                                            className="h-12 w-full"
+                                            style={{ height: "48px" }}
+                                            value={capabilities.homeSampleCollection}
+                                            onChange={(value) =>
+                                                setCapabilities((prev) => ({
+                                                    ...prev,
+                                                    homeSampleCollection: value,
+                                                }))
+                                            }
+                                        >
+                                            <Option value="">Select</Option>
+                                            <Option value="Yes">Yes</Option>
+                                            <Option value="No">No</Option>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-12">
                                 <div className="sm:w-full">
                                     <div className="space-y-2">
@@ -2112,6 +2192,336 @@ export const HospitalServices = () => {
                             </div>
                         </div>
                     }
+
+                    {facility === "SpecialistClinic" && (
+                        <div className="space-y-6">
+                            {/* Core and Specialized Services */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    What are the core and specialized medical services or procedures you provide?
+                                </label>
+                                <TextArea
+                                    rows={3}
+                                    className="border-gray-300 rounded-md"
+                                    value={capabilities.coreServices}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            coreServices: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="e.g., Dialysis, Fertility Treatment"
+                                />
+                            </div>
+
+                            {/* Inpatient/Outpatient Care */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you offer inpatient or outpatient care (or both)?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.careType}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            careType: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Inpatient">Inpatient</Option>
+                                    <Option value="Outpatient">Outpatient</Option>
+                                    <Option value="Both">Both</Option>
+                                </Select>
+                            </div>
+
+                            {/* On-Site Doctor/Specialist */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Is a medical doctor or specialist always available on-site?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.onSiteDoctor}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            onSiteDoctor: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Emergency Response Plan */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you have an in-house emergency response plan?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.emergencyResponsePlan}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            emergencyResponsePlan: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Critical Care */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Are you equipped for critical care?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.criticalCare}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            criticalCare: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Multidisciplinary Care */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you offer multidisciplinary care?
+                                </label>
+                                <TextArea
+                                    rows={3}
+                                    className="border-gray-300 rounded-md"
+                                    value={capabilities.multidisciplinaryCare}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            multidisciplinaryCare: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="e.g., Dieticians, Mental Health"
+                                />
+                            </div>
+
+                            {/* Bed Capacity */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    What is your bed capacity (if applicable)?
+                                </label>
+                                <Input
+                                    type="number"
+                                    className="h-12 border-gray-300 rounded-md"
+                                    value={capabilities.bedCapacity}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            bedCapacity: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Enter number of beds"
+                                />
+                            </div>
+
+                            {/* Home Services */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Can your facility accommodate home services or mobile health?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.homeServices}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            homeServices: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Online Booking */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you support online pre-booking?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.onlineBooking}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            onlineBooking: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* 24/7 Availability */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Are your services available 24/7?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.is24Hour}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            is24Hour: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Operating Hours if not 24/7 */}
+                            {capabilities.is24Hour === "No" && (
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <label className="text-sm font-bold text-gray-800">
+                                            Opening Time
+                                        </label>
+                                        <Input
+                                            type="time"
+                                            className="h-12 border-gray-300 rounded-md"
+                                            value={capabilities.openingTime}
+                                            onChange={(e) => handleTimeChange("openingTime", e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="text-sm font-bold text-gray-800">
+                                            Closing Time
+                                        </label>
+                                        <Input
+                                            type="time"
+                                            className="h-12 border-gray-300 rounded-md"
+                                            value={capabilities.closingTime}
+                                            onChange={(e) => handleTimeChange("closingTime", e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Daily Patient Limit */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you have any limitations on the number of patients per day?
+                                </label>
+                                <Input
+                                    type="text"
+                                    className="h-12 border-gray-300 rounded-md"
+                                    value={capabilities.patientLimit}
+                                    onChange={(e) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            patientLimit: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="e.g., 50 patients"
+                                />
+                            </div>
+
+                            {/* Public Holiday Work */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you work on public holidays?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.publicHolidayWork}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            publicHolidayWork: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* Collaboration with other facilities */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you work with other hospitals or clinics?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.collaboratesWithOthers}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            collaboratesWithOthers: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* HMOs */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you work with HMOs?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.worksWithHMOs}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            worksWithHMOs: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+
+                            {/* NHIS/Private Insurance */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-800">
+                                    Do you accept NHIS or private health insurance?
+                                </label>
+                                <Select
+                                    className="h-12 w-full"
+                                    value={capabilities.acceptsInsurance}
+                                    onChange={(value) =>
+                                        setCapabilities((prev) => ({
+                                            ...prev,
+                                            acceptsInsurance: value,
+                                        }))
+                                    }
+                                >
+                                    <Option value="Yes">Yes</Option>
+                                    <Option value="No">No</Option>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
 
 

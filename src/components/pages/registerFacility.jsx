@@ -128,7 +128,7 @@ export const RegistrationStep = () => {
 
   const handleSendOtp = async (phone, type) => {
     try {
-      await sendOtp({ phone });
+      await sendOtp({ phone,type });
       toast.success(`OTP sent to ${phone}`, {
         position: "top-right",
         autoClose: 3000,
@@ -293,7 +293,10 @@ export const RegistrationStep = () => {
                                   "Ambulance",
                                   "Insurance",
                                 ].map((type) => (
-                                  <SelectItem key={type} value={type}>
+                                  <SelectItem
+                                    key={type}
+                                    value={type === "Specialist Clinic" ? "SpecialistClinic" : type}
+                                  >
                                     {type}
                                   </SelectItem>
                                 ))}
