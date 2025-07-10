@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [facilityType, setFacilityType] = useState(localStorage.getItem('facilityType') || 'Hospital');
 
   const [isPharmacy, setIsPharmacy] = useState(false);
+  const [hasLab,setHasLab ] = useState(false);
   const [isAmbulance, setIsAmbulance] = useState(false);
 
 

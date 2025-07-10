@@ -9,6 +9,7 @@ import logo from "../../assets/logo.png";
 
 export default function Navbar() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -20,9 +21,45 @@ export default function Navbar() {
         setLoading(false);
     }, []);
 
+    // Handle scrolling when coming from external pages
+    useEffect(() => {
+        // Check if there's a hash in the URL when component mounts or location changes
+        if (location.pathname === '/' && location.hash) {
+            const sectionId = location.hash.substring(1); // Remove the '#' from hash
+            setTimeout(() => {
+                const element = document.getElementById(sectionId);
+                element?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+        }
+    }, [location]);
+
     const scrollToSection = (sectionId) => {
+        setIsMenuOpen(false);
+
+        // If not on home page, navigate to home with hash
+        if (location.pathname !== '/') {
+            navigate(`/#${sectionId}`);
+            return;
+        }
+
+        // If already on home page, scroll directly
         const element = document.getElementById(sectionId);
         element?.scrollIntoView({ behavior: "smooth" });
+
+        // Update URL hash without triggering navigation
+        window.history.replaceState(null, null, `#${sectionId}`);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.clear();
+        setToken(null);
+        setIsMenuOpen(false);
+        navigate("/login");
+    };
+
+    const handleNavigation = (path) => {
+        navigate(path);
         setIsMenuOpen(false);
     };
 
@@ -34,7 +71,6 @@ export default function Navbar() {
     ];
 
     if (loading) {
-        // Optionally, render a placeholder or nothing to avoid flickering
         return null;
     }
 
@@ -69,45 +105,47 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* Right Side Buttons */}
-                    {token ? (
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={() => {
-                                    localStorage.removeItem("token");
-                                    localStorage.clear();
-                                    setToken(null);
-                                    navigate("/login");
-                                }}
-                                className="text-primarysolid hover:primarysolid"
-                            >
-                                Logout
-                            </Button>
-                            <Button
-                                onClick={() => navigate("/facility-dashboard/home")}
-                                className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
-                            >
-                                Dashboard
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={() => navigate("/login")}
-                                className="text-primarysolid hover:primarysolid"
-                            >
-                                Login
-                            </Button>
-                            <Button
-                                onClick={() => navigate("/register")}
-                                className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
-                            >
-                                Get Started
-                            </Button>
-                        </div>
-                    )}
+                    {/* Desktop Right Side Buttons */}
+                    <div className="hidden md:flex items-center gap-2">
+                        {token ? (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        localStorage.removeItem("token");
+                                        localStorage.clear();
+                                        setToken(null);
+                                        navigate("/login");
+                                    }}
+                                    className="text-primarysolid hover:primarysolid"
+                                >
+                                    Logout
+                                </Button>
+                                <Button
+                                    onClick={() => navigate("/facility-dashboard/home")}
+                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Dashboard
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => navigate("/login")}
+                                    className="text-primarysolid hover:primarysolid"
+                                >
+                                    Login
+                                </Button>
+                                <Button
+                                    onClick={() => navigate("/register")}
+                                    className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Get Started
+                                </Button>
+                            </>
+                        )}
+                    </div>
 
                     {/* Mobile Menu Toggle */}
                     <div className="md:hidden ml-2">
@@ -126,15 +164,51 @@ export default function Navbar() {
                 {isMenuOpen && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
+                            {/* Navigation Items */}
                             {navItems.map((item) => (
                                 <button
                                     key={item.id}
                                     onClick={() => scrollToSection(item.id)}
-                                    className="text-gray-700 hover:primarysolid block px-3 py-2 text-base font-medium w-full text-left"
+                                    className="text-gray-700 hover:text-primarysolid block px-3 py-2 text-base font-medium w-full text-left transition-colors"
                                 >
                                     {item.label}
                                 </button>
                             ))}
+
+                            {/* Authentication Buttons in Mobile Menu */}
+                            <div className="border-t border-gray-200 pt-3 mt-3">
+                                {token ? (
+                                    <>
+                                        <button
+                                            onClick={() => handleNavigation("/facility-dashboard/home")}
+                                            className="bg-primarysolid text-white block px-3 py-2 text-base font-medium w-full text-left rounded-md mb-2 hover:bg-primarysolid/90 transition-colors"
+                                        >
+                                            Dashboard
+                                        </button>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="text-red-600 hover:text-red-800 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => handleNavigation("/login")}
+                                            className="text-primarysolid hover:text-primarysolid/80 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
+                                        >
+                                            Login
+                                        </button>
+                                        <button
+                                            onClick={() => handleNavigation("/register")}
+                                            className="bg-primarysolid text-white block px-3 py-2 text-base font-medium w-full text-left rounded-md mt-2 hover:bg-primarysolid/90 transition-colors"
+                                        >
+                                            Get Started
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -142,4 +216,3 @@ export default function Navbar() {
         </nav>
     );
 }
-

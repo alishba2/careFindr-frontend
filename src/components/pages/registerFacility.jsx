@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../../components/button.jsx";
 import { Card, CardContent } from "../../components/card.jsx";
 import { Input } from "../../components/input.jsx";
@@ -25,7 +25,7 @@ import PhoneInput from "react-phone-input-2";
 import { CheckCircle, Info } from "lucide-react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import Navbar from "./navbar.jsx";
-
+import { useRef } from "react";
 const validationSchema = Yup.object({
   facilityType: Yup.string().required("Facility type is required"),
   facilityName: Yup.string().required("Facility name is required"),
@@ -53,7 +53,7 @@ const validationSchema = Yup.object({
     otherwise: (schema) => schema.notRequired(),
   }),
   address: Yup.string().required("Address is required"),
-  registration: Yup.string().required("Registration number is required"),
+  registration: Yup.string(),
   website: Yup.string().url("Invalid URL").nullable(),
   password: Yup.string()
     .min(6, "Min 6 characters")
@@ -65,14 +65,70 @@ const validationSchema = Yup.object({
 });
 
 const OtpInput = ({ otp, setOtp, onVerify }) => {
+  const inputRefs = useRef([]);
+
+  useEffect(() => {
+    // Focus on the first input when component mounts
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
+    }
+  }, []);
+
   const handleOtpChange = (index, value) => {
+    // Only allow numeric input
+    if (!/^\d*$/.test(value)) return;
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
+    // Move to next input if current input is filled
+    if (value && index < otp.length - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
     // Auto-verify when all OTP digits are filled
     if (newOtp.every((digit) => digit !== "") && value !== "") {
       onVerify(newOtp.join(""));
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    // Handle backspace to move to previous input
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    
+    // Handle arrow keys for navigation
+    if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+    
+    if (e.key === 'ArrowRight' && index < otp.length - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text/plain');
+    const digits = pastedData.replace(/\D/g, '').slice(0, otp.length);
+    
+    if (digits.length > 0) {
+      const newOtp = [...otp];
+      for (let i = 0; i < digits.length && i < otp.length; i++) {
+        newOtp[i] = digits[i];
+      }
+      setOtp(newOtp);
+      
+      // Focus on the next empty input or the last input
+      const nextIndex = Math.min(digits.length, otp.length - 1);
+      inputRefs.current[nextIndex]?.focus();
+      
+      // Auto-verify if all digits are filled
+      if (newOtp.every((digit) => digit !== "")) {
+        onVerify(newOtp.join(""));
+      }
     }
   };
 
@@ -81,15 +137,23 @@ const OtpInput = ({ otp, setOtp, onVerify }) => {
       {otp.map((digit, index) => (
         <input
           key={index}
+          ref={(el) => (inputRefs.current[index] = el)}
+          type="text"
+          inputMode="numeric"
+          pattern="\d*"
           maxLength="1"
           value={digit}
           onChange={(e) => handleOtpChange(index, e.target.value)}
-          className="w-12 h-12 text-center border border-gray-300 rounded focus:border-primarysolid"
+          onKeyDown={(e) => handleKeyDown(index, e)}
+          onPaste={handlePaste}
+          className="w-12 h-12 text-center border border-gray-300 rounded focus:border-primarysolid focus:outline-none text-lg font-semibold"
         />
       ))}
     </div>
   );
 };
+
+
 
 export const RegistrationStep = () => {
   const navigate = useNavigate();
@@ -128,7 +192,7 @@ export const RegistrationStep = () => {
 
   const handleSendOtp = async (phone, type) => {
     try {
-      await sendOtp({ phone,type });
+      await sendOtp({ phone, type });
       toast.success(`OTP sent to ${phone}`, {
         position: "top-right",
         autoClose: 3000,

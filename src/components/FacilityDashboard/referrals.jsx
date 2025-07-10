@@ -346,6 +346,7 @@ const DateFilter = ({ value, onChange }) => {
 };
 
 // Main Referrals Component
+// Main Referrals Component
 const Referrals = () => {
   const { facilityType } = useAuth();
 
@@ -413,80 +414,88 @@ const Referrals = () => {
     return sum + numericValue;
   }, 0);
 
-  // Define columns based on facilityType
-  const getColumns = () => {
-    switch (facilityType) {
-      case "Hospital":
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Symptoms", dataIndex: "symptoms", key: "symptoms" },
-          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-      case "Pharmacy":
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Medication Requested", dataIndex: "medicationRequested", key: "medicationRequested" },
-          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-      case "Laboratory":
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Test Requested", dataIndex: "testRequested", key: "testRequested" },
-          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-      case "Ambulance":
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Pick Up Location", dataIndex: "pickUpLocation", key: "pickUpLocation" },
-          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-      case "Insurance":
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Occupation", dataIndex: "occupation", key: "occupation" },
-          { title: "Preferred Plan", dataIndex: "preferredPlan", key: "preferredPlan" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-      default:
-        return [
-          { title: "Name", dataIndex: "name", key: "name" },
-          { title: "Age", dataIndex: "age", key: "age" },
-          { title: "Sex", dataIndex: "sex", key: "sex" },
-          { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
-          { title: "Symptoms", dataIndex: "symptoms", key: "symptoms" },
-          { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
-          { title: "Date", dataIndex: "date", key: "date" },
-          { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
-        ];
-    }
+  const handleConfirmArrival = (record) => {
+    console.log(`Confirmed arrival for: ${record.name}`);
+    // Optional: mark as confirmed or send to backend
   };
 
-  // Check if any filter is applied
-  const hasActiveFilters = filterAge || filterSex || (filterDateRange && filterDateRange.length > 0) || searchText;
+  // Columns based on facilityType + Action Column
+  const getColumns = () => {
+    const baseColumns = {
+      Hospital: [
+        { title: "Name", dataIndex: "name", key: "name" },
+        { title: "Age", dataIndex: "age", key: "age" },
+        { title: "Sex", dataIndex: "sex", key: "sex" },
+        { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+        { title: "Symptoms", dataIndex: "symptoms", key: "symptoms" },
+        { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+        { title: "Date", dataIndex: "date", key: "date" },
+        { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+      ],
+      Pharmacy: [
+        { title: "Name", dataIndex: "name", key: "name" },
+        { title: "Age", dataIndex: "age", key: "age" },
+        { title: "Sex", dataIndex: "sex", key: "sex" },
+        { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+        { title: "Medication Requested", dataIndex: "medicationRequested", key: "medicationRequested" },
+        { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+        { title: "Date", dataIndex: "date", key: "date" },
+        { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+      ],
+      Laboratory: [
+        { title: "Name", dataIndex: "name", key: "name" },
+        { title: "Age", dataIndex: "age", key: "age" },
+        { title: "Sex", dataIndex: "sex", key: "sex" },
+        { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+        { title: "Test Requested", dataIndex: "testRequested", key: "testRequested" },
+        { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+        { title: "Date", dataIndex: "date", key: "date" },
+        { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+      ],
+      Ambulance: [
+        { title: "Name", dataIndex: "name", key: "name" },
+        { title: "Age", dataIndex: "age", key: "age" },
+        { title: "Sex", dataIndex: "sex", key: "sex" },
+        { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+        { title: "Pick Up Location", dataIndex: "pickUpLocation", key: "pickUpLocation" },
+        { title: "Differential Diagnosis", dataIndex: "differentialDiagnosis", key: "differentialDiagnosis" },
+        { title: "Date", dataIndex: "date", key: "date" },
+        { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+      ],
+      Insurance: [
+        { title: "Name", dataIndex: "name", key: "name" },
+        { title: "Age", dataIndex: "age", key: "age" },
+        { title: "Sex", dataIndex: "sex", key: "sex" },
+        { title: "Phone Number", dataIndex: "phoneNumber", key: "phoneNumber" },
+        { title: "Occupation", dataIndex: "occupation", key: "occupation" },
+        { title: "Preferred Plan", dataIndex: "preferredPlan", key: "preferredPlan" },
+        { title: "Date", dataIndex: "date", key: "date" },
+        { title: "Referral Amount", dataIndex: "referralAmount", key: "referralAmount" },
+      ],
+    };
+
+    const defaultCols = baseColumns[facilityType] || baseColumns["Hospital"];
+
+    return [
+      ...defaultCols,
+      {
+        title: "Action",
+        key: "action",
+        render: (_, record) => (
+          <Button
+            type="primary"
+            className="bg-primarysolid"
+            onClick={() => handleConfirmArrival(record)}
+          >
+            Confirm Arrival
+          </Button>
+        ),
+      },
+    ];
+  };
+
+  const hasActiveFilters =
+    filterAge || filterSex || (filterDateRange && filterDateRange.length > 0) || searchText;
 
   useEffect(() => {
     let filtered = [...data];
@@ -499,7 +508,7 @@ const Referrals = () => {
       filtered = filtered.filter((item) => item.sex === filterSex);
     }
 
-    if (filterDateRange && filterDateRange.length === 2) {
+    if (filterDateRange.length === 2) {
       const [fromDate, toDate] = filterDateRange;
       filtered = filtered.filter((item) => {
         const itemDate = moment(item.date, "YYYY-MM-DD");
@@ -534,19 +543,12 @@ const Referrals = () => {
     setSearchText("");
   };
 
-
-  useEffect(()=>{
-
-
-    console.log(filteredData,"filteredData")
-  },[filteredData])
   return (
     <div className="py-6 px-4 sm:px-6">
       <h2 className="text-4xl font-bold mb-4">Referrals</h2>
 
       {/* Search + Filters */}
       <div className="flex flex-col md:flex-row md:items-center mb-6 gap-4">
-        {/* Search */}
         <div className="relative w-full md:max-w-sm border border-gray-300 rounded-lg">
           <Input
             placeholder="Search"
@@ -558,15 +560,8 @@ const Referrals = () => {
           <Search className="absolute text-gray-500 left-3 top-1/2 -translate-y-1/2" />
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          {/* Date Range Filter - Using Custom Component */}
-          <DateFilter
-            value={filterDateRange}
-            onChange={setFilterDateRange}
-          />
-
-          {/* Clear Button (Shown only when filters are applied) */}
+          <DateFilter value={filterDateRange} onChange={setFilterDateRange} />
           {hasActiveFilters && (
             <Button
               type="default"
@@ -585,7 +580,7 @@ const Referrals = () => {
           columns={getColumns()}
           dataSource={filteredData}
           pagination={false}
-          className="rounded-xl pointer-events-none"
+          className="rounded-xl"
         />
       </div>
 
@@ -599,3 +594,4 @@ const Referrals = () => {
 };
 
 export default Referrals;
+
