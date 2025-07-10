@@ -7,7 +7,6 @@ import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
 import { useNavigate } from "react-router-dom";
 const { Dragger } = Upload;
 
-
 export const DocumentUpload = () => {
   const { facilityType, authData, fetchAuthData } = useAuth();
 
@@ -145,7 +144,9 @@ export const DocumentUpload = () => {
     multiple: field === "facilityPhotos" || field === "specialistSchedules",
     beforeUpload: () => false,
     fileList: fileList[field],
-    accept: field === "facilityPhotos" ? ".jpg,.png,.pdf" : ".doc,.pdf,.xls",
+    accept: field === "facilityPhotos" 
+      ? ".jpg,.jpeg,.png,.pdf" 
+      : ".doc,.docx,.pdf,.xls,.xlsx,.txt",
     onRemove: (file) => handleDelete(file, field),
   });
 
@@ -252,14 +253,13 @@ export const DocumentUpload = () => {
                     className="w-full h-11 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
                   >
                     <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate md:text-[13px] md:leading-[1.2] md:tracking-[0.2px]">
-                      {fileList[field]?.[0]?.name || "Accepts DOC, PDF, XLS"}
+                      {fileList[field]?.[0]?.name || "Accepts DOC, DOCX, PDF, XLS, XLSX"}
                     </p>
                   </Button>
                 </Upload>
               </div>
             ))}
           </div>
-
 
           {/* Additional Info */}
           <div className="space-y-2">
@@ -274,13 +274,10 @@ export const DocumentUpload = () => {
         </div>
       </Card>
 
-
       <div className="flex my-3 mb-8 gap-5 p-6 ">
-
         <Button
           className="h-12 flex-1 px-6 bg-gray-300  font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
           onClick={() => navigate("/facility-dashboard/service-capacity")}
-
         >
           Back
         </Button>
@@ -298,10 +295,6 @@ export const DocumentUpload = () => {
           )}
         </Button>
       </div>
-
-
-
-
     </div>
   );
 };
