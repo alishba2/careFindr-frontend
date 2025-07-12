@@ -27,10 +27,14 @@ import Notifications from "./components/FacilityDashboard/notification";
 
 import Users from "./components/AdminDashboard/users";
 import Landing from "./components/pages/home";
+
+import { ChatProvider } from "./components/hook/chatContext";
 export const App = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ChatProvider>
+
+<BrowserRouter>
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -125,6 +129,8 @@ export const App = () => {
           </Route>
         </Routes>
       </BrowserRouter>
+      </ChatProvider>
+      
     </AuthProvider>
   );
 };

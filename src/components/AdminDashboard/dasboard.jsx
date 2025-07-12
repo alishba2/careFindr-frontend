@@ -40,6 +40,7 @@ import Referrals from "./referrals";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
+import AdminChatPage from "./converstaions";
 const statCards = [
   {
     label: "Total Facilities",
@@ -140,6 +141,7 @@ const AdminDashboard = () => {
     if (key === "4") navigate("/admin-dashboard/admins");
     if (key === "5") navigate("/admin-dashboard/users");
     if (key === "6") navigate("/admin-dashboard/referrals");
+    if (key === "8") navigate("/admin-dashboard/conversations");
   };
 
   return (
@@ -195,7 +197,6 @@ const AdminDashboard = () => {
               <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>
                 Insurance
               </Menu.Item>
-
             </SubMenu>
             <Menu.Item key="4" icon={<img src={doucment} alt="doucment" />}>
               {!collapsed && "Document Review"}
@@ -287,7 +288,7 @@ const AdminDashboard = () => {
               <Route path="/admins" element={<AdminList />} />
               <Route path="/users" element={<Users />} />
               <Route path="/referrals" element={<Referrals />} />
-
+              <Route path="/conversations" element={<AdminChatPage />} />
             </Routes>
           </Content>
         </Layout>
