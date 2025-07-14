@@ -59,7 +59,7 @@ const FacilityDetail = () => {
 
       <HospitalServices />
 
-      <FacilityDoc facilityId={id}/>
+      <FacilityDoc facilityId={id} />
 
 
     </div>
