@@ -13,7 +13,6 @@ import {
 import { Layout, Menu, Button } from "antd";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
-import Navbar from "./topBar";
 import AllFacilities from "./allFacilities";
 import AdminList from "./admin";
 import FacilityDetail from "./facility-detail";
@@ -37,9 +36,12 @@ import time from "../../components/asstes/time.png";
 import Users from "./users";
 import { User } from "lucide-react";
 import Referrals from "./referrals";
+import Navbar from "../pages/navbar";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
+
+import AdminChatPage from "./converstaions";
 const statCards = [
   {
     label: "Total Facilities",
@@ -140,6 +142,7 @@ const AdminDashboard = () => {
     if (key === "4") navigate("/admin-dashboard/admins");
     if (key === "5") navigate("/admin-dashboard/users");
     if (key === "6") navigate("/admin-dashboard/referrals");
+    if (key === "8") navigate("/admin-dashboard/conversations");
   };
 
   return (
@@ -195,11 +198,8 @@ const AdminDashboard = () => {
               <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>
                 Insurance
               </Menu.Item>
-
             </SubMenu>
-            <Menu.Item key="4" icon={<img src={doucment} alt="doucment" />}>
-              {!collapsed && "Document Review"}
-            </Menu.Item>
+           
             <Menu.Item key="5" icon={<img src={users} alt="users" />}>
               {!collapsed && "Users"}
             </Menu.Item>
@@ -207,7 +207,7 @@ const AdminDashboard = () => {
               {!collapsed && "Referrals"}
             </Menu.Item>
             <Menu.Item key="8" icon={<img src={message} alt="message" />}>
-              {!collapsed && "Conversations"}
+              {!collapsed && "Messages"}
             </Menu.Item>
             <Menu.Item
               key="9"
@@ -287,6 +287,8 @@ const AdminDashboard = () => {
               <Route path="/admins" element={<AdminList />} />
               <Route path="/users" element={<Users />} />
               <Route path="/referrals" element={<Referrals />} />
+              <Route path="/conversations" element={<AdminChatPage />} />
+              <Route path="/conversations/:chatId" element={<AdminChatPage />} />
 
             </Routes>
           </Content>

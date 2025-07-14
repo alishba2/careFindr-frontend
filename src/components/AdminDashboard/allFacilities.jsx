@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Input, Table, Tag, Button, message, Select } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Input, Table, Tag, Button, message, Select, Dropdown, Menu } from "antd";
+import { SearchOutlined, MoreOutlined, FilterOutlined } from "@ant-design/icons";
 import { states } from "../enums/state";
 import { lgas } from "../enums/lgas";
 import {
@@ -9,79 +9,178 @@ import {
 } from "../../services/facility";
 import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
+import filter from "../../assets/FunnelSimple.png";
 const { Option } = Select;
 
-const columns = (onVerify) => [
+const columns = (onVerify, onRevise) => [
   {
     title: "Facility Name",
     dataIndex: "name",
     key: "name",
+    render: (text) => (
+      <span className="font-medium text-gray-900">{text}</span>
+    ),
   },
   {
     title: "Facility Type",
     dataIndex: "hospitalType",
     key: "hospitalType",
     render: (_, record) => {
+      let displayText = "";
       if (record.hospitalType && record.hospitalType !== "N/A") {
-        return `${record.type} / ${record.hospitalType}`;
+        displayText = `${record.type} / ${record.hospitalType}`;
+      } else if (record.insuranceType && record.insuranceType !== "N/A") {
+        displayText = `${record.type} / ${record.insuranceType}`;
+      } else {
+        displayText = record.type || "-";
       }
-      if (record.insuranceType && record.insuranceType !== "N/A") {
-        return `${record.type} / ${record.insuranceType}`;
-      }
-      return record.type || "-";
+      return <span className="text-gray-700">{displayText}</span>;
     },
   },
   {
-    title: "State / LGA",
+    title: "LGA / State",
     key: "location",
     render: (_, record) => {
-      if (record.lga && record.state) {
-        return `${record.lga} / ${record.state}`;
-      }
-      return record.state || record.lga || "-";
+      const location = record.lga && record.state
+        ? `${record.lga} / ${record.state}`
+        : record.state || record.lga || "-";
+      return <span className="text-gray-700">{location}</span>;
     },
-  },
-  {
-    title: "Document Status",
-    dataIndex: "status",
-    key: "status",
-    render: (status) => (
-      <Tag color={status === "Verified" ? "green" : "orange"}>{status}</Tag>
-    ),
   },
   {
     title: "Registration Date",
     dataIndex: "createdAt",
     key: "createdAt",
-    render: (date) => dayjs(date).format("DD MMM YYYY"),
+    render: (date) => (
+      <span className="text-gray-700">
+        {dayjs(date).format("DD MMM YYYY")}
+      </span>
+    ),
   },
   {
-    title: "Action",
-    dataIndex: "action",
-    key: "action",
-    render: (_, record) =>
-      record.status !== "Verified" ? (
-        <Button
-          size="small"
-          type="primary"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent row click
-            onVerify(record._id);
-          }}
-        >
-          Verify
-        </Button>
-      ) : (
-        <span className="text-gray-400">Already Verified</span>
-      ),
-  },
-  {
-    title: "Total Referrals",
-    dataIndex: "totalReferrals",
-    key: "totalReferrals",
-    render: (value) => <p className="pl-12 text-gray-800">{value || 0}</p>,
-  },
+    title: "Document Status",
+    dataIndex: "status",
+    key: "status",
+    render: (_, record) => {
+      const menuItems = [
+        {
+          key: "verify",
+          label: "Verify",
+          disabled: record.status === "Verified",
+          onClick: () => onVerify(record._id),
+        },
+        {
+          key: "revise",
+          label: "Revise",
+          onClick: () => onRevise(record._id),
+        },
+      ];
+
+      if (record.status === "Verified") {
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              type="primary"
+              size="small"
+              className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
+            >
+              Verify
+            </Button>
+            <Dropdown
+              menu={{ items: menuItems }}
+              placement="bottomRight"
+              trigger={["click"]}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<MoreOutlined />}
+                className="text-gray-400 hover:text-gray-600"
+              />
+            </Dropdown>
+          </div>
+        );
+      }
+
+      if (record.status === "Need Revision") {
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              type="primary"
+              size="small"
+              className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                onVerify(record._id);
+              }}
+            >
+              Verify
+            </Button>
+            <Button
+              size="small"
+              className="bg-red-500 hover:bg-red-600 border-red-500 text-white rounded-md px-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRevise(record._id);
+              }}
+            >
+              Revise
+            </Button>
+            <Dropdown
+              menu={{ items: menuItems }}
+              placement="bottomRight"
+              trigger={["click"]}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<MoreOutlined />}
+                className="text-gray-400 hover:text-gray-600"
+              />
+            </Dropdown>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex items-center gap-2">
+          <Button
+            type="primary"
+            size="small"
+            className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              onVerify(record._id);
+            }}
+          >
+            Verify
+          </Button>
+          <Button
+            size="small"
+            className="bg-red-500 hover:bg-red-600 border-red-500 text-white rounded-md px-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRevise(record._id);
+            }}
+          >
+            Revise
+          </Button>
+          <Dropdown
+            menu={{ items: menuItems }}
+            placement="bottomRight"
+            trigger={["click"]}
+          >
+            <Button
+              type="text"
+              size="small"
+              icon={<MoreOutlined />}
+              className="text-gray-400 hover:text-gray-600"
+            />
+          </Dropdown>
+        </div>
+      );
+    },
+  }
 ];
 
 const AllFacilities = () => {
@@ -99,19 +198,20 @@ const AllFacilities = () => {
   const [filterState, setFilterState] = useState("");
   const [filterLga, setFilterLga] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [showClear, setShowClear] = useState(false);
 
-  const fetchFacilities = async () => {
+  const fetchFacilities = async (currentPage = page) => {
     console.log(type, "type is here");
     setLoading(true);
     try {
-      const response = type !== "all"
-        ? await getFacilitiesByType({ type, page, limit })
-        : await getAllFacilities({ page, limit });
+      const response = type && type !== "all"
+        ? await getFacilitiesByType({ type, page: currentPage, limit })
+        : await getAllFacilities({ page: currentPage, limit });
 
       console.log(response, "response is here");
 
       const formattedData = response.facilities.map((facility, index) => ({
-        key: index + (page - 1) * limit,
+        key: index + (currentPage - 1) * limit,
         _id: facility._id,
         name: facility.name,
         type: facility.type,
@@ -135,8 +235,32 @@ const AllFacilities = () => {
     }
   };
 
+  // Reset filters when type changes
+  useEffect(() => {
+    setFilterType(type || "all");
+    setSearchText("");
+    setFilterState("");
+    setFilterLga("");
+    setFilterStatus("");
+    setPage(1); // Reset to first page when type changes
+  }, [type]);
+
+  // Fetch data when type or page changes
+  useEffect(() => {
+    fetchFacilities(page);
+  }, [type, page]);
+
   // Apply client-side filtering
   useEffect(() => {
+    // Check if any filters are active
+    const hasActiveFilters = searchText || 
+      (filterType && filterType !== "all") || 
+      filterState || 
+      filterLga || 
+      filterStatus;
+    
+    setShowClear(hasActiveFilters);
+
     let filtered = [...data];
 
     // Filter by search text (name)
@@ -146,8 +270,8 @@ const AllFacilities = () => {
       );
     }
 
-    // Filter by type
-    if (filterType && filterType !== "all") {
+    // Filter by type (only apply if we're showing all types and a specific type is selected)
+    if (filterType && filterType !== "all" && (!type || type === "all")) {
       filtered = filtered.filter((item) => item.type === filterType);
     }
 
@@ -171,7 +295,7 @@ const AllFacilities = () => {
     }
 
     setFilteredData(filtered);
-  }, [data, searchText, filterType, filterState, filterLga, filterStatus]);
+  }, [data, searchText, filterType, filterState, filterLga, filterStatus, type]);
 
   const handleVerify = async (id) => {
     try {
@@ -185,6 +309,18 @@ const AllFacilities = () => {
     }
   };
 
+  const handleRevise = async (id) => {
+    try {
+      console.log("Revising facility ID:", id);
+      // Placeholder for actual revision API call
+      message.success("Facility marked for revision");
+      fetchFacilities();
+    } catch (error) {
+      console.error("Revision failed", error);
+      message.error("Failed to mark facility for revision");
+    }
+  };
+
   const handleClearFilters = () => {
     setSearchText("");
     setFilterType(type || "all");
@@ -193,119 +329,141 @@ const AllFacilities = () => {
     setFilterStatus("");
   };
 
-  useEffect(() => {
-    fetchFacilities();
-  }, [type, page]);
-
   // Options for filters
   const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance", "Laboratory"];
-  const statusOptions = ["Verified", "Pending"];
+  const statusOptions = ["Verified", "Pending", "Need Revision"];
   const stateOptions = states || [];
-  const lgaOptions = Object.values(lgas).flat() || []; // Flatten if lgas is a state-to-LGA mapping
+  const lgaOptions = Object.values(lgas).flat() || [];
 
   return (
-    <div className="p-2 md:p-6">
-      <h2 className="text-2xl font-bold py-3 text-gray-800">
-        {type
-          ? `${type.charAt(0).toUpperCase() + type.slice(1)} Facilities`
-          : "All Facilities"}
-      </h2>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          {/* Search Input */}
-          <Input
-            prefix={<SearchOutlined className="text-gray-500" />}
-            placeholder="Search"
-            className="h-10 w-full md:w-80 rounded-[10px] border border-gray-300 focus:ring-1 focus:ring-[#359DF4] focus:border-[#359DF4]"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
+    <div>
+      <div className="py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {type && type !== "all"
+              ? `${type.charAt(0).toUpperCase() + type.slice(1)} Facilities`
+              : "All Facilities"}
+          </h1>
+        </div>
 
-          {/* Type Filter */}
-         {type=="all"&& <Select
-            placeholder="Filter by Type"
-            className="h-10 w-full md:w-44 rounded-[10px] border bg-gray"
-            onChange={(value) => setFilterType(value)}
-            suffixIcon={<i className="ri-equalizer-line text-gray-500" />} // optional: or use AntD's default icon
-          >
-            <Option value="">All Types</Option>
-            {typeOptions.map((option) => (
-              <Option key={option} value={option}>
-                {option}
-              </Option>
-            ))}
-          </Select>}
+        {/* Filters */}
+        <div className="mb-3">
+          <div className="flex flex-row lg:flex-row gap-4 items-start lg:items-center">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-md">
+              <Input
+                prefix={<SearchOutlined className="text-gray-400" />}
+                placeholder="Search"
+                className="h-11 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </div>
 
-          {/* State Filter */}
-          <Select
-            placeholder="Filter by LGA / State"
-            className="h-10 w-full md:w-44 rounded-[10px] border "
-            // value={filterState}
-            onChange={(value) => {
-              setFilterState(value);
-              setFilterLga("");
+            {/* Filter Controls */}
+            <div className="flex flex-wrap gap-3">
+              {/* Type Filter - Only show when type is "all" or not specified */}
+              {(!type || type === "all") && (
+                <Select
+                  placeholder="Filter by Type"
+                  className="min-w-[160px]"
+                  value={filterType === "all" ? undefined : filterType}
+                  onChange={(value) => setFilterType(value || "all")}
+                  suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                  style={{ height: 44 }}
+                >
+                  <Option value="">All Types</Option>
+                  {typeOptions.map((option) => (
+                    <Option key={option} value={option}>
+                      {option}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+
+              {/* State Filter */}
+              <Select
+                placeholder="Filter by State"
+                className="min-w-[180px]"
+                value={filterState || undefined}
+                onChange={(value) => {
+                  setFilterState(value || "");
+                  setFilterLga("");
+                }}
+                showSearch
+                suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                style={{ height: 44 }}
+              >
+                <Option value="">All States</Option>
+                {stateOptions.map((state) => (
+                  <Option key={state} value={state}>
+                    {state}
+                  </Option>
+                ))}
+              </Select>
+
+              {/* Status Filter */}
+              <Select
+                placeholder="Filter by Status"
+                className="min-w-[160px]"
+                value={filterStatus || undefined}
+                onChange={(value) => setFilterStatus(value || "")}
+                suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                style={{ height: 44 }}
+              >
+                <Option value="">All Statuses</Option>
+                {statusOptions.map((option) => (
+                  <Option key={option} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              </Select>
+
+              {/* Clear Filters Button */}
+              {showClear && (
+                <Button
+                  type="default"
+                  className="h-11 px-6 rounded-lg border-gray-300 hover:bg-gray-50"
+                  onClick={handleClearFilters}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <Table
+            columns={columns(handleVerify, handleRevise)}
+            dataSource={filteredData}
+            loading={loading}
+            pagination={{
+              current: page,
+              total: totalPages * limit,
+              pageSize: limit,
+              onChange: (page) => setPage(page),
+              showSizeChanger: false,
+              showQuickJumper: false,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`,
+              className: "px-6 py-4 border-t border-gray-200",
             }}
-            showSearch
-            suffixIcon={<i className="ri-equalizer-line text-gray-500" />}
-          >
-            <Option value="">All States</Option>
-            {stateOptions.map((state) => (
-              <Option key={state} value={state}>
-                {state}
-              </Option>
-            ))}
-          </Select>
-
-          {/* Status Filter */}
-          <Select
-            placeholder="Filter by Status"
-            className="h-10 w-full md:w-44 rounded-[10px] border "
-            // value={filterStatus}
-            onChange={(value) => setFilterStatus(value)}
-            suffixIcon={<i className="ri-equalizer-line text-gray-500" />}
-          >
-            <Option value="">Document Status</Option>
-            {statusOptions.map((option) => (
-              <Option key={option} value={option}>
-                {option}
-              </Option>
-            ))}
-          </Select>
-
-          {/* Clear Button */}
-          <Button
-            type="default"
-            className="h-10 px-4 rounded-[10px] border border-gray-300 hover:bg-gray-100"
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </Button>
+            className="rounded-lg"
+            onRow={(record) => ({
+              onClick: () =>
+                navigate(`/admin-dashboard/facilities/${record._id}`),
+              className: "cursor-pointer hover:bg-gray-50 transition-colors",
+            })}
+            scroll={{ x: 1200 }}
+            size="large"
+            rowClassName="h-16"
+          />
         </div>
       </div>
-
-
-      <div className="bg-white rounded-xl shadow">
-        <Table
-          columns={columns(handleVerify)}
-          dataSource={filteredData}
-          loading={loading}
-          pagination={{
-            current: page,
-            total: totalPages * limit,
-            pageSize: limit,
-            onChange: (page) => setPage(page),
-            showSizeChanger: false,
-          }}
-          className="overflow-x-auto rounded-xl"
-          onRow={(record) => ({
-            onClick: () =>
-              navigate(`/admin-dashboard/facilities/${record._id}`),
-            style: { cursor: "pointer" },
-          })}
-        />
-      </div>
     </div>
-
   );
 };
 

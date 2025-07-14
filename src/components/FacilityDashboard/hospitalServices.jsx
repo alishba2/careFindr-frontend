@@ -35,6 +35,7 @@ export const HospitalServices = () => {
     const [typeFacility, setTypeFacility] = useState(null);
     const navigate = useNavigate();
     const [capabilities, setCapabilities] = useState(initialCapabilitiesState);
+    const userType = localStorage.getItem("userType");
 
     useEffect(() => {
         setFacility(null);
@@ -106,15 +107,15 @@ export const HospitalServices = () => {
                     // if(newCapabilities?.)
 
 
-                        useEffect(() => {
-                    
-                            console.log(capabilities, "capabilities");
-                    
-                            if (capabilities.hasLaboratory) {
-                                setIsAmbulance(true);
-                            }
-                    
-                        }, [capabilities])
+                    useEffect(() => {
+
+                        console.log(capabilities, "capabilities");
+
+                        if (capabilities.hasLaboratory) {
+                            setIsAmbulance(true);
+                        }
+
+                    }, [capabilities])
 
                     setCapabilities(newCapabilities);
                     setInitialCapabilities(JSON.parse(JSON.stringify(newCapabilities)));
@@ -209,45 +210,86 @@ export const HospitalServices = () => {
 
     return (
         <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
-            <StepProgress currentStep={authData?.onBoardingStep} />
-            <div className="mb-6 p-6 h-24 flex flex-col gap-2">
-                <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
-                    {typeFacility === "Hospital" && facility === "Ambulance"
-                        ? "Ambulance Details"
-                        : "Service & Capacity"}
-                </h2>
-                <p className="text-base font-inter font-medium text-[16px] leading-24px tracking-[0.5%] font-[500]">
-                    Ensuring accuracy for patients, regulators, and partners
-                </p>
-            </div>
 
-            <Card className="border-none shadow-none">
+            {
+                userType != "admin" ? (
+                    <>
+                        <StepProgress currentStep={authData?.onBoardingStep} />
+                        <div className=" p-6 h-24 flex flex-col gap-2">
+                            <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
+                                {typeFacility === "Hospital" && facility === "Ambulance"
+                                    ? "Ambulance Details"
+                                    : "Service & Capacity"}
+                            </h2>
+                            <p className="text-base font-inter font-medium text-[16px] leading-24px tracking-[0.5%] font-[500]">
+                                Ensuring accuracy for patients, regulators, and partners
+                            </p>
+                        </div>
+                    </>
+                ) : (
+                    <div className=" p-6 h-18 flex flex-col gap-2">
+                        <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
+                            {typeFacility === "Hospital" && facility === "Ambulance"
+                                ? "Ambulance Details"
+                                : "Service & Capacity"}
+                        </h2>
+
+                    </div>
+                )
+            }
+
+            <Card className="border-none shadow-none ">
                 <div className="p-6 space-y-6 border-none">
                     {renderForm()}
                 </div>
             </Card>
 
-            <div className="flex my-3 mb-8 gap-5 p-6">
-                <Button
-                    className="h-12 flex-1 px-6 bg-gray-300 font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
-                    onClick={() => navigate("/facility-dashboard/facility-info")}
-                >
-                    Back
-                </Button>
-                <Button
-                    className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
-                    onClick={handleSubmit}
-                    disabled={saving || !hasChanges}
-                >
-                    {saving ? (
-                        <>
-                            <span className="loader mr-2" /> Saving...
-                        </>
-                    ) : (
-                        "Update & Next"
-                    )}
-                </Button>
-            </div>
+            {
+                userType == "admin" ? (
+
+                    <div className="flex my-3 mb-8 gap-5 p-6">
+
+                        <Button
+                            className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
+                            onClick={handleSubmit}
+                            disabled={saving || !hasChanges}
+                        >
+                            {saving ? (
+                                <>
+                                    <span className="loader mr-2" /> Saving...
+                                </>
+                            ) : (
+                                "Update "
+                            )}
+                        </Button>
+                    </div>
+                ) : (
+
+                    <div className="flex my-3 mb-8 gap-5 p-6">
+                        <Button
+                            className="h-12 flex-1 px-6 bg-gray-300 font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
+                            onClick={() => navigate("/facility-dashboard/facility-info")}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
+                            onClick={handleSubmit}
+                            disabled={saving || !hasChanges}
+                        >
+                            {saving ? (
+                                <>
+                                    <span className="loader mr-2" /> Saving...
+                                </>
+                            ) : (
+                                "Update & Next"
+                            )}
+                        </Button>
+                    </div>
+                )
+            }
+
+
         </div>
     );
 };

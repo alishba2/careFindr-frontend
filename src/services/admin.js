@@ -1,5 +1,5 @@
 import axios from './axiosConfig';
-let backendUrl = import.meta.env.VITE_APP_BASE_URL ;
+let backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
 export const createAdmin = async (data) => {
     try {
@@ -17,6 +17,16 @@ export const getAdmins = async () => {
         return response.data;
     } catch (error) {
         console.error("Error fetching facility services:", error);
+        throw error;
+    }
+}
+export const getCurrentAdmin = async () => {
+    try {
+        const response = await axios.get(`${backendUrl}/api/admin/me`);
+        return response.data;
+    }
+    catch (error) {
+        console.error("error fetching admin");
         throw error;
     }
 }

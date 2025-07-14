@@ -7,6 +7,8 @@ import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
 import { useNavigate } from "react-router-dom";
 const { Dragger } = Upload;
 
+
+
 export const DocumentUpload = () => {
   const { facilityType, authData, fetchAuthData } = useAuth();
 
@@ -18,6 +20,7 @@ export const DocumentUpload = () => {
     licenseRegistration: [],
   });
 
+  const [update, setUpdate] = useState(false);
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [initialFiles, setInitialFiles] = useState(null);
   const [initialAdditionalInfo, setInitialAdditionalInfo] = useState("");
@@ -66,6 +69,10 @@ export const DocumentUpload = () => {
     const fetchFacilityDocs = async () => {
       try {
         const response = await GetFacilityDocs();
+        console.log(response, "respone hsere");
+        if (response) {
+          setUpdate(true);
+        }
         if (response) {
           const newFileList = {
             facilityPhotos: response.facilityPhotos?.map((path) => ({
@@ -144,8 +151,8 @@ export const DocumentUpload = () => {
     multiple: field === "facilityPhotos" || field === "specialistSchedules",
     beforeUpload: () => false,
     fileList: fileList[field],
-    accept: field === "facilityPhotos" 
-      ? ".jpg,.jpeg,.png,.pdf" 
+    accept: field === "facilityPhotos"
+      ? ".jpg,.jpeg,.png,.pdf"
       : ".doc,.docx,.pdf,.xls,.xlsx,.txt",
     onRemove: (file) => handleDelete(file, field),
   });
@@ -193,7 +200,8 @@ export const DocumentUpload = () => {
         }
       });
 
-      await FacilityDocs(formData, initialFiles !== null);
+
+      await FacilityDocs(formData, update);
       message.success("Facility documents uploaded successfully!");
       setInitialFiles(JSON.parse(JSON.stringify(fileList)));
       setInitialAdditionalInfo(additionalInfo);

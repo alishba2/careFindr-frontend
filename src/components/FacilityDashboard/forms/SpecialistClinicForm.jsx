@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Select } from 'antd';
 import { Input } from '../../input';
 import TextArea from "antd/es/input/TextArea";
@@ -9,6 +9,12 @@ import NumericInput from '../NumericInput';
 const { Option } = Select;
 
 const SpecialistClinicForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours }) => {
+
+    useEffect(()=>{
+
+        console.log(capabilities, "capabilities");
+
+    },[capabilities])
     return (
         <div className="space-y-6">
             {/* Core and Specialized Services */}

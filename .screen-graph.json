@@ -89,6 +89,14 @@
       "routes": [
         "/users"
       ]
+    },
+    {
+      "id": "src/components/AdminDashboard/converstaions.jsx",
+      "label": "converstaions",
+      "routes": [
+        "/conversations",
+        "/conversations/:chatId"
+      ]
     }
   ],
   "edges": [
@@ -201,6 +209,102 @@
           "column": 14,
           "endColumn": 65,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/AdminDashboard/dasboard.jsx:290:14-to-src/components/AdminDashboard/converstaions.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/AdminDashboard/converstaions.jsx",
+      "data": {
+        "viaRoute": "/conversations",
+        "trigger": {
+          "element": "<Route path=\"/conversations\" element={<AdminChatPage />} />",
+          "line": 290,
+          "endLine": 290,
+          "column": 14,
+          "endColumn": 73,
+          "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/AdminDashboard/dasboard.jsx:291:14-to-src/components/AdminDashboard/converstaions.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/AdminDashboard/converstaions.jsx",
+      "data": {
+        "viaRoute": "/conversations/:chatId",
+        "trigger": {
+          "element": "<Route path=\"/conversations/:chatId\" element={<AdminChatPage />} />",
+          "line": 291,
+          "endLine": 291,
+          "column": 14,
+          "endColumn": 81,
+          "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:58:8-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 58,
+          "endLine": 58,
+          "column": 8,
+          "endColumn": 26,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:118:40-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 118,
+          "endLine": 118,
+          "column": 40,
+          "endColumn": 58,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:135:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 135,
+          "endLine": 135,
+          "column": 51,
+          "endColumn": 69,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:141:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "navigate(\"/register\")",
+          "line": 141,
+          "endLine": 141,
+          "column": 51,
+          "endColumn": 72,
+          "sourceFile": "src/components/pages/navbar.jsx"
         }
       }
     },
