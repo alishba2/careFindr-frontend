@@ -320,17 +320,17 @@ const AdminChatPage = () => {
   };
 
   // Show loading or error states for non-admin users
-  if (role !== "admin") {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">You need admin privileges to access this page.</p>
-        </div>
-      </div>
-    );
-  }
+  // if (role !== "admin") {
+  //   return (
+  //     <div className="h-screen flex items-center justify-center bg-gray-50">
+  //       <div className="text-center">
+  //         <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+  //         <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+  //         <p className="text-gray-600">You need admin privileges to access this page.</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="h-screen flex bg-gray-50">
