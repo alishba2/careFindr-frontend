@@ -61,7 +61,9 @@ export const updateFacility = async (data) => {
 
 export const adminLogin = async (login) => {
   try {
+    console.log(login, "login here");
     const response = await axios.post(`${backendUrl}/api/admin/login`, login);
+    console.log(response.data, "response here");
     return response.data;
   } catch (error) {
     console.error("Error logging in admin:", error);
