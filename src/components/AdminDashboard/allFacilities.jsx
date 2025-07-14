@@ -12,6 +12,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import filter from "../../assets/FunnelSimple.png";
 const { Option } = Select;
 
+
+import { verifyAllDocuments } from "../../services/facilityDocs";
+
+
+
 const columns = (onVerify, onRevise) => [
   {
     title: "Facility Name",
@@ -62,125 +67,22 @@ const columns = (onVerify, onRevise) => [
     dataIndex: "status",
     key: "status",
     render: (_, record) => {
-      const menuItems = [
-        {
-          key: "verify",
-          label: "Verify",
-          disabled: record.status === "Verified",
-          onClick: () => onVerify(record._id),
-        },
-        {
-          key: "revise",
-          label: "Revise",
-          onClick: () => onRevise(record._id),
-        },
-      ];
-
-      if (record.status === "Verified") {
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              type="primary"
-              size="small"
-              className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
-            >
-              Verify
-            </Button>
-            <Dropdown
-              menu={{ items: menuItems }}
-              placement="bottomRight"
-              trigger={["click"]}
-            >
-              <Button
-                type="text"
-                size="small"
-                icon={<MoreOutlined />}
-                className="text-gray-400 hover:text-gray-600"
-              />
-            </Dropdown>
-          </div>
-        );
-      }
-
-      if (record.status === "Need Revision") {
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              type="primary"
-              size="small"
-              className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                onVerify(record._id);
-              }}
-            >
-              Verify
-            </Button>
-            <Button
-              size="small"
-              className="bg-red-500 hover:bg-red-600 border-red-500 text-white rounded-md px-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRevise(record._id);
-              }}
-            >
-              Revise
-            </Button>
-            <Dropdown
-              menu={{ items: menuItems }}
-              placement="bottomRight"
-              trigger={["click"]}
-            >
-              <Button
-                type="text"
-                size="small"
-                icon={<MoreOutlined />}
-                className="text-gray-400 hover:text-gray-600"
-              />
-            </Dropdown>
-          </div>
-        );
-      }
-
       return (
-        <div className="flex items-center gap-2">
-          <Button
-            type="primary"
-            size="small"
-            className="bg-green-500 hover:bg-green-600 border-green-500 rounded-md px-4"
-            onClick={(e) => {
-              e.stopPropagation();
-              onVerify(record._id);
-            }}
-          >
-            Verify
-          </Button>
-          <Button
-            size="small"
-            className="bg-red-500 hover:bg-red-600 border-red-500 text-white rounded-md px-4"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRevise(record._id);
-            }}
-          >
-            Revise
-          </Button>
-          <Dropdown
-            menu={{ items: menuItems }}
-            placement="bottomRight"
-            trigger={["click"]}
-          >
-            <Button
-              type="text"
-              size="small"
-              icon={<MoreOutlined />}
-              className="text-gray-400 hover:text-gray-600"
-            />
-          </Dropdown>
-        </div>
+        <Tag
+          color={
+            record.status === "verified"
+              ? "green"
+              : record.status === "rejected"
+              ? "red"
+              : "blue"
+          }
+          className="text-gray-700"
+        >
+          {record.status}
+        </Tag>
       );
     },
-  }
+  },
 ];
 
 const AllFacilities = () => {
@@ -367,11 +269,12 @@ const AllFacilities = () => {
               {(!type || type === "all") && (
                 <Select
                   placeholder="Filter by Type"
-                  className="min-w-[160px]"
+                  className="min-w-[160px] ant-select-selector"
                   value={filterType === "all" ? undefined : filterType}
                   onChange={(value) => setFilterType(value || "all")}
                   suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
-                  style={{ height: 44 }}
+                  style={{ height: 40, backgroundColor: "transparent" }}
+                  dropdownClassName="ant-select-dropdown"
                 >
                   <Option value="">All Types</Option>
                   {typeOptions.map((option) => (

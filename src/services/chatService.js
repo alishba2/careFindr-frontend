@@ -36,7 +36,7 @@ chatAxios.interceptors.response.use(
 class ChatService {
   constructor() {
     this.socket = null;
-    this.baseURL = 'http://localhost:8000';
+    this.baseURL = import.meta.env.VITE_APP_BASE_URL;
     this.isConnected = false;
     this.eventListeners = new Map();
     this.cancelSource = source;

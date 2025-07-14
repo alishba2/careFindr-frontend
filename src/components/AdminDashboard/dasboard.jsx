@@ -42,6 +42,8 @@ const { SubMenu } = Menu;
 
 
 import AdminChatPage from "./converstaions";
+import BlogUI from "./blog";
+import AddBlogPost from "./blog";
 const statCards = [
   {
     label: "Total Facilities",
@@ -143,6 +145,7 @@ const AdminDashboard = () => {
     if (key === "5") navigate("/admin-dashboard/users");
     if (key === "6") navigate("/admin-dashboard/referrals");
     if (key === "8") navigate("/admin-dashboard/conversations");
+    if (key === "10") navigate("/admin-dashboard/blogs");
   };
 
   return (
@@ -199,7 +202,7 @@ const AdminDashboard = () => {
                 Insurance
               </Menu.Item>
             </SubMenu>
-           
+
             <Menu.Item key="5" icon={<img src={users} alt="users" />}>
               {!collapsed && "Users"}
             </Menu.Item>
@@ -289,6 +292,7 @@ const AdminDashboard = () => {
               <Route path="/referrals" element={<Referrals />} />
               <Route path="/conversations" element={<AdminChatPage />} />
               <Route path="/conversations/:chatId" element={<AdminChatPage />} />
+              <Route path="blogs" element={<AddBlogPost/> }/>
 
             </Routes>
           </Content>
