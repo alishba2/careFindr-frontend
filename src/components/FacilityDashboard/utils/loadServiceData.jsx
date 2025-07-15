@@ -166,8 +166,67 @@ export const loadServiceData = (serviceData, capabilities) => {
                 additionalInformation: serviceData.specialistClinicDetails.additionalInfo || "",
             };
             break;
-    }
 
+        // 🩸 NEW: Blood Bank Case
+        case "Blood Bank":
+            newCapabilities = {
+                ...newCapabilities,
+                // Blood Products and Types
+                bloodProductsProvided: serviceData.bloodBankDetails.bloodProductsProvided || [],
+                
+                // Screening and Safety
+                infectionsTestedFor: serviceData.bloodBankDetails.infectionsTestedFor || "",
+                
+                // Inventory and Capacity
+                currentBloodInventoryCapacity: serviceData.bloodBankDetails.currentBloodInventoryCapacity || "",
+                maxStorageCapacityPerComponent: serviceData.bloodBankDetails.maxStorageCapacityPerComponent || "",
+                shortageManagement: serviceData.bloodBankDetails.shortageManagement || "",
+                expiryDateTracking: serviceData.bloodBankDetails.expiryDateTracking || "",
+                hasMobileDonationUnits: serviceData.bloodBankDetails.hasMobileDonationUnits ? "Yes" : "No",
+                averageBloodCollectionTime: serviceData.bloodBankDetails.averageBloodCollectionTime || "",
+                
+                // Operational Standards
+                acceptsReturnedBlood: serviceData.bloodBankDetails.acceptsReturnedBlood ? "Yes" : "No",
+                returnTimeFrame: serviceData.bloodBankDetails.returnTimeFrame || "",
+                allPhlebotomistsCertified: serviceData.bloodBankDetails.allPhlebotomistsCertified ? "Yes" : "No",
+                auditFrequency: serviceData.bloodBankDetails.auditFrequency || "",
+                dailyWeeklyRequestVolume: serviceData.bloodBankDetails.dailyWeeklyRequestVolume || "",
+                bloodExpiryManagement: serviceData.bloodBankDetails.bloodExpiryManagement || "",
+                allowsDirectPatientRequests: serviceData.bloodBankDetails.allowsDirectPatientRequests ? "Yes" : "No",
+                
+                // Logistics & Delivery
+                providesEmergencyDelivery: serviceData.bloodBankDetails.providesEmergencyDelivery ? "Yes" : "No",
+                emergencyResponseTime: serviceData.bloodBankDetails.emergencyResponseTime || "",
+                logisticsType: serviceData.bloodBankDetails.logisticsType || "",
+                coldChainProcedures: serviceData.bloodBankDetails.coldChainProcedures || "",
+                chargesForDelivery: serviceData.bloodBankDetails.chargesForDelivery ? "Yes" : "No",
+                deliveryCost: serviceData.bloodBankDetails.deliveryCost?.toString() || "",
+                priorityDispatchAvailable: serviceData.bloodBankDetails.priorityDispatchAvailable ? "Yes" : "No",
+                turnaroundTimeEmergency: serviceData.bloodBankDetails.turnaroundTimeEmergency || "",
+                turnaroundTimeNonEmergency: serviceData.bloodBankDetails.turnaroundTimeNonEmergency || "",
+                
+                // Pricing & Payment
+                bloodProductCosts: serviceData.bloodBankDetails.bloodProductCosts || "",
+                bloodBankAcceptsInsurance: serviceData.bloodBankDetails.acceptsInsurance ? "Yes" : "No",
+                
+                // Donor Recruitment & Retention
+                donorRecruitmentMethods: serviceData.bloodBankDetails.donorRecruitmentMethods || "",
+                hasDonorRetentionStrategy: serviceData.bloodBankDetails.hasDonorRetentionStrategy ? "Yes" : "No",
+                donationSystems: serviceData.bloodBankDetails.donationSystems || [],
+                
+                // Certification
+                bloodBankAccreditations: serviceData.bloodBankDetails.accreditationsCertifications || "",
+                
+                // General fields
+                openingTime: serviceData.bloodBankDetails.operatingHours?.openingTime || "",
+                closingTime: serviceData.bloodBankDetails.operatingHours?.closingTime || "",
+                operatingDays: serviceData.bloodBankDetails.operatingDays || [],
+                hasOtherBranches: serviceData.bloodBankDetails.branches?.length > 0 ? "Yes" : "No",
+                branchAddresses: serviceData.bloodBankDetails.branches?.map((b) => b.address) || [""],
+                additionalInformation: serviceData.bloodBankDetails.additionalInfo || "",
+            };
+            break;
+    }
 
     console.log(newCapabilities, "new capability is here");
     return { newCapabilities, subSpecialities };

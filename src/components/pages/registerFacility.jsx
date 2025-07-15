@@ -356,6 +356,7 @@ export const RegistrationStep = () => {
                                   "Pharmacy",
                                   "Ambulance",
                                   "Insurance",
+                                  "Blood Bank"
                                 ].map((type) => (
                                   <SelectItem
                                     key={type}

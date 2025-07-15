@@ -37,6 +37,8 @@ import Users from "./users";
 import { User } from "lucide-react";
 import Referrals from "./referrals";
 import Navbar from "../pages/navbar";
+import Notifications from "./notifications";
+import { AdminAnalytics } from "./analytics";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
@@ -137,6 +139,7 @@ const AdminDashboard = () => {
         "Ambulance",
         "Insurance",
         "Other",
+        "Blood Bank"
       ].includes(key)
     ) {
       navigate("/admin-dashboard/facilities?type=" + key);
@@ -145,7 +148,10 @@ const AdminDashboard = () => {
     if (key === "5") navigate("/admin-dashboard/users");
     if (key === "6") navigate("/admin-dashboard/referrals");
     if (key === "8") navigate("/admin-dashboard/conversations");
+    if (key === "9") navigate("/admin-dashboard/notifications");
     if (key === "10") navigate("/admin-dashboard/blogs");
+    if (key === "11") navigate("/admin-dashboard/analytics")
+
   };
 
   return (
@@ -200,6 +206,9 @@ const AdminDashboard = () => {
               </Menu.Item>
               <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>
                 Insurance
+              </Menu.Item>
+               <Menu.Item key="Blood Bank" icon={<ExperimentOutlined />}>
+                Blood Bank
               </Menu.Item>
             </SubMenu>
 
@@ -292,7 +301,10 @@ const AdminDashboard = () => {
               <Route path="/referrals" element={<Referrals />} />
               <Route path="/conversations" element={<AdminChatPage />} />
               <Route path="/conversations/:chatId" element={<AdminChatPage />} />
-              <Route path="blogs" element={<AddBlogPost/> }/>
+              <Route path="blogs" element={<AddBlogPost />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
+
 
             </Routes>
           </Content>

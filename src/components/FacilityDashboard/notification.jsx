@@ -67,7 +67,7 @@ const getNotificationMessage = (action) => {
   const fetchNotifications = async () => {
     try {
       const res = await axios.get(
-        `${backendUrl}/api/notifications/${facilityId}?page=1&limit=10`
+        `${backendUrl}/api/notifications/facility/${facilityId}?page=1&limit=10`
       );
       setNotifications(res.data.notifications || []);
     } catch (err) {

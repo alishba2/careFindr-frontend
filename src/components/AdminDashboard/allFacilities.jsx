@@ -13,7 +13,6 @@ import filter from "../../assets/FunnelSimple.png";
 const { Option } = Select;
 
 
-import { verifyAllDocuments } from "../../services/facilityDocs";
 
 
 
@@ -131,7 +130,7 @@ const AllFacilities = () => {
       setTotalPages(response.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch facilities", err);
-      message.error("Failed to fetch facilities");
+    
     } finally {
       setLoading(false);
     }
@@ -232,7 +231,7 @@ const AllFacilities = () => {
   };
 
   // Options for filters
-  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance", "Laboratory"];
+  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance", "Laboratory","Blood Bank"];
   const statusOptions = ["Verified", "Pending", "Need Revision"];
   const stateOptions = states || [];
   const lgaOptions = Object.values(lgas).flat() || [];

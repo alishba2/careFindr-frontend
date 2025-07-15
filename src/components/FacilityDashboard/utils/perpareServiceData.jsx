@@ -125,6 +125,68 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
             };
             break;
 
+        // 🩸 NEW: Blood Bank Case
+        case "Blood Bank":
+            serviceData.bloodBankDetails = {
+                // Blood Products and Types
+                bloodProductsProvided: capabilities.bloodProductsProvided || [],
+                
+                // Screening and Safety
+                infectionsTestedFor: capabilities.infectionsTestedFor || "",
+                
+                // Inventory and Capacity
+                currentBloodInventoryCapacity: capabilities.currentBloodInventoryCapacity || "",
+                maxStorageCapacityPerComponent: capabilities.maxStorageCapacityPerComponent || "",
+                shortageManagement: capabilities.shortageManagement || "",
+                expiryDateTracking: capabilities.expiryDateTracking || "",
+                hasMobileDonationUnits: capabilities.hasMobileDonationUnits === "Yes",
+                averageBloodCollectionTime: capabilities.averageBloodCollectionTime || "",
+                
+                // Operational Standards
+                acceptsReturnedBlood: capabilities.acceptsReturnedBlood === "Yes",
+                returnTimeFrame: capabilities.returnTimeFrame || "",
+                allPhlebotomistsCertified: capabilities.allPhlebotomistsCertified === "Yes",
+                auditFrequency: capabilities.auditFrequency || "",
+                dailyWeeklyRequestVolume: capabilities.dailyWeeklyRequestVolume || "",
+                bloodExpiryManagement: capabilities.bloodExpiryManagement || "",
+                allowsDirectPatientRequests: capabilities.allowsDirectPatientRequests === "Yes",
+                
+                // Logistics & Delivery
+                providesEmergencyDelivery: capabilities.providesEmergencyDelivery === "Yes",
+                emergencyResponseTime: capabilities.emergencyResponseTime || "",
+                logisticsType: capabilities.logisticsType || "",
+                coldChainProcedures: capabilities.coldChainProcedures || "",
+                chargesForDelivery: capabilities.chargesForDelivery === "Yes",
+                deliveryCost: Number(capabilities.deliveryCost) || 0,
+                priorityDispatchAvailable: capabilities.priorityDispatchAvailable === "Yes",
+                turnaroundTimeEmergency: capabilities.turnaroundTimeEmergency || "",
+                turnaroundTimeNonEmergency: capabilities.turnaroundTimeNonEmergency || "",
+                
+                // Pricing & Payment
+                bloodProductCosts: capabilities.bloodProductCosts || "",
+                acceptsInsurance: capabilities.bloodBankAcceptsInsurance === "Yes",
+                
+                // Donor Recruitment & Retention
+                donorRecruitmentMethods: capabilities.donorRecruitmentMethods || "",
+                hasDonorRetentionStrategy: capabilities.hasDonorRetentionStrategy === "Yes",
+                donationSystems: capabilities.donationSystems || [],
+                
+                // Certification
+                accreditationsCertifications: capabilities.bloodBankAccreditations || "",
+                
+                // General fields
+                operatingHours: {
+                    openingTime: capabilities.openingTime,
+                    closingTime: capabilities.closingTime,
+                },
+                operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
+                branches: capabilities.hasOtherBranches === "Yes" 
+                    ? capabilities.branchAddresses.map((address) => ({ address })) 
+                    : [],
+                additionalInfo: capabilities.additionalInformation || "",
+            };
+            break;
+
         default:
             if (!serviceData.hospitalDetails) {
                 serviceData.hospitalDetails = {

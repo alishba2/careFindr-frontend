@@ -53,20 +53,59 @@ const AdminList = () => {
         ...params,
       });
 
-      if (response.success) {
-        setData(
-          response.data.map((admin) => ({
-            ...admin,
-            key: admin._id,
-          }))
-        );
-        setPagination({
-          current: response.pagination.current,
-          pageSize: response.pagination.pageSize,
-          total: response.pagination.total,
-        });
+      console.log(response, "Admin API response");
+
+      // Handle different response structures
+      let adminsData = [];
+      let paginationData = {
+        current: params.current || 1,
+        pageSize: params.pageSize || 10,
+        total: 0,
+      };
+
+      if (response.success && response.admins) {
+        // Structure: { success: true, admins: [...], pagination: {...} }
+        adminsData = response.admins;
+        if (response.pagination) {
+          paginationData = {
+            current: response.pagination.current,
+            pageSize: response.pagination.pageSize,
+            total: response.pagination.total,
+          };
+        } else {
+          paginationData.total = response.admins.length;
+        }
+      } else if (response.admins) {
+        // Structure: { admins: [...] }
+        adminsData = response.admins;
+        paginationData.total = response.admins.length;
+      } else if (Array.isArray(response)) {
+        // Structure: [admin1, admin2, ...]
+        adminsData = response;
+        paginationData.total = response.length;
+      } else {
+        console.error("Unexpected response structure:", response);
+        message.error("Unexpected response format from server");
+        return;
       }
+
+      // Process admin data and add missing fields
+      const processedData = adminsData.map((admin) => ({
+        ...admin,
+        key: admin._id,
+        // Add default status if missing
+        status: admin.status || 'active',
+        // Ensure accessFunctions is array
+        accessFunctions: admin.accessFunctions || [],
+        // Add display name for better UX
+        displayName: admin.fullName || `${admin.firstName || ''} ${admin.lastName || ''}`.trim(),
+      }));
+
+      setData(processedData);
+      setPagination(paginationData);
+
     } catch (error) {
+      console.error("Error fetching admins:", error);
       message.error(error.message || "Failed to fetch admins");
     } finally {
       setLoading(false);
@@ -78,10 +117,20 @@ const AdminList = () => {
     fetchAdmins();
   }, []);
 
-  // Handle search
+  // Handle search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchText !== undefined) {
+        fetchAdmins({ current: 1, pageSize: pagination.pageSize });
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchText]);
+
+  // Handle search input change
   const handleSearch = (value) => {
     setSearchText(value);
-    fetchAdmins({ current: 1, pageSize: pagination.pageSize });
   };
 
   // Handle pagination change
@@ -99,7 +148,10 @@ const AdminList = () => {
         role: admin.role,
         phone: admin.phone,
         accessType: admin.accessType,
+        status: admin.status,
       });
+    } else {
+      form.resetFields();
     }
     setIsModalVisible(true);
   };
@@ -114,46 +166,62 @@ const AdminList = () => {
   // Handle form submit
   const onFinish = async (values) => {
     try {
+      setLoading(true);
+      let response;
+
       if (editingAdmin) {
         // Update existing admin
-        const response = await updateAdmin(editingAdmin._id, values);
-        if (response.success) {
-          message.success("Admin updated successfully!");
-          fetchAdmins({
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-          });
-        }
+        response = await updateAdmin(editingAdmin._id, values);
       } else {
         // Create new admin
-        const response = await createAdmin(values);
-        if (response.success) {
-          message.success("Admin created successfully!");
-          fetchAdmins({
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-          });
-        }
+        response = await createAdmin(values);
       }
-      handleCancel();
+
+      // Handle different response structures
+      if (response && (response.success !== false)) {
+        message.success(
+          editingAdmin 
+            ? "Admin updated successfully!" 
+            : "Admin created successfully!"
+        );
+        
+        await fetchAdmins({
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+        });
+        
+        handleCancel();
+      } else {
+        throw new Error(response?.message || "Operation failed");
+      }
     } catch (error) {
+      console.error("Error saving admin:", error);
       message.error(error.message || "Operation failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle delete
   const handleDelete = async (adminId) => {
     try {
+      setLoading(true);
       const response = await deleteAdmin(adminId);
-      if (response.success) {
+      
+      if (response && (response.success !== false)) {
         message.success("Admin deleted successfully!");
-        fetchAdmins({
+        await fetchAdmins({
           current: pagination.current,
           pageSize: pagination.pageSize,
         });
+      } else {
+        throw new Error(response?.message || "Failed to delete admin");
       }
     } catch (error) {
+      console.error("Error deleting admin:", error);
       message.error(error.message || "Failed to delete admin");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,17 +232,16 @@ const AdminList = () => {
       dataIndex: "fullName",
       key: "fullName",
       sorter: true,
+      render: (text, record) => {
+        return record.displayName || text || 'N/A';
+      }
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
-    {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-    },
+  
     {
       title: "Access Type",
       dataIndex: "accessType",
@@ -184,29 +251,47 @@ const AdminList = () => {
           superAdmin: "red",
           admin: "blue",
           editor: "green",
+          moderator: "orange",
         };
-        return <Tag color={colors[accessType]}>{accessType}</Tag>;
+        const color = colors[accessType] || "default";
+        return (
+          <Tag color={color}>
+            {accessType?.charAt(0).toUpperCase() + accessType?.slice(1) || 'N/A'}
+          </Tag>
+        );
       },
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
+      render: (phone) => phone || 'N/A',
     },
     {
       title: "Date Joined",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date) => {
+        try {
+          return date ? new Date(date).toLocaleDateString() : 'N/A';
+        } catch (error) {
+          return 'Invalid Date';
+        }
+      },
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={status === "active" ? "green" : "red"}>{status}</Tag>
-      ),
-    },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status) => {
+    //     const statusValue = status || 'active';
+    //     return (
+    //       <Tag color={statusValue === "active" ? "green" : "red"}>
+    //         {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
+    //       </Tag>
+    //     );
+    //   },
+    // },
     {
       title: "Actions",
       key: "actions",
@@ -218,16 +303,24 @@ const AdminList = () => {
               type="text"
               icon={<EditOutlined />}
               onClick={() => showModal(record)}
+              loading={loading}
             />
           </Tooltip>
           <Popconfirm
-            title="Are you sure you want to delete this admin?"
+            title="Delete Admin"
+            description="Are you sure you want to delete this admin?"
             onConfirm={() => handleDelete(record._id)}
             okText="Yes"
             cancelText="No"
+            okButtonProps={{ loading: loading }}
           >
             <Tooltip title="Delete">
-              <Button type="text" danger icon={<DeleteOutlined />} />
+              <Button 
+                type="text" 
+                danger 
+                icon={<DeleteOutlined />}
+                loading={loading}
+              />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -250,9 +343,10 @@ const AdminList = () => {
           />
           <Button
             type="primary"
-            className="h-10 rounded-xl"
+            className="h-10 rounded-xl bg-primarysolid"
             icon={<PlusOutlined />}
             onClick={() => showModal()}
+            loading={loading}
           >
             Add Admin
           </Button>
@@ -264,9 +358,16 @@ const AdminList = () => {
           columns={columns}
           dataSource={data}
           loading={loading}
-          pagination={pagination}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`,
+          }}
           onChange={handleTableChange}
           className="overflow-x-auto rounded-xl"
+          scroll={{ x: 800 }}
         />
       </div>
 
@@ -276,6 +377,7 @@ const AdminList = () => {
         onCancel={handleCancel}
         footer={null}
         className="text-center"
+        destroyOnClose={true}
       >
         <Form
           form={form}
@@ -287,7 +389,10 @@ const AdminList = () => {
           <Form.Item
             name="fullName"
             label="Full Name"
-            rules={[{ required: true, message: "Please input the full name!" }]}
+            rules={[
+              { required: true, message: "Please input the full name!" },
+              { min: 2, message: "Name must be at least 2 characters!" }
+            ]}
           >
             <Input className="py-3" placeholder="Enter full name" />
           </Form.Item>
@@ -308,20 +413,10 @@ const AdminList = () => {
             label="Phone"
             rules={[
               { required: true, message: "Please input the phone number!" },
+              { pattern: /^[\+]?[\d\s\-\(\)]+$/, message: "Please enter a valid phone number!" }
             ]}
           >
             <Input className="py-3" placeholder="Enter phone number" />
-          </Form.Item>
-
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Please input the role!" }]}
-          >
-            <Input
-              className="py-3"
-              placeholder="Enter role (e.g., Manager, Assistant)"
-            />
           </Form.Item>
 
           <Form.Item
@@ -336,6 +431,7 @@ const AdminList = () => {
               <Option value="admin">Admin</Option>
               <Option value="superAdmin">Super Admin</Option>
               <Option value="editor">Editor</Option>
+              <Option value="moderator">Moderator</Option>
             </Select>
           </Form.Item>
 
@@ -353,7 +449,13 @@ const AdminList = () => {
           )}
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button 
+            
+              htmlType="submit" 
+              className="w-full h-12 bg-primarysolid"
+              loading={loading}
+              
+            >
               {editingAdmin ? "Update Admin" : "Add Admin"}
             </Button>
           </Form.Item>

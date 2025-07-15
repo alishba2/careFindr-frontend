@@ -20,6 +20,8 @@ import SpecialistClinicForm from "./forms/SpecialistClinicForm";
 import { initialCapabilitiesState } from "./utils/initialState";
 import { loadServiceData } from "./utils/loadServiceData";
 import { prepareServiceData } from "./utils/perpareServiceData";
+import BloodBankForm from "./forms/BloodbankFrom";
+
 export const HospitalServices = () => {
     const { authData, facilityType, fetchAuthData, setIsAmbulance } = useAuth();
     const [progress, setProgress] = useState(0);
@@ -46,6 +48,15 @@ export const HospitalServices = () => {
             setFacility(facilityType);
         }
     }, [facilityType, type]);
+
+    // Separate useEffect for handling ambulance setting when capabilities change
+    useEffect(() => {
+        console.log(capabilities, "capabilities");
+        
+        if (capabilities.hasLaboratory) {
+            setIsAmbulance(true);
+        }
+    }, [capabilities, setIsAmbulance]);
 
     const areStatesEqual = (state1, state2) => {
         return JSON.stringify(state1) === JSON.stringify(state2);
@@ -88,9 +99,9 @@ export const HospitalServices = () => {
 
     useEffect(() => {
         const getFacilityServices = async () => {
-
             try {
-                const response = await GetFacilityService();
+                console.log(authData,"auth data is here" );
+                const response = await GetFacilityService(authData?._id);
                 if (response?.service) {
                     const serviceData = response.service;
                     setProgress(2);
@@ -104,19 +115,7 @@ export const HospitalServices = () => {
 
                     console.log(newCapabilities, "new capabilities here");
 
-                    // if(newCapabilities?.)
-
-
-                    useEffect(() => {
-
-                        console.log(capabilities, "capabilities");
-
-                        if (capabilities.hasLaboratory) {
-                            setIsAmbulance(true);
-                        }
-
-                    }, [capabilities])
-
+                    // Set capabilities and initial capabilities immediately
                     setCapabilities(newCapabilities);
                     setInitialCapabilities(JSON.parse(JSON.stringify(newCapabilities)));
 
@@ -138,7 +137,7 @@ export const HospitalServices = () => {
         }
 
         getFacilityServices();
-    }, []);
+    }, [authData]); // Empty dependency array to run only once
 
     const handleSubmit = async () => {
         if (!validateOperatingHours()) {
@@ -203,6 +202,9 @@ export const HospitalServices = () => {
                 return <InsuranceForm {...commonProps} />;
             case "SpecialistClinic":
                 return <SpecialistClinicForm {...commonProps} />;
+            
+            case "Blood Bank":
+                return <BloodBankForm {...commonProps} />;
             default:
                 return null;
         }

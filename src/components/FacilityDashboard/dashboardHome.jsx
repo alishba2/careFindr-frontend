@@ -52,7 +52,7 @@ export default function DashboardHome() {
     setLoadingNotifications(true);
     try {
       const res = await axios.get(
-        `${backendUrl}/api/notifications/${authData?._id}?page=1&limit=5`
+        `${backendUrl}/api/notifications/facility/${authData?._id}?page=1&limit=5`
       );
       setRecentActivity(res.data.notifications?.slice(0, 5) || []);
     } catch (err) {

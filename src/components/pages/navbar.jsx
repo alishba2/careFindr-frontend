@@ -13,6 +13,7 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
+    let userType = localStorage.getItem("userType");
 
     // Fetch token from localStorage on component mount
     useEffect(() => {
@@ -55,12 +56,25 @@ export default function Navbar() {
         localStorage.clear();
         setToken(null);
         setIsMenuOpen(false);
-        navigate("/login");
+        
+        // Redirect based on user type
+        if (userType === "admin") {
+            navigate("/admin-login");
+        } else {
+            navigate("/login");
+        }
     };
 
     const handleNavigation = (path) => {
         navigate(path);
         setIsMenuOpen(false);
+    };
+
+    const getDashboardPath = () => {
+        if (userType === "admin") {
+            return "/admin-dashboard/home";
+        }
+        return "/facility-dashboard/home";
     };
 
     const navItems = [
@@ -69,6 +83,9 @@ export default function Navbar() {
         { label: "Hospitals", id: "hospitals" },
         { label: "FAQ", id: "faq" },
     ];
+
+    // Don't show menu items for admin users
+    const shouldShowMenuItems = userType !== "admin";
 
     if (loading) {
         return null;
@@ -90,20 +107,22 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
-                            {navItems.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => scrollToSection(item.id)}
-                                    className="text-gray-700 hover:text-primarysolid px-3 py-2 text-sm font-medium transition-colors"
-                                >
-                                    {item.label}
-                                </button>
-                            ))}
+                    {/* Desktop Navigation - Only show for non-admin users */}
+                    {shouldShowMenuItems && (
+                        <div className="hidden md:block">
+                            <div className="ml-10 flex items-baseline space-x-4">
+                                {navItems.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => scrollToSection(item.id)}
+                                        className="text-gray-700 hover:text-primarysolid px-3 py-2 text-sm font-medium transition-colors"
+                                    >
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Desktop Right Side Buttons */}
                     <div className="hidden md:flex items-center gap-2">
@@ -111,18 +130,13 @@ export default function Navbar() {
                             <>
                                 <Button
                                     variant="ghost"
-                                    onClick={() => {
-                                        localStorage.removeItem("token");
-                                        localStorage.clear();
-                                        setToken(null);
-                                        navigate("/login");
-                                    }}
+                                    onClick={handleLogout}
                                     className="text-primarysolid hover:primarysolid"
                                 >
                                     Logout
                                 </Button>
                                 <Button
-                                    onClick={() => navigate("/facility-dashboard/home")}
+                                    onClick={() => navigate(getDashboardPath())}
                                     className="bg-primarysolid md:text-sm hover:bg-primarysolid text-white shadow-sm"
                                 >
                                     Dashboard
@@ -147,25 +161,27 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* Mobile Menu Toggle */}
-                    <div className="md:hidden ml-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="text-gray-700 hover:primarysolid"
-                        >
-                            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                        </Button>
-                    </div>
+                    {/* Mobile Menu Toggle - Only show if there are menu items or user is not logged in */}
+                    {(shouldShowMenuItems || !token) && (
+                        <div className="md:hidden ml-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="text-gray-700 hover:primarysolid"
+                            >
+                                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Mobile Navigation */}
-                {isMenuOpen && (
+                {/* Mobile Navigation - Only show for non-admin users */}
+                {isMenuOpen && (shouldShowMenuItems || !token) && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
-                            {/* Navigation Items */}
-                            {navItems.map((item) => (
+                            {/* Navigation Items - Only show for non-admin users */}
+                            {shouldShowMenuItems && navItems.map((item) => (
                                 <button
                                     key={item.id}
                                     onClick={() => scrollToSection(item.id)}
@@ -176,11 +192,11 @@ export default function Navbar() {
                             ))}
 
                             {/* Authentication Buttons in Mobile Menu */}
-                            <div className="border-t border-gray-200 pt-3 mt-3">
+                            <div className={`border-t border-gray-200 pt-3 ${shouldShowMenuItems ? 'mt-3' : ''}`}>
                                 {token ? (
                                     <>
                                         <button
-                                            onClick={() => handleNavigation("/facility-dashboard/home")}
+                                            onClick={() => handleNavigation(getDashboardPath())}
                                             className="bg-primarysolid text-white block px-3 py-2 text-base font-medium w-full text-left rounded-md mb-2 hover:bg-primarysolid/90 transition-colors"
                                         >
                                             Dashboard
