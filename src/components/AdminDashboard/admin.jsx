@@ -431,7 +431,7 @@ const AdminList = () => {
               <Option value="admin">Admin</Option>
               <Option value="superAdmin">Super Admin</Option>
               <Option value="editor">Editor</Option>
-              <Option value="moderator">Moderator</Option>
+              {/* <Option value="moderator">Moderator</Option> */}
             </Select>
           </Form.Item>
 
