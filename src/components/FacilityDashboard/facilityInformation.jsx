@@ -149,7 +149,7 @@ const OtpInput = ({ otp, setOtp, onVerify, disabled = false }) => {
 };
 
 export const FacilityInformation = () => {
-    const { authData, fetchAuthData, role } = useAuth();
+    const { authData, fetchAuthData } = useAuth();
     const [selectedState, setSelectedState] = useState("");
     const [error, setError] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -161,12 +161,8 @@ export const FacilityInformation = () => {
     const [whatsappOtp, setWhatsappOtp] = useState(["", "", "", "", "", ""]);
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
     const [isWhatsappVerified, setIsWhatsappVerified] = useState(false);
-    let userType = localStorage.getItem("userType");
 
     const navigate = useNavigate();
-
-    // Check if user is admin
-    const isAdmin = userType === "admin";
 
     const [initialValues, setInitialValues] = useState({
         facilityType: "Hospital",
@@ -216,7 +212,6 @@ export const FacilityInformation = () => {
     }, [authData]);
 
     const handleSendOtp = async (number, type) => {
-        if (isAdmin) return;
         try {
             let phone = number;
             await sendOtp({ phone, type });
@@ -238,7 +233,6 @@ export const FacilityInformation = () => {
     };
 
     const handleVerifyOtp = async (otp, number, type) => {
-        if (isAdmin) return;
         try {
             let phone = number;
             await verifyOtp({ otp, phone, type });
@@ -265,11 +259,6 @@ export const FacilityInformation = () => {
     };
 
     const handleSubmit = async (values, { setSubmitting }) => {
-        if (isAdmin) {
-            setSubmitting(false);
-            return;
-        }
-
         if (!isPhoneVerified || !isWhatsappVerified) {
             setError("Please verify both phone and WhatsApp numbers before submitting.");
             setSubmitting(false);
@@ -327,27 +316,15 @@ export const FacilityInformation = () => {
 
     return (
         <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
-            {
-                userType != "admin" ? (
-                    <>
-                        <StepProgress currentStep={authData?.onBoardingStep} />
-                        <div className=" p-6 h-24 flex flex-col gap-2">
-                            <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
-                                Facility Information
-                            </h2>
-                            <p className="text-base font-inter font-medium text-[16px] leading-[24px] tracking-[0.5%] font-[500]">
-                                Manage and update facility information
-                            </p>
-                        </div>
-                    </>
-                ) : (
-                    <div className=" p-6 h-2 flex flex-col gap-2">
-                        <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
-                            Facility Information
-                        </h2>
-                    </div>
-                )
-            }
+            <StepProgress currentStep={authData?.onBoardingStep} />
+            <div className=" p-6 h-24 flex flex-col gap-2">
+                <h2 className="text-[30px] font-semibold text-fgtext-contrast leading-[36px] tracking-[0.5%]">
+                    Facility Information
+                </h2>
+                <p className="text-base font-inter font-medium text-[16px] leading-[24px] tracking-[0.5%] font-[500]">
+                    Manage and update facility information
+                </p>
+            </div>
 
             <Card className="border-none shadow-none mt-10">
                 <CardContent className="px-6">
@@ -374,14 +351,13 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => {
+                                                    onValueChange={(val) => {
                                                         setFieldValue("facilityType", val);
                                                         setFieldValue("hospitalType", null);
                                                         setFieldValue("insuranceType", null);
                                                     }}
-                                                    disabled={isAdmin}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Choose facility type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -415,8 +391,7 @@ export const FacilityInformation = () => {
                                             as={Input}
                                             name="facilityName"
                                             placeholder="Enter facility name"
-                                            className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                            disabled={isAdmin}
+                                            className="h-12 border-[#d7dbdf] w-full"
                                         />
                                         <ErrorMessage
                                             name="facilityName"
@@ -435,10 +410,9 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => setFieldValue("hospitalType", val)}
-                                                    disabled={isAdmin}
+                                                    onValueChange={(val) => setFieldValue("hospitalType", val)}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select hospital type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -466,10 +440,9 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => setFieldValue("insuranceType", val)}
-                                                    disabled={isAdmin}
+                                                    onValueChange={(val) => setFieldValue("insuranceType", val)}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select insurance type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -497,8 +470,7 @@ export const FacilityInformation = () => {
                                             as={Input}
                                             name="contactEmail"
                                             placeholder="johndoe@mail.com"
-                                            className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                            disabled={isAdmin}
+                                            className="h-12 border-[#d7dbdf] w-full"
                                         />
                                         <ErrorMessage
                                             name="contactEmail"
@@ -516,7 +488,7 @@ export const FacilityInformation = () => {
                                                     <PhoneInput
                                                         country={"ng"}
                                                         value={field.value}
-                                                        onChange={isAdmin ? undefined : (val) => {
+                                                        onChange={(val) => {
                                                             setPhoneNumber(val);
                                                             setFieldValue("phoneNumber", val);
                                                             if (val !== authData?.phone) {
@@ -524,29 +496,24 @@ export const FacilityInformation = () => {
                                                                 setIsPhoneVerifying(false);
                                                             }
                                                         }}
-                                                        inputClass={`!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full ${isAdmin ? '!bg-gray-100 !cursor-not-allowed' : ''}`}
+                                                        inputClass="!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full"
                                                         inputStyle={{ width: "100%" }}
                                                         countryCodeEditable={false}
-                                                        disabled={isAdmin}
                                                     />
                                                 )}
                                             </Field>
-                                            {!isAdmin && (
-                                                <>
-                                                    {isPhoneVerified ? (
-                                                        <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
-                                                            Verified
-                                                        </span>
-                                                    ) : (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleSendOtp(phoneNumber, "phone")}
-                                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
-                                                        >
-                                                            Verify
-                                                        </button>
-                                                    )}
-                                                </>
+                                            {isPhoneVerified ? (
+                                                <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSendOtp(phoneNumber, "phone")}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
+                                                >
+                                                    Verify
+                                                </button>
                                             )}
                                         </div>
                                         <ErrorMessage
@@ -554,14 +521,13 @@ export const FacilityInformation = () => {
                                             component="div"
                                             className="text-red-500 text-sm"
                                         />
-                                        {isPhoneVerifying && !isAdmin && (
+                                        {isPhoneVerifying && (
                                             <div className="mt-2">
                                                 <label className="text-sm font-medium">Enter OTP</label>
                                                 <OtpInput
                                                     otp={phoneOtp}
                                                     setOtp={setPhoneOtp}
                                                     onVerify={(otp) => handleVerifyOtp(otp, phoneNumber, "phone")}
-                                                    disabled={isAdmin}
                                                 />
                                                 <div className="text-sm mt-1">
                                                     Didn't receive?{" "}
@@ -588,14 +554,13 @@ export const FacilityInformation = () => {
                                                 <PhoneInput
                                                     country={"ng"}
                                                     value={field.value}
-                                                    onChange={isAdmin ? undefined : (val) => {
+                                                    onChange={(val) => {
                                                         setSecondaryPhone(val);
                                                         setFieldValue("secondaryPhone", val);
                                                     }}
-                                                    inputClass={`!h-12 !border !border-[#d7dbdf] !rounded !w-full ${isAdmin ? '!bg-gray-100 !cursor-not-allowed' : ''}`}
+                                                    inputClass="!h-12 !border !border-[#d7dbdf] !rounded !w-full"
                                                     inputStyle={{ width: "100%" }}
                                                     countryCodeEditable={false}
-                                                    disabled={isAdmin}
                                                 />
                                             )}
                                         </Field>
@@ -615,7 +580,7 @@ export const FacilityInformation = () => {
                                                     <PhoneInput
                                                         country={"ng"}
                                                         value={field.value}
-                                                        onChange={isAdmin ? undefined : (val) => {
+                                                        onChange={(val) => {
                                                             setWhatsapp(val);
                                                             setFieldValue("whatsapp", val);
                                                             if (val !== authData?.whatsapp) {
@@ -623,29 +588,24 @@ export const FacilityInformation = () => {
                                                                 setIsWhatsappVerifying(false);
                                                             }
                                                         }}
-                                                        inputClass={`!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full ${isAdmin ? '!bg-gray-100 !cursor-not-allowed' : ''}`}
+                                                        inputClass="!h-12 !border !border-[#d7dbdf] !rounded pr-20 !w-full"
                                                         inputStyle={{ width: "100%" }}
                                                         countryCodeEditable={false}
-                                                        disabled={isAdmin}
                                                     />
                                                 )}
                                             </Field>
-                                            {!isAdmin && (
-                                                <>
-                                                    {isWhatsappVerified ? (
-                                                        <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
-                                                            Verified
-                                                        </span>
-                                                    ) : (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleSendOtp(whatsapp, "whatsapp")}
-                                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
-                                                        >
-                                                            Verify
-                                                        </button>
-                                                    )}
-                                                </>
+                                            {isWhatsappVerified ? (
+                                                <span className="absolute px-2 right-2 top-1/2 -translate-y-1/2 h-6 text-green-600 rounded-full border bg-[#E4FAEF] rounded">
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSendOtp(whatsapp, "whatsapp")}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 bg-primarysolid text-white px-3 text-sm rounded"
+                                                >
+                                                    Verify
+                                                </button>
                                             )}
                                         </div>
                                         <ErrorMessage
@@ -653,14 +613,13 @@ export const FacilityInformation = () => {
                                             component="div"
                                             className="text-red-500 text-sm"
                                         />
-                                        {isWhatsappVerifying && !isAdmin && (
+                                        {isWhatsappVerifying && (
                                             <div className="mt-2">
                                                 <label className="text-sm font-medium">Enter OTP</label>
                                                 <OtpInput
                                                     otp={whatsappOtp}
                                                     setOtp={setWhatsappOtp}
                                                     onVerify={(otp) => handleVerifyOtp(otp, whatsapp, "whatsapp")}
-                                                    disabled={isAdmin}
                                                 />
                                                 <div className="text-sm mt-1">
                                                     Didn't receive?{" "}
@@ -668,7 +627,6 @@ export const FacilityInformation = () => {
                                                         type="button"
                                                         onClick={() => handleSendOtp(whatsapp, "whatsapp")}
                                                         className="text-blue-600"
-                                                        disabled={isAdmin}
                                                     >
                                                         Send again
                                                     </button>
@@ -686,8 +644,7 @@ export const FacilityInformation = () => {
                                         as={Input}
                                         name="address"
                                         placeholder="Enter your address"
-                                        className={`h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200 ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                        disabled={isAdmin}
+                                        className="h-12 border-[#d7dbdf] focus:border-primarysolid transition-all duration-200"
                                     />
                                     <ErrorMessage
                                         name="address"
@@ -705,10 +662,9 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => setFieldValue("country", val)}
-                                                    disabled={isAdmin}
+                                                    onValueChange={(val) => setFieldValue("country", val)}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Nigeria" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -731,15 +687,14 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => {
+                                                    onValueChange={(val) => {
                                                         setFieldValue("state", val);
                                                         setFieldValue("lga", "");
                                                         setFieldValue("lcda", "");
                                                         setSelectedState(val);
                                                     }}
-                                                    disabled={isAdmin}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select your state" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -769,13 +724,12 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => {
+                                                    onValueChange={(val) => {
                                                         setFieldValue("lga", val);
                                                         setFieldValue("lcda", "");
                                                     }}
-                                                    disabled={isAdmin}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select your LGA" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -802,8 +756,7 @@ export const FacilityInformation = () => {
                                             as={Input}
                                             name="registrationNumber"
                                             placeholder="Enter registration number"
-                                            className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                            disabled={isAdmin}
+                                            className="h-12 border-[#d7dbdf] w-full"
                                         />
                                         <ErrorMessage
                                             name="registrationNumber"
@@ -822,10 +775,9 @@ export const FacilityInformation = () => {
                                             {({ field }) => (
                                                 <Select
                                                     value={field.value}
-                                                    onValueChange={isAdmin ? undefined : (val) => setFieldValue("lcda", val)}
-                                                    disabled={isAdmin}
+                                                    onValueChange={(val) => setFieldValue("lcda", val)}
                                                 >
-                                                    <SelectTrigger className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}>
+                                                    <SelectTrigger className="h-12 border-[#d7dbdf] w-full">
                                                         <SelectValue placeholder="Select LCDA" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -852,8 +804,7 @@ export const FacilityInformation = () => {
                                         as={Input}
                                         name="website"
                                         placeholder="https://hospital.com"
-                                        className={`h-12 border-[#d7dbdf] w-full ${isAdmin ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                        disabled={isAdmin}
+                                        className="h-12 border-[#d7dbdf] w-full"
                                     />
                                     <ErrorMessage
                                         name="website"
@@ -861,15 +812,13 @@ export const FacilityInformation = () => {
                                         className="text-red-500 text-sm"
                                     />
                                 </div>
-                                {userType !== "admin" && (
-                                    <Button
-                                        type="submit"
-                                        disabled={isSubmitting || !isPhoneVerified || !isWhatsappVerified || !dirty}
-                                        className="w-full h-12 bg-primarysolid text-white rounded-xl"
-                                    >
-                                        {isSubmitting ? "Updating..." : "Update & Next"}
-                                    </Button>
-                                )}
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting || !isPhoneVerified || !isWhatsappVerified || !dirty}
+                                    className="w-full h-12 bg-primarysolid text-white rounded-xl"
+                                >
+                                    {isSubmitting ? "Updating..." : "Update & Next"}
+                                </Button>
                             </Form>
                         )}
                     </Formik>
