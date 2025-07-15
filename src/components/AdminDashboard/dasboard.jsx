@@ -159,11 +159,21 @@ const AdminDashboard = () => {
       <Navbar />
       <Layout>
         <Sider
-          width={320}
-          className="bg-white shadow-md mt-6 mx-6 rounded-xl p-4"
+          width={collapsed ? 60 : Math.min(350, window.innerWidth - 40)}
           collapsible
           collapsed={collapsed}
           trigger={null}
+          className="bg-white shadow-md mt-6  mx-2 rounded-xl px-4 pt-6"
+          breakpoint="md"
+          collapsedWidth={60}
+          onBreakpoint={(broken) => setCollapsed(broken)}
+          style={{
+            height: "calc(100vh - 6rem)",
+            maxWidth: "calc(100vw - 20px)",
+            overflow: "scroll",
+            scrollbarWidth: "none",
+
+          }}
         >
           <div className="flex justify-end mb-4">
             <Button
@@ -207,7 +217,7 @@ const AdminDashboard = () => {
               <Menu.Item key="Insurance" icon={<FileSearchOutlined />}>
                 Insurance
               </Menu.Item>
-               <Menu.Item key="Blood Bank" icon={<ExperimentOutlined />}>
+              <Menu.Item key="Blood Bank" icon={<ExperimentOutlined />}>
                 Blood Bank
               </Menu.Item>
             </SubMenu>
@@ -243,7 +253,14 @@ const AdminDashboard = () => {
         </Sider>
 
         <Layout>
-          <Content className="p-6">
+          <Content
+            style={{
+              height: "100%",
+              overflowY: "scroll",
+              backgroundColor: "#f5f5f5",
+              maxHeight: "93vh",
+            }}
+          className="p-6">
             <Routes>
               <Route
                 path="/"
