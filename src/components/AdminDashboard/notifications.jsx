@@ -260,38 +260,43 @@ const Notifications = ({ loc }) => {
                         ))}
                     </div>
 
-                    {/* Enhanced Pagination - Only show in full page mode */}
-                    {!isDashboard && totalCount > 0 && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                            <Row justify="space-between" align="middle" className="flex-wrap gap-4">
-                                <Col xs={24} sm={12} md={8}>
-                                    <div className="text-sm text-gray-600">
-                                        Showing {((currentPage - 1) * itemsPerPage) + 1} to{' '}
-                                        {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} notifications
-                                    </div>
-                                </Col>
+               {/* Enhanced Pagination - Only show in full page mode */}
+{!isDashboard && totalCount > 0 && (
+    <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200 shadow-sm">
+        <Row justify="space-between" align="middle" className="flex-wrap gap-2 sm:gap-4">
+            {/* Results Count - Always visible but text size adjusts */}
+        
 
-                                <Col xs={24} sm={12} md={16} className="flex justify-end">
-                                    <Pagination
-                                        current={currentPage}
-                                        total={totalCount}
-                                        pageSize={itemsPerPage}
-                                        onChange={handlePageChange}
-                                        onShowSizeChange={handlePageChange}
-                                        showSizeChanger={true}
-                                        showQuickJumper={true}
-                                        showTotal={(total, range) =>
-                                            `${range[0]}-${range[1]} of ${total}`
-                                        }
-                                        pageSizeOptions={['5', '10', '20', '50']}
-                                        size="default"
-                                        className="text-center"
-                                        responsive={true}
-                                    />
-                                </Col>
-                            </Row>
-                        </div>
-                    )}
+            {/* Pagination Controls */}
+            <Col xs={24} sm={24} md={12} lg={16} xl={16}>
+                <div className="flex justify-center md:justify-end">
+                    <Pagination
+                    align="center"
+                        current={currentPage}
+                        total={totalCount}
+                        pageSize={itemsPerPage}
+                        onChange={handlePageChange}
+                        onShowSizeChange={handlePageChange}
+                        showSizeChanger={false}
+                        // showQuickJumper={window.innerWidth >= 768} // Hide quick jumper on mobile
+                        showTotal={(total, range) =>
+                            window.innerWidth >= 640 
+                                ? `${range[0]}-${range[1]} of ${total}`
+                                : `${range[0]}-${range[1]}` // Shorter text on mobile
+                        }
+                        pageSizeOptions={['5', '10', '20', '50']}
+                        size={window.innerWidth >= 640 ? "default" : "small"} // Smaller on mobile
+                        className="text-center"
+                        responsive={true}
+                        // Custom props for better mobile experience
+                        showLessItems={window.innerWidth < 480} // Show fewer page numbers on very small screens
+                        simple={window.innerWidth < 380} // Simple pagination on very small screens
+                    />
+                </div>
+            </Col>
+        </Row>
+    </div>
+)}
 
                     {/* Dashboard mode "View All" link */}
                     {isDashboard && notifications.length > 0 && (

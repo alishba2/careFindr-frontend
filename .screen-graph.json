@@ -48,8 +48,8 @@
       ]
     },
     {
-      "id": "src/components/FacilityDashboard/notification.jsx",
-      "label": "notification",
+      "id": "src/components/AdminDashboard/notifications.jsx",
+      "label": "notifications",
       "routes": [
         "notifications"
       ]
@@ -124,9 +124,9 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:217:20-to-src/components/FacilityDashboard/notification.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:217:20-to-src/components/AdminDashboard/notifications.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
-      "target": "src/components/FacilityDashboard/notification.jsx",
+      "target": "src/components/AdminDashboard/notifications.jsx",
       "data": {
         "viaRoute": "notifications",
         "trigger": {
