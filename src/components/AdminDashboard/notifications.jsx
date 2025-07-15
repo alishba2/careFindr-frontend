@@ -5,14 +5,19 @@ import { getAllNotifications } from '../../services/notification';
 
 const { Option } = Select;
 
-const Notifications = () => {
+const Notifications = ({ loc }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(loc === 'dashboard' ? 5 : 10);
     const [error, setError] = useState(null);
+
+    // Check if this is dashboard mode
+    const isDashboard = loc === 'dashboard';
+
+    console.log(loc, "locaitoin is here");
 
     // Function to format action text
     const formatAction = (action) => {
@@ -24,6 +29,9 @@ const Notifications = () => {
             'NEW_REFERRAL': 'received a new patient referral',
             'FACILITY_APPROVED': 'was approved',
             'FACILITY_REJECTED': 'was rejected',
+            'DOCUMENT_VERIFIED': 'had documents verified',
+            'DOCUMENT_REJECTED': 'had documents rejected',
+            'ONBOARDING_COMPLETED': 'completed onboarding',
             // Add more action mappings as needed
         };
 
@@ -35,8 +43,12 @@ const Notifications = () => {
         const date = new Date(dateString);
         const now = new Date();
         const diffTime = Math.abs(now - date);
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+        if (diffMinutes < 60) return `${diffMinutes} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
         if (diffDays === 1) return '1 day ago';
         if (diffDays < 7) return `${diffDays} days ago`;
         if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
@@ -54,6 +66,9 @@ const Notifications = () => {
             'NEW_REFERRAL': 'orange',
             'FACILITY_APPROVED': 'green',
             'FACILITY_REJECTED': 'red',
+            'DOCUMENT_VERIFIED': 'green',
+            'DOCUMENT_REJECTED': 'red',
+            'ONBOARDING_COMPLETED': 'cyan',
         };
         return colorMap[action] || 'default';
     };
@@ -63,7 +78,9 @@ const Notifications = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await getAllNotifications(page, limit);
+            
+            // For dashboard mode, always get first 5
+            const response = await getAllNotifications(isDashboard ? 1 : page, isDashboard ? 5 : limit);
 
             if (response && response.notifications) {
                 setNotifications(response.notifications);
@@ -79,11 +96,19 @@ const Notifications = () => {
     };
 
     useEffect(() => {
-        fetchNotifications(currentPage, itemsPerPage);
-    }, [currentPage, itemsPerPage]);
+        if (isDashboard) {
+            // Dashboard mode: always fetch first 5
+            fetchNotifications(1, 5);
+        } else {
+            // Full page mode: normal pagination
+            fetchNotifications(currentPage, itemsPerPage);
+        }
+    }, [currentPage, itemsPerPage, isDashboard]);
 
-    // Handle page change
+    // Handle page change (only for non-dashboard mode)
     const handlePageChange = (page, pageSize) => {
+        if (isDashboard) return; // Don't handle pagination in dashboard mode
+        
         setCurrentPage(page);
         if (pageSize !== itemsPerPage) {
             setItemsPerPage(pageSize);
@@ -91,26 +116,34 @@ const Notifications = () => {
         }
     };
 
-    // Handle page size change
+    // Handle page size change (only for non-dashboard mode)
     const handlePageSizeChange = (value) => {
+        if (isDashboard) return;
+        
         setItemsPerPage(value);
         setCurrentPage(1); // Reset to first page
     };
 
     // Refresh notifications
     const handleRefresh = () => {
-        fetchNotifications(currentPage, itemsPerPage);
+        if (isDashboard) {
+            fetchNotifications(1, 5);
+        } else {
+            fetchNotifications(currentPage, itemsPerPage);
+        }
     };
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto p-6">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-                        <BellOutlined className="text-blue-500" />
-                        Notifications
-                    </h2>
-                </div>
+            <div className={isDashboard ? "" : "max-w-6xl mx-auto p-6"}>
+                {!isDashboard && (
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                            <BellOutlined className="text-blue-500" />
+                            Notifications
+                        </h2>
+                    </div>
+                )}
                 <div className="flex justify-center items-center py-20">
                     <Spin size="large" tip="Loading notifications..." />
                 </div>
@@ -120,13 +153,15 @@ const Notifications = () => {
 
     if (error) {
         return (
-            <div className="max-w-6xl mx-auto p-6">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-                        <BellOutlined className="text-blue-500" />
-                        Notifications
-                    </h2>
-                </div>
+            <div className={isDashboard ? "" : "max-w-6xl mx-auto p-6"}>
+                {!isDashboard && (
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                            <BellOutlined className="text-blue-500" />
+                            Notifications
+                        </h2>
+                    </div>
+                )}
                 <Alert
                     message="Error"
                     description={error}
@@ -146,58 +181,75 @@ const Notifications = () => {
     }
 
     return (
-        <div className=" mx-auto p-6">
-            {/* Header with Controls */}
-            <div className="mb-6">
-                <Row justify="space-between" align="middle" className="mb-4">
-                    <Col>
-                        <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
-                            <BellOutlined className="text-blue-500" />
-                            Notifications
-                        </h2>
-                        <p className="text-gray-600 mt-1">
-                            {totalCount} total notifications • Page {currentPage} of {totalPages}
-                        </p>
-                    </Col>
+        <div className={isDashboard ? "" : "mx-auto p-6"}>
+            {/* Header with Controls - Only show in full page mode */}
+            {!isDashboard && (
+                <div className="mb-6">
+                    <Row justify="space-between" align="middle" className="mb-4">
+                        <Col>
+                            <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                                <BellOutlined className="text-blue-500" />
+                                Notifications
+                            </h2>
+                            <p className="text-gray-600 mt-1">
+                                {totalCount} total notifications • Page {currentPage} of {totalPages}
+                            </p>
+                        </Col>
+                    </Row>
+                </div>
+            )}
 
-                </Row>
-            </div>
+            {/* Dashboard mode header */}
+            {isDashboard && notifications.length > 0 && (
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Recent Notifications</h3>
+                    <button
+                        onClick={handleRefresh}
+                        className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+                    >
+                        <ReloadOutlined />
+                        Refresh
+                    </button>
+                </div>
+            )}
 
             {/* Notifications List */}
             {notifications.length === 0 ? (
                 <Card className="text-center py-8">
                     <Empty
-                        description="No notifications found"
+                        description={isDashboard ? "No recent notifications" : "No notifications found"}
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                     />
                 </Card>
             ) : (
                 <>
-                    <div className="space-y-3 mb-6">
+                    <div className={`space-y-3 ${isDashboard ? '' : 'mb-6'}`}>
                         {notifications.map((notification) => (
                             <Card
                                 key={notification._id}
                                 className="transition-all duration-200 hover:shadow-md cursor-pointer hover:bg-gray-50"
-                                bodyStyle={{ padding: '16px 20px' }}
+                                bodyStyle={{ padding: isDashboard ? '12px 16px' : '16px 20px' }}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="font-medium text-gray-800">
+                                                <span className={`font-medium text-gray-800 ${isDashboard ? 'text-sm' : ''}`}>
                                                     {notification.facilityId?.name || 'Unknown Facility'}
                                                 </span>
-                                                <span className="text-gray-600">
+                                                <span className={`text-gray-600 ${isDashboard ? 'text-sm' : ''}`}>
                                                     {formatAction(notification.action)}
                                                 </span>
-                                                <Badge
-                                                    color={getActionColor(notification.action)}
-                                                    text={notification.action.replace('_', ' ')}
-                                                    className="text-xs"
-                                                />
+                                                {!isDashboard && (
+                                                    <Badge
+                                                        color={getActionColor(notification.action)}
+                                                        text={notification.action.replace('_', ' ')}
+                                                        className="text-xs"
+                                                    />
+                                                )}
                                             </div>
 
-                                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                                            <div className={`flex items-center gap-1 text-gray-500 ${isDashboard ? 'text-xs' : 'text-sm'}`}>
                                                 <ClockCircleOutlined className="text-xs" />
                                                 {formatDate(notification.createdAt)}
                                             </div>
@@ -208,8 +260,8 @@ const Notifications = () => {
                         ))}
                     </div>
 
-                    {/* Enhanced Pagination */}
-                    {totalCount > 0 && (
+                    {/* Enhanced Pagination - Only show in full page mode */}
+                    {!isDashboard && totalCount > 0 && (
                         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                             <Row justify="space-between" align="middle" className="flex-wrap gap-4">
                                 <Col xs={24} sm={12} md={8}>
@@ -238,6 +290,18 @@ const Notifications = () => {
                                     />
                                 </Col>
                             </Row>
+                        </div>
+                    )}
+
+                    {/* Dashboard mode "View All" link */}
+                    {isDashboard && notifications.length > 0 && (
+                        <div className="mt-4 text-center">
+                            <a 
+                                href="/admin-dashboard/notifications" 
+                                className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                            >
+                                View All Notifications →
+                            </a>
                         </div>
                     )}
                 </>
