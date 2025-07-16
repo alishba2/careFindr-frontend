@@ -361,7 +361,651 @@ const FacilityServiceComponent = ({facilityId}) => {
         );
     };
 
-    // ... [Keep all other existing render functions unchanged - renderHospitalDetails, renderLaboratoryDetails, etc.]
+ const renderHospitalDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No hospital details available</p>
+            </div>
+        );
+
+        return (
+            <div className="border  border-gray-200 rounded-lg p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 bg-none  sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Opening Time</p>
+                        <p className="font-semibold text-gray-900">{details.openingTime}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Closing Time</p>
+                        <p className="font-semibold text-gray-900">{details.closingTime}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Admission Fee</p>
+                        <p className="font-semibold text-green-600">${details.admissionFee}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Consultation Fee</p>
+                        <p className="font-semibold text-green-600">${details.consultationFee}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Total Bed Space</p>
+                        <p className="font-semibold text-blue-600">{details.totalBedSpace}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600 mb-2">Facilities</p>
+                        <div className="flex gap-2">
+                            <span className={`px-2 py-1 rounded text-xs ${details.hasLaboratory ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                Lab: {details.hasLaboratory ? 'Yes' : 'No'}
+                            </span>
+                            <span className={`px-2 py-1 rounded text-xs ${details.hasPharmacy ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                Pharmacy: {details.hasPharmacy ? 'Yes' : 'No'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Operation Days */}
+                {details.operationDays && details.operationDays.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Operation Days</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.operationDays.map((day, index) => (
+                                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+                                    {day}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Core Clinical Specialities */}
+                {details.coreClinicalSpecialities && details.coreClinicalSpecialities.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Core Clinical Specialities</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.coreClinicalSpecialities.map((specialty, index) => (
+                                <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm capitalize">
+                                    {specialty}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Sub Specialities */}
+                {details.subSpecialities && details.subSpecialities.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Sub Specialities</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.subSpecialities.map((specialty, index) => (
+                                <span key={index} className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">
+                                    {specialty}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Facility Features */}
+                {details.facilityFeatures && details.facilityFeatures.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Facility Features</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.facilityFeatures.map((feature, index) => (
+                                <span key={index} className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm capitalize">
+                                    {feature.replace('-', ' ')}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.name && (
+                                        <p className="text-sm mb-1">
+                                            <span className="font-medium">Name:</span> {branch.name}
+                                        </p>
+                                    )}
+                                    {branch.address && (
+                                        <div className="text-sm mb-1">
+                                            <span className="font-medium">Address:</span>
+                                            {Array.isArray(branch.address) ? (
+                                                <ul className="ml-4 mt-1">
+                                                    {branch.address.map((addr, addrIndex) => (
+                                                        <li key={addrIndex} className="text-gray-600">• {addr}</li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <span className="text-gray-600"> {branch.address}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {branch.phone && (
+                                        <p className="text-sm mb-1">
+                                            <span className="font-medium">Phone:</span> <span className="text-gray-600">{branch.phone}</span>
+                                        </p>
+                                    )}
+                                    {branch.email && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Email:</span> <span className="text-gray-600">{branch.email}</span>
+                                        </p>
+                                    )}
+                                    
+                                    {/* Show other branch properties */}
+                                    {Object.keys(branch).filter(key => !['name', 'address', 'phone', 'email'].includes(key)).map(key => (
+                                        <p key={key} className="text-sm">
+                                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
+                                            <span className="text-gray-600"> {String(branch[key])}</span>
+                                        </p>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderLaboratoryDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No laboratory details available</p>
+            </div>
+        );
+        
+        return (
+            <div className=" p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Accreditation Status</p>
+                        <p className={`font-semibold ${details.accreditationStatus === 'Approved' ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.accreditationStatus || 'Not specified'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Home Sample Collection</p>
+                        <p className={`font-semibold ${details.homeSampleCollection ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.homeSampleCollection ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">COVID-19 Testing</p>
+                        <p className={`font-semibold ${details.covid19Testing ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.covid19Testing ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    {details.operatingHours && (
+                        <>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Opening Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.openingTime}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Closing Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.closingTime}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span> 
+                                            <span className="text-gray-600"> {branch.address}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderPharmacyDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No pharmacy details available</p>
+            </div>
+        );
+        
+        return (
+            <div className="bg-white p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Licensed Pharmacist On Site</p>
+                        <p className={`font-semibold ${details.hasLicensedPharmacistOnSite ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.hasLicensedPharmacistOnSite ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Delivery Available</p>
+                        <p className={`font-semibold ${details.deliveryAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.deliveryAvailable ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    {details.operatingHours && (
+                        <>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Opening Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.openingTime}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Closing Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.closingTime}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Compliance Documents */}
+                {details.complianceDocuments && details.complianceDocuments.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Compliance Documents</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.complianceDocuments.map((doc, index) => (
+                                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+                                    {doc}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Accepted Payments */}
+                {details.acceptedPayments && details.acceptedPayments.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Accepted Payments</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.acceptedPayments.map((payment, index) => (
+                                <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+                                    {payment}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span> 
+                                            <span className="text-gray-600"> {branch.address}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderAmbulanceDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No ambulance details available</p>
+            </div>
+        );
+        
+        return (
+            <div className="bg-white p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Average Response Time</p>
+                        <p className="font-semibold text-blue-600">{details.avgResponseTime || 'Not specified'}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Road Worthy Ambulances</p>
+                        <p className="font-semibold text-gray-900">{details.numRoadWorthyAmbulances || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Max Daily Trips</p>
+                        <p className="font-semibold text-gray-900">{details.maxTripsDaily || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Backup Vehicles</p>
+                        <p className="font-semibold text-gray-900">{details.backupVehicles || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Pay Per Trip</p>
+                        <p className="font-semibold text-green-600">₦{details.payPerTrip || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Flat Rates</p>
+                        <p className="font-semibold text-green-600">₦{details.flatRates || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Insurance Accepted</p>
+                        <p className={`font-semibold ${details.insuranceAccepted ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.insuranceAccepted ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Registered with Federal Health</p>
+                        <p className={`font-semibold ${details.registeredWithFederalHealth ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.registeredWithFederalHealth ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    {details.operatingHours && (
+                        <>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Opening Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.openingTime}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Closing Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.closingTime}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Ambulance Types */}
+                {details.ambulanceTypes && details.ambulanceTypes.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Ambulance Types</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.ambulanceTypes.map((type, index) => (
+                                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+                                    {type}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Vehicle Equipment */}
+                {details.vehicleEquipment && details.vehicleEquipment.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Vehicle Equipment</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.vehicleEquipment.map((equipment, index) => (
+                                <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+                                    {equipment}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Typical Crew */}
+                {details.typicalCrew && details.typicalCrew.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Typical Crew</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.typicalCrew.map((crew, index) => (
+                                <span key={index} className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm">
+                                    {crew}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span> 
+                                            <span className="text-gray-600"> {branch.address}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderInsuranceDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No insurance details available</p>
+            </div>
+        );
+        
+        return (
+            <div className="bg-white p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {details.operatingHours && (
+                        <>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Opening Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.openingTime}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Closing Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.closingTime}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Coverage Information */}
+                {details.coveredServices && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Covered Services</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-green-400">
+                            {details.coveredServices}
+                        </p>
+                    </div>
+                )}
+
+                {details.exclusions && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Exclusions</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-red-400">
+                            {details.exclusions}
+                        </p>
+                    </div>
+                )}
+
+                {details.preExistingConditions && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Pre-existing Conditions</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-yellow-400">
+                            {details.preExistingConditions}
+                        </p>
+                    </div>
+                )}
+
+                {details.emergencyCoverage && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Emergency Coverage</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.emergencyCoverage}
+                        </p>
+                    </div>
+                )}
+
+                {details.outOfNetworkReimbursement && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Out of Network Reimbursement</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-purple-400">
+                            {details.outOfNetworkReimbursement}
+                        </p>
+                    </div>
+                )}
+
+                {details.preAuthorization && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Pre-authorization</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-indigo-400">
+                            {details.preAuthorization}
+                        </p>
+                    </div>
+                )}
+
+                {details.premiumsCopayments && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Premiums & Copayments</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-green-400">
+                            {details.premiumsCopayments}
+                        </p>
+                    </div>
+                )}
+
+                {/* Waiting Periods */}
+                {details.waitingPeriods && details.waitingPeriods.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Waiting Periods</h3>
+                        <div className="space-y-2">
+                            {details.waitingPeriods.map((period, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded border">
+                                    <span className="font-medium">{period.service}</span>
+                                    <span className="text-gray-600">{period.duration} {period.unit}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Accredited Hospitals */}
+                {details.accreditedHospitals && details.accreditedHospitals.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Accredited Hospitals</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.accreditedHospitals.map((hospital, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Hospital {index + 1}</h4>
+                                    {hospital.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span> 
+                                            <span className="text-gray-600"> {hospital.address}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span> 
+                                            <span className="text-gray-600"> {branch.address}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderSpecialistClinicDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No specialist clinic details available</p>
+            </div>
+        );
+        return (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <pre className="text-sm text-gray-600 overflow-x-auto whitespace-pre-wrap">
+                    {JSON.stringify(details, null, 2)}
+                </pre>
+            </div>
+        );
+    };
 
     if (isLoading) return (
         <div className="flex justify-center items-center h-64">

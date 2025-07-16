@@ -46,7 +46,6 @@ export default function Navbar() {
         // If already on home page, scroll directly
         const element = document.getElementById(sectionId);
         element?.scrollIntoView({ behavior: "smooth" });
-
         // Update URL hash without triggering navigation
         window.history.replaceState(null, null, `#${sectionId}`);
     };
