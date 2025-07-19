@@ -13,9 +13,6 @@ import filter from "../../assets/FunnelSimple.png";
 const { Option } = Select;
 
 
-
-
-
 const columns = (onVerify, onRevise) => [
   {
     title: "Facility Name",
@@ -231,7 +228,7 @@ const AllFacilities = () => {
   };
 
   // Options for filters
-  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance", "Laboratory","Blood Bank"];
+  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance","SpecialistClinic", "Laboratory","Blood Bank"];
   const statusOptions = ["Verified", "Pending", "Need Revision"];
   const stateOptions = states || [];
   const lgaOptions = Object.values(lgas).flat() || [];

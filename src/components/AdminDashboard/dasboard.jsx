@@ -10,6 +10,20 @@ import {
   CarOutlined,
   BankOutlined,
   LoadingOutlined,
+  UserOutlined,
+  // Add status-specific icons
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  StopOutlined,
+  PlayCircleOutlined,
+  DatabaseOutlined,
+  HeartOutlined,
+  SafetyOutlined,
+  TeamOutlined,
+  ShoppingOutlined,
+  PhoneOutlined,
+  MediumOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Button, Spin, Alert, Skeleton } from "antd";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
@@ -49,8 +63,9 @@ import time from "../../components/asstes/time.png";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
-// Icon mapping for dynamic stats
+// Enhanced icon mapping with status-specific icons
 const iconMap = {
+  // Existing image icons
   color: <img src={color} alt="color" />,
   file: <img src={file} alt="file" />,
   hospital: <img src={falities} alt="hospital" />,
@@ -59,6 +74,22 @@ const iconMap = {
   register: <img src={register} alt="register" />,
   time: <img src={time} alt="time" />,
   facilities: <img src={falities} alt="facilities" />,
+  
+  // Status-specific Ant Design icons
+  total: <DatabaseOutlined className="text-blue-600" style={{ fontSize: '24px' }} />,
+  active: <PlayCircleOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
+  pending: <ClockCircleOutlined className="text-yellow-600" style={{ fontSize: '24px' }} />,
+  verified: <CheckCircleOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
+  deactivated: <StopOutlined className="text-red-600" style={{ fontSize: '24px' }} />,
+  
+  // Facility type specific icons
+  hospitalIcon: <BankOutlined className="text-blue-600" style={{ fontSize: '24px' }} />,
+  laboratoryIcon: <ExperimentOutlined className="text-purple-600" style={{ fontSize: '24px' }} />,
+  pharmacyIcon: <MedicineBoxOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
+  ambulanceIcon: <CarOutlined className="text-red-600" style={{ fontSize: '24px' }} />,
+  insuranceIcon: <SafetyOutlined className="text-blue-600" style={{ fontSize: '24px' }} />,
+  specialistIcon: <UserOutlined className="text-indigo-600" style={{ fontSize: '24px' }} />,
+  bloodBankIcon: <HeartOutlined className="text-red-600" style={{ fontSize: '24px' }} />,
 };
 
 const AdminDashboard = () => {
@@ -90,98 +121,98 @@ const AdminDashboard = () => {
       if (adminStatsResponse?.stats) {
         const { stats } = adminStatsResponse;
         
-        // Create stat cards from the comprehensive data
+        // Create stat cards with appropriate icons
         const facilityTypeStats = [
           {
             label: "Total Facilities",
             count: stats.overview?.totalFacilities?.toLocaleString() || "0",
-            icon: "color",
+            icon: "total",
             delta: `Total registered facilities`,
             bg: "bg-[#E5FFD1]",
           },
           {
             label: "Hospitals",
             count: (stats.facilitiesByType?.Hospital || 0).toLocaleString(),
-            icon: "hospital",
+            icon: "hospitalIcon",
             delta: `Hospital facilities`,
             bg: "bg-[#FFD1E5]",
           },
           {
             label: "Laboratories",
             count: (stats.facilitiesByType?.Laboratory || 0).toLocaleString(),
-            icon: "lab",
+            icon: "laboratoryIcon",
             delta: `Laboratory facilities`,
             bg: "bg-[#D1FFFB]",
           },
           {
-            label: "Specialist Clinics",
+            label: "Specialist Clinic Center",
             count: (stats.facilitiesByType?.SpecialistClinic || 0).toLocaleString(),
-            icon: "time",
-            delta: `Specialist clinic facilities`,
+            icon: "specialistIcon",
+            delta: `Specialist clinic center facilities`,
             bg: "bg-[#FFE5D1]",
           },
           {
             label: "Pharmacies",
             count: (stats.facilitiesByType?.Pharmacy || 0).toLocaleString(),
-            icon: "file",
+            icon: "pharmacyIcon",
             delta: `Pharmacy facilities`,
             bg: "bg-[#D1E5FF]",
           },
           {
             label: "Ambulance Services",
             count: (stats.facilitiesByType?.Ambulance || 0).toLocaleString(),
-            icon: "car",
+            icon: "ambulanceIcon",
             delta: `Ambulance service providers`,
             bg: "bg-[#E2D1FF]",
           },
           {
             label: "Insurance Providers",
             count: (stats.facilitiesByType?.Insurance || 0).toLocaleString(),
-            icon: "register",
+            icon: "insuranceIcon",
             delta: `Insurance providers`,
             bg: "bg-[#FFD1E5]",
           },
           {
             label: "Blood Banks",
             count: (stats.facilitiesByType?.['Blood Bank'] || 0).toLocaleString(),
-            icon: "lab",
+            icon: "bloodBankIcon",
             delta: `Blood bank facilities`,
             bg: "bg-[#FFE5D1]",
           },
           {
             label: "Active Facilities",
             count: (stats.overview?.activeFacilities || 0).toLocaleString(),
-            icon: "color",
+            icon: "active",
             delta: `Currently active`,
             bg: "bg-[#E5FFD1]",
           },
           {
             label: "Pending Facilities",
             count: (stats.overview?.pendingFacilities || 0).toLocaleString(),
-            icon: "time",
+            icon: "pending",
             delta: `Awaiting verification`,
-            bg: "bg-[#FFE5D1]",
+            bg: "bg-[#FFF3CD]",
           },
           {
             label: "Verified Facilities",
             count: (stats.overview?.verifiedFacilities || 0).toLocaleString(),
-            icon: "register",
+            icon: "verified",
             delta: `Fully verified`,
-            bg: "bg-[#E5FFD1]",
+            bg: "bg-[#D4EDDA]",
           },
           {
             label: "Deactivated Facilities",
             count: (stats.overview?.deactivatedFacilities || 0).toLocaleString(),
-            icon: "car",
+            icon: "deactivated",
             delta: `Currently deactivated`,
-            bg: "bg-[#FFD1E5]",
+            bg: "bg-[#F8D7DA]",
           }
         ];
 
         // Map icons and set the stats
         const mappedStats = facilityTypeStats.map(stat => ({
           ...stat,
-          icon: iconMap[stat.icon] || iconMap.file
+          icon: iconMap[stat.icon] || iconMap.total
         }));
         
         setStatCards(mappedStats);
@@ -198,91 +229,91 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fallback default stats in case API fails
+  // Fallback default stats with proper icons
   const getDefaultStats = () => [
     {
       label: "Total Facilities",
       count: "Loading...",
-      icon: iconMap.color,
+      icon: iconMap.total,
       delta: "Please wait",
       bg: "bg-[#E5FFD1]",
     },
     {
       label: "Hospitals",
       count: "Loading...",
-      icon: iconMap.hospital,
+      icon: iconMap.hospitalIcon,
       delta: "Please wait",
       bg: "bg-[#FFD1E5]",
     },
     {
       label: "Laboratories",
       count: "Loading...",
-      icon: iconMap.lab,
+      icon: iconMap.laboratoryIcon,
       delta: "Please wait",
       bg: "bg-[#D1FFFB]",
     },
     {
       label: "Specialist Clinics",
       count: "Loading...",
-      icon: iconMap.time,
+      icon: iconMap.specialistIcon,
       delta: "Please wait",
       bg: "bg-[#FFE5D1]",
     },
     {
       label: "Pharmacies",
       count: "Loading...",
-      icon: iconMap.file,
+      icon: iconMap.pharmacyIcon,
       delta: "Please wait",
       bg: "bg-[#D1E5FF]",
     },
     {
       label: "Ambulance Services",
       count: "Loading...",
-      icon: iconMap.car,
+      icon: iconMap.ambulanceIcon,
       delta: "Please wait",
       bg: "bg-[#E2D1FF]",
     },
     {
       label: "Insurance Providers",
       count: "Loading...",
-      icon: iconMap.register,
+      icon: iconMap.insuranceIcon,
       delta: "Please wait",
       bg: "bg-[#FFD1E5]",
     },
     {
       label: "Blood Banks",
       count: "Loading...",
-      icon: iconMap.lab,
+      icon: iconMap.bloodBankIcon,
       delta: "Please wait",
       bg: "bg-[#FFE5D1]",
     },
     {
       label: "Active Facilities",
       count: "Loading...",
-      icon: iconMap.color,
+      icon: iconMap.active,
       delta: "Please wait",
       bg: "bg-[#E5FFD1]",
     },
     {
       label: "Pending Facilities",
       count: "Loading...",
-      icon: iconMap.time,
+      icon: iconMap.pending,
       delta: "Please wait",
-      bg: "bg-[#FFE5D1]",
+      bg: "bg-[#FFF3CD]",
     },
     {
       label: "Verified Facilities",
       count: "Loading...",
-      icon: iconMap.register,
+      icon: iconMap.verified,
       delta: "Please wait",
-      bg: "bg-[#E5FFD1]",
+      bg: "bg-[#D4EDDA]",
     },
     {
       label: "Deactivated Facilities",
       count: "Loading...",
-      icon: iconMap.car,
+      icon: iconMap.deactivated,
       delta: "Please wait",
-      bg: "bg-[#FFD1E5]",
+      bg: "bg-[#F8D7DA]",
     }
   ];
 
@@ -294,7 +325,7 @@ const AdminDashboard = () => {
         "all",
         "Hospital",
         "Laboratory",
-        "Clinic",
+        "SpecialistClinic",
         "Pharmacy",
         "Ambulance",
         "Insurance",
@@ -386,6 +417,9 @@ const AdminDashboard = () => {
               <Menu.Item key="Laboratory" icon={<ExperimentOutlined />}>
                 Laboratory
               </Menu.Item>
+              <Menu.Item key="SpecialistClinic" icon={<UserOutlined />}>
+                Specialist Clinic
+              </Menu.Item>
               <Menu.Item key="Pharmacy" icon={<MedicineBoxOutlined />}>
                 Pharmacy
               </Menu.Item>
@@ -454,15 +488,6 @@ const AdminDashboard = () => {
                           Welcome back! Here's what's happening with your facilities today.
                         </p>
                       </div>
-                      
-                      {/* <Button 
-                        icon={<LoadingOutlined spin={loading} />}
-                        onClick={fetchDashboardStats}
-                        disabled={loading}
-                        className="flex items-center"
-                      >
-                        {loading ? 'Refreshing...' : 'Refresh Data'}
-                      </Button> */}
                     </div>
 
                     {/* Error Alert */}
@@ -531,7 +556,7 @@ const AdminDashboard = () => {
                               <div className="text-xl lg:text-2xl font-bold mb-2">
                                 {card.count}
                               </div>
-                              <div className="font-inter font-normal text-xs lg:text-sm leading-tight tracking-[0.5%] text-[#259678]">
+                              <div className="font-inter font-normal text-xs lg:text-sm leading-tight tracking-[0.5%] text-primarysolid">
                                 {card.delta}
                               </div>
                             </div>

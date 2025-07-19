@@ -209,6 +209,13 @@ const FacilityInfo = ({ facilityId }) => {
               value={facility.lcda} 
             />
           )}
+            {facility.address && (
+            <InfoCard 
+              icon={MapPin} 
+              title="Address" 
+              value={facility.address} 
+            />
+          )}
         </div>
       </div>
 

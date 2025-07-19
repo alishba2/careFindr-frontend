@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { GetFacilityService } from "../../services/service";
 
-const FacilityServiceComponent = ({facilityId}) => {
+const FacilityServiceComponent = ({ facilityId }) => {
     const [serviceData, setServiceData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -61,7 +61,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                 <p className="text-yellow-700">No blood bank details available</p>
             </div>
         );
-        
+
         return (
             <div className="bg-white p-6 space-y-6">
                 {/* Basic Information */}
@@ -338,7 +338,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
                                     {branch.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {branch.address}</span>
                                         </p>
                                     )}
@@ -361,7 +361,7 @@ const FacilityServiceComponent = ({facilityId}) => {
         );
     };
 
- const renderHospitalDetails = (details) => {
+    const renderHospitalDetails = (details) => {
         if (!details) return (
             <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
                 <p className="text-yellow-700">No hospital details available</p>
@@ -404,7 +404,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Operation Days */}
                 {details.operationDays && details.operationDays.length > 0 && (
                     <div className="border-t pt-4">
@@ -418,7 +418,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Core Clinical Specialities */}
                 {details.coreClinicalSpecialities && details.coreClinicalSpecialities.length > 0 && (
                     <div className="border-t pt-4">
@@ -432,7 +432,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Sub Specialities */}
                 {details.subSpecialities && details.subSpecialities.length > 0 && (
                     <div className="border-t pt-4">
@@ -446,7 +446,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Facility Features */}
                 {details.facilityFeatures && details.facilityFeatures.length > 0 && (
                     <div className="border-t pt-4">
@@ -460,7 +460,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Branches */}
                 {details.branches && details.branches.length > 0 && (
                     <div className="border-t pt-4">
@@ -498,11 +498,11 @@ const FacilityServiceComponent = ({facilityId}) => {
                                             <span className="font-medium">Email:</span> <span className="text-gray-600">{branch.email}</span>
                                         </p>
                                     )}
-                                    
+
                                     {/* Show other branch properties */}
                                     {Object.keys(branch).filter(key => !['name', 'address', 'phone', 'email'].includes(key)).map(key => (
                                         <p key={key} className="text-sm">
-                                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> 
+                                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
                                             <span className="text-gray-600"> {String(branch[key])}</span>
                                         </p>
                                     ))}
@@ -511,7 +511,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* Additional Information */}
                 {details.additionalInfo && (
                     <div className="border-t pt-4">
@@ -524,14 +524,198 @@ const FacilityServiceComponent = ({facilityId}) => {
             </div>
         );
     };
+    const renderSpecialistClinicDetails = (details) => {
+        if (!details) return (
+            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
+                <p className="text-yellow-700">No specialist clinic details available</p>
+            </div>
+        );
 
+        return (
+            <div className="bg-white p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Care Type</p>
+                        <p className="font-semibold text-gray-900">{details.careType || 'Not specified'}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">On-Site Doctor</p>
+                        <p className={`font-semibold ${details.onSiteDoctor ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.onSiteDoctor ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Emergency Response Plan</p>
+                        <p className={`font-semibold ${details.emergencyResponsePlan ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.emergencyResponsePlan ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Critical Care</p>
+                        <p className={`font-semibold ${details.criticalCare ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.criticalCare ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Bed Capacity</p>
+                        <p className="font-semibold text-blue-600">{details.bedCapacity || 0}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Home Services</p>
+                        <p className={`font-semibold ${details.homeServices ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.homeServices ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Online Booking</p>
+                        <p className={`font-semibold ${details.onlineBooking ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.onlineBooking ? 'Available' : 'Not Available'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">24 Hour Service</p>
+                        <p className={`font-semibold ${details.is24Hour ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.is24Hour ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Patient Limit</p>
+                        <p className="font-semibold text-gray-900">{details.patientLimit || 'No limit'}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Public Holiday Work</p>
+                        <p className={`font-semibold ${details.publicHolidayWork ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.publicHolidayWork ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Collaborates with Others</p>
+                        <p className={`font-semibold ${details.collaboratesWithOthers ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.collaboratesWithOthers ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Works with HMOs</p>
+                        <p className={`font-semibold ${details.worksWithHMOs ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.worksWithHMOs ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded border">
+                        <p className="text-sm text-gray-600">Accepts Insurance</p>
+                        <p className={`font-semibold ${details.acceptsInsurance ? 'text-green-600' : 'text-red-600'}`}>
+                            {details.acceptsInsurance ? 'Yes' : 'No'}
+                        </p>
+                    </div>
+
+                    {/* Operating Hours */}
+                    {details.operatingHours && (
+                        <>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Opening Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.openingTime}</p>
+                            </div>
+                            <div className="p-4 bg-gray-50 rounded border">
+                                <p className="text-sm text-gray-600">Closing Time</p>
+                                <p className="font-semibold text-gray-900">{details.operatingHours.closingTime}</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Core Services */}
+                {details.coreServices && details.coreServices.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Core Services</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.coreServices.map((service, index) => (
+                                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+                                    {service}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Multidisciplinary Care */}
+                {details.multidisciplinaryCare && details.multidisciplinaryCare.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Multidisciplinary Care</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.multidisciplinaryCare.map((care, index) => (
+                                <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+                                    {care}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Operating Days */}
+                {details.operatingDays && details.operatingDays.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Operating Days</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {details.operatingDays.includes('24/7') ? (
+                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm">24/7</span>
+                            ) : (
+                                details.operatingDays.map((day, index) => (
+                                    <span key={index} className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm">
+                                        {day}
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Branches */}
+                {details.branches && details.branches.length > 0 && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Branches</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {details.branches.map((branch, index) => (
+                                <div key={index} className="border border-gray-200 rounded p-4 bg-gray-50">
+                                    <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
+                                    {branch.address && (
+                                        <p className="text-sm">
+                                            <span className="font-medium">Address:</span>
+                                            <span className="text-gray-600"> {branch.address}</span>
+                                        </p>
+                                    )}
+                                    error: 'Facility documents not found'
+                                    {/* Show other branch properties if any */}
+                                    {Object.keys(branch).filter(key => key !== 'address').map(key => (
+                                        <p key={key} className="text-sm">
+                                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                                            <span className="text-gray-600"> {String(branch[key])}</span>
+                                        </p>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Additional Information */}
+                {details.additionalInfo && (
+                    <div className="border-t pt-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">Additional Information</h3>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded border-l-4 border-blue-400">
+                            {details.additionalInfo}
+                        </p>
+                    </div>
+                )}
+            </div>
+        );
+    };
     const renderLaboratoryDetails = (details) => {
         if (!details) return (
             <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
                 <p className="text-yellow-700">No laboratory details available</p>
             </div>
         );
-        
+
         return (
             <div className=" p-6 space-y-6">
                 {/* Basic Information */}
@@ -578,7 +762,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
                                     {branch.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {branch.address}</span>
                                         </p>
                                     )}
@@ -607,7 +791,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                 <p className="text-yellow-700">No pharmacy details available</p>
             </div>
         );
-        
+
         return (
             <div className="bg-white p-6 space-y-6">
                 {/* Basic Information */}
@@ -676,7 +860,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
                                     {branch.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {branch.address}</span>
                                         </p>
                                     )}
@@ -705,7 +889,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                 <p className="text-yellow-700">No ambulance details available</p>
             </div>
         );
-        
+
         return (
             <div className="bg-white p-6 space-y-6">
                 {/* Basic Information */}
@@ -812,7 +996,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
                                     {branch.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {branch.address}</span>
                                         </p>
                                     )}
@@ -841,7 +1025,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                 <p className="text-yellow-700">No insurance details available</p>
             </div>
         );
-        
+
         return (
             <div className="bg-white p-6 space-y-6">
                 {/* Basic Information */}
@@ -949,7 +1133,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Hospital {index + 1}</h4>
                                     {hospital.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {hospital.address}</span>
                                         </p>
                                     )}
@@ -969,7 +1153,7 @@ const FacilityServiceComponent = ({facilityId}) => {
                                     <h4 className="font-medium text-gray-900 mb-2">Branch {index + 1}</h4>
                                     {branch.address && (
                                         <p className="text-sm">
-                                            <span className="font-medium">Address:</span> 
+                                            <span className="font-medium">Address:</span>
                                             <span className="text-gray-600"> {branch.address}</span>
                                         </p>
                                     )}
@@ -992,27 +1176,13 @@ const FacilityServiceComponent = ({facilityId}) => {
         );
     };
 
-    const renderSpecialistClinicDetails = (details) => {
-        if (!details) return (
-            <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-center">
-                <p className="text-yellow-700">No specialist clinic details available</p>
-            </div>
-        );
-        return (
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <pre className="text-sm text-gray-600 overflow-x-auto whitespace-pre-wrap">
-                    {JSON.stringify(details, null, 2)}
-                </pre>
-            </div>
-        );
-    };
 
     if (isLoading) return (
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
         </div>
     );
-    
+
     if (error) return (
         <div className="bg-red-50 border border-red-200 rounded p-4 text-center">
             <p className="text-red-700">Error: {error.message}</p>
@@ -1020,7 +1190,7 @@ const FacilityServiceComponent = ({facilityId}) => {
     );
 
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
             {renderServiceDetails()}
         </div>
     );

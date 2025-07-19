@@ -34,103 +34,103 @@ export const App = () => {
     <AuthProvider>
       <ChatProvider>
 
-<BrowserRouter>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        <Routes>
-          {/* Public routes with redirect if already logged in */}
-          <Route
-            path="/"
-            element={
-              // <RedirectIfAuthenticated>
+        <BrowserRouter>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+          <Routes>
+            {/* Public routes with redirect if already logged in */}
+            <Route
+              path="/"
+              element={
+                // <RedirectIfAuthenticated>
                 <Landing />
-              // </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <RedirectIfAuthenticated>
-                <RegistrationStep />
-              </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/verify-otp"
-            element={
-              <RedirectIfAuthenticated>
-                <VerifyOtp />
-              </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <RedirectIfAuthenticated>
-                <Login />
-              </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <RedirectIfAuthenticated>
-                <ForgotPassword />
-              </RedirectIfAuthenticated>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <RedirectIfAuthenticated>
-                <ResetPassword />
-              </RedirectIfAuthenticated>
-            }
-          />
+                // </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <RedirectIfAuthenticated>
+                  <RegistrationStep />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/verify-otp"
+              element={
+                <RedirectIfAuthenticated>
+                  <VerifyOtp />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <RedirectIfAuthenticated>
+                  <Login />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <RedirectIfAuthenticated>
+                  <ForgotPassword />
+                </RedirectIfAuthenticated>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <RedirectIfAuthenticated>
+                  <ResetPassword />
+                </RedirectIfAuthenticated>
+              }
+            />
 
-          {/* Admin routes */}
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/register-admin" element={<AdminRegister />} />
-          <Route
-            path="/admin-dashboard/*"
-            element={
-              <AdminDashboard />
-            }
-          />
+            {/* Admin routes */}
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/register-admin" element={<AdminRegister />} />
+            <Route
+              path="/admin-dashboard/*"
+              element={
+                <AdminDashboard />
+              }
+            />
 
-          {/* Facility dashboard routes */}
-          <Route
-            path="/facility-dashboard"
-            element={
-              <ProtectedRoute>
-                <FacilityDashboard />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome />} />
-            <Route path="facility-info" element={<FacilityInformation />} />
-            <Route path="service-capacity" element={<Services />} />
-            <Route path="document-upload" element={<DocumentUpload />} />
-            <Route path="referrals" element={<Referrals />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="support" element={<Feedback />} />
-            <Route path="*" element={<Navigate to="home" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            {/* Facility dashboard routes */}
+            <Route
+              path="/facility-dashboard"
+              element={
+                <ProtectedRoute>
+                  <FacilityDashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="home" replace />} />
+              <Route path="home" element={<DashboardHome />} />
+              <Route path="facility-info" element={<FacilityInformation />} />
+              <Route path="service-capacity" element={<Services />} />
+              <Route path="document-upload" element={<DocumentUpload />} />
+              <Route path="referrals" element={<Referrals />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="support" element={<Feedback />} />
+              <Route path="*" element={<Navigate to="home" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </ChatProvider>
-      
+
     </AuthProvider>
   );
 };
