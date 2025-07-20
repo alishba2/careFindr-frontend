@@ -78,21 +78,51 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
 
         case "Insurance":
             serviceData.insuranceDetails = {
-                coveredServices: capabilities.coveredServices,
-                exclusions: capabilities.exclusions,
+                // Coverage Details
+                coveredServices: capabilities.coveredServices || "",
+                exclusions: capabilities.exclusions || "",
                 preExistingConditions: capabilities.preExistingConditions === "Yes",
-                emergencyCoverage: capabilities.emergencyCoverage,
-                accreditedHospitals: capabilities.accreditedHospitals.map((address) => ({ address })),
+                emergencyCoverage: capabilities.emergencyCoverage || "",
+                limitationForCareCoverage: capabilities.limitationForCareCoverage || "",
+                
+                // Claim Process - UPDATED FIELD NAMES
+                claimProcessSteps: capabilities.claimProcessSteps || "",
+                daysToSettleClaims: capabilities.daysToSettleClaims || "",
+                conPayments: capabilities.conPayments || false, // Boolean field
+                handleRejectedClaims: capabilities.handleRejectedClaims || "",
+                paymentSystem: capabilities.paymentSystem || "",
+                
+                // Integration & Technology - UPDATED FIELD NAMES
+                canVerifyCoverage: capabilities.canVerifyCoverage || "",
+                supportTechIntegration: capabilities.supportTechIntegration || "",
+                
+                // Regulatory Compliance - UPDATED FIELD NAMES
+                registeredWithNHIA: capabilities.registeredWithNHIA || "",
+                complyWithNigerianHealthCare: capabilities.complyWithNigerianHealthCare || "",
+                handleDisputesOrComplaints: capabilities.handleDisputesOrComplaints || "",
+                
+                // Hospital Network - FIXED STRUCTURE
+                accreditedHospitals: capabilities.accreditedHospitals || [{ address: "" }],
                 outOfNetworkReimbursement: capabilities.outOfNetworkReimbursement === "Yes",
-                preAuthorization: capabilities.preAuthorization,
-                waitingPeriods: capabilities.waitingPeriods,
-                premiumsCopayments: capabilities.premiumsCopayments,
+                
+                // Pre-authorization
+                preAuthorization: capabilities.preAuthorization || "",
+                preAuthRequired: capabilities.preAuthRequired || "",
+                waitingPeriods: capabilities.waitingPeriods || [],
+                
+                // Premiums & Payments
+                premiumsCopayments: capabilities.premiumsCopayments || "",
+                
+                // Operating Details
                 operatingHours: {
-                    openingTime: capabilities.openingTime,
-                    closingTime: capabilities.closingTime,
+                    openingTime: capabilities.openingTime || "",
+                    closingTime: capabilities.closingTime || "",
                 },
-                branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
-                additionalInfo: capabilities.additionalInformation,
+                operatingDays: capabilities.operatingDays?.filter((day) => day !== "24/7") || [],
+                branches: capabilities.hasOtherBranches === "Yes" 
+                    ? capabilities.branchAddresses.map((address) => ({ address })) 
+                    : [],
+                additionalInfo: capabilities.additionalInformation || "",
             };
             break;
 
@@ -211,3 +241,4 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
 
     return serviceData;
 };
+

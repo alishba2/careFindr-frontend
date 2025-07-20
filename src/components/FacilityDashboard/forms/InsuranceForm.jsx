@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Input } from '../../input';
 import { Button } from '../../button';
-import { Select } from 'antd';
+import { Select, Checkbox } from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import { BranchAddresses } from '../BranchAddresses';
 import { AdditionalInfo } from '../AdditionalInfo';
@@ -13,14 +13,14 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
     const addAccreditedHospital = () => {
         setCapabilities((prev) => ({
             ...prev,
-            accreditedHospitals: [...prev.accreditedHospitals, ""],
+            accreditedHospitals: [...prev.accreditedHospitals, { address: "" }],
         }));
     };
 
     const updateAccreditedHospital = (index, value) => {
         setCapabilities((prev) => {
             const updatedHospitals = [...prev.accreditedHospitals];
-            updatedHospitals[index] = value;
+            updatedHospitals[index] = { address: value };
             return { ...prev, accreditedHospitals: updatedHospitals };
         });
     };
@@ -51,28 +51,6 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
         setCapabilities((prev) => {
             const updatedPeriods = prev.waitingPeriods.filter((_, i) => i !== index);
             return { ...prev, waitingPeriods: updatedPeriods };
-        });
-    };
-
-    const addClaimDocument = () => {
-        setCapabilities((prev) => ({
-            ...prev,
-            complianceDocuments: [...prev.complianceDocuments, { type: "", name: "", file: null }],
-        }));
-    };
-
-    const updateClaimDocument = (index, field, value) => {
-        setCapabilities((prev) => {
-            const updatedDocs = [...prev.complianceDocuments];
-            updatedDocs[index] = { ...updatedDocs[index], [field]: value };
-            return { ...prev, complianceDocuments: updatedDocs };
-        });
-    };
-
-    const deleteClaimDocument = (index) => {
-        setCapabilities((prev) => {
-            const updatedDocs = prev.complianceDocuments.filter((_, i) => i !== index);
-            return { ...prev, complianceDocuments: updatedDocs };
         });
     };
 
@@ -158,60 +136,13 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                         }
                     >
                         <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
-                </div>
-            </div>
-
-            {/* Emergency Care Access */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Emergency Care Access</label>
-
-                {/* Ambulance and Emergency Services */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Are ambulance and emergency services included in your coverage?
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.ambulanceEmergencyIncluded}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                ambulanceEmergencyIncluded: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
                         <Option value="Yes">Yes, Fully Covered</Option>
                         <Option value="Partial">Partially Covered</Option>
                         <Option value="No">No</Option>
                     </Select>
                 </div>
 
-                {capabilities.ambulanceEmergencyIncluded === "Partial" && (
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-800">
-                            Please specify what emergency services are covered
-                        </label>
-                        <TextArea
-                            rows={3}
-                            className="border-gray-300 rounded-md"
-                            value={capabilities.partialEmergencyCoverage}
-                            onChange={(e) =>
-                                setCapabilities((prev) => ({
-                                    ...prev,
-                                    partialEmergencyCoverage: e.target.value,
-                                }))
-                            }
-                            placeholder="e.g., Emergency room visits covered, ambulance transport not covered"
-                        />
-                    </div>
-                )}
-
-                {/* Emergency Coverage Limitations */}
+                {/* Emergency Coverage Limitations - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
                         Are there any limitations or conditions for emergency care coverage?
@@ -219,11 +150,11 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     <TextArea
                         rows={3}
                         className="border-gray-300 rounded-md"
-                        value={capabilities.emergencyCoverageLimitations}
+                        value={capabilities.limitationForCareCoverage}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                emergencyCoverageLimitations: e.target.value,
+                                limitationForCareCoverage: e.target.value,
                             }))
                         }
                         placeholder="e.g., Pre-approval required for non-life threatening emergencies"
@@ -231,92 +162,88 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 </div>
             </div>
 
-            {/* Claim Process */}
+            {/* Claim Process - UPDATED FIELD NAMES */}
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Claim Process</label>
 
-                {/* Claims Processing Procedure */}
+                {/* Claims Processing Procedure - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">What is your claims processing procedure?</label>
                     <TextArea
                         rows={4}
                         className="border-gray-300 rounded-md"
-                        value={capabilities.claimsProcessingProcedure}
+                        value={capabilities.claimProcessSteps}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                claimsProcessingProcedure: e.target.value,
+                                claimProcessSteps: e.target.value,
                             }))
                         }
                         placeholder="Describe your step-by-step claims processing procedure"
                     />
                 </div>
 
-                {/* Claims Settlement Time */}
+                {/* Claims Settlement Time - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">How long does it take to settle provider claims?</label>
                     <Input
                         type="text"
                         className="h-12 border-gray-300 rounded-md"
-                        value={capabilities.claimsSettlementTime}
+                        value={capabilities.daysToSettleClaims}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                claimsSettlementTime: e.target.value,
+                                daysToSettleClaims: e.target.value,
                             }))
                         }
                         placeholder="e.g., 7-14 business days"
                     />
                 </div>
 
-                {/* Co-payments or Deductibles */}
+                {/* Co-payments or Deductibles - UPDATED TO BOOLEAN */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">Are there co-payments or deductibles involved?</label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.hasCopaymentsDeductibles}
-                        onChange={(value) =>
+                    <Checkbox
+                        checked={capabilities.conPayments}
+                        onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                hasCopaymentsDeductibles: value,
+                                conPayments: e.target.checked,
                             }))
                         }
                     >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
+                        Yes, co-payments or deductibles are required
+                    </Checkbox>
                 </div>
 
-                {/* Rejected Claims Handling */}
+                {/* Rejected Claims Handling - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">How do you handle rejected or disputed claims?</label>
                     <TextArea
                         rows={3}
                         className="border-gray-300 rounded-md"
-                        value={capabilities.rejectedClaimsProcess}
+                        value={capabilities.handleRejectedClaims}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                rejectedClaimsProcess: e.target.value,
+                                handleRejectedClaims: e.target.value,
                             }))
                         }
                         placeholder="Describe your process for handling rejected or disputed claims"
                     />
                 </div>
 
-                {/* Payment System Type */}
+                {/* Payment System Type - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">Is your payment system automated or manual?</label>
                     <Select
                         className="h-12 w-full"
                         style={{ height: "48px" }}
-                        value={capabilities.paymentSystemType}
+                        value={capabilities.paymentSystem}
                         onChange={(value) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                paymentSystemType: value,
+                                paymentSystem: value,
                             }))
                         }
                     >
@@ -326,35 +253,13 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                         <Option value="Hybrid">Hybrid (Both)</Option>
                     </Select>
                 </div>
-
-                {/* Reimbursement-based Plans */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Do you offer reimbursement-based plans? (Pay first, then file claim)
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.offersReimbursementPlans}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                offersReimbursementPlans: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
-                </div>
             </div>
 
             {/* Hospital Network */}
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Hospital Network</label>
 
-                {/* Accredited Hospitals */}
+                {/* Accredited Hospitals - UPDATED TO HANDLE OBJECTS */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">List of Accredited Hospitals</label>
                     {capabilities.accreditedHospitals.map((hospital, index) => (
@@ -362,9 +267,9 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                             <Input
                                 type="text"
                                 className="h-12 border-gray-300 rounded-md flex-1"
-                                value={hospital}
+                                value={hospital.address || ""}
                                 onChange={(e) => updateAccreditedHospital(index, e.target.value)}
-                                placeholder={`Hospital ${index + 1} Name`}
+                                placeholder={`Hospital ${index + 1} Name/Address`}
                             />
                             <Button
                                 className="h-12 px-4 bg-red-500 text-white rounded-md"
@@ -405,11 +310,11 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 </div>
             </div>
 
-            {/* Integration & Technology */}
+            {/* Integration & Technology - UPDATED FIELD NAMES */}
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Integration & Technology</label>
 
-                {/* API/Tech Integration */}
+                {/* API/Tech Integration - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
                         Do you support API or tech integration with platforms like ours?
@@ -417,11 +322,11 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     <Select
                         className="h-12 w-full"
                         style={{ height: "48px" }}
-                        value={capabilities.supportsApiIntegration}
+                        value={capabilities.supportTechIntegration}
                         onChange={(value) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                supportsApiIntegration: value,
+                                supportTechIntegration: value,
                             }))
                         }
                     >
@@ -432,7 +337,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     </Select>
                 </div>
 
-                {/* Real-time Coverage Verification */}
+                {/* Real-time Coverage Verification - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
                         Can we verify patient coverage in real time?
@@ -440,11 +345,11 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     <Select
                         className="h-12 w-full"
                         style={{ height: "48px" }}
-                        value={capabilities.realTimeCoverageVerification}
+                        value={capabilities.canVerifyCoverage}
                         onChange={(value) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                realTimeCoverageVerification: value,
+                                canVerifyCoverage: value,
                             }))
                         }
                     >
@@ -454,77 +359,6 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                         <Option value="In Development">In Development</Option>
                     </Select>
                 </div>
-            </div>
-
-            {/* Family/Dependent Coverage */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Family or Dependent Coverage</label>
-
-                {/* Family Coverage Available */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Can patients add spouse, children, or elderly parents?
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.offersFamilyCoverage}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                offersFamilyCoverage: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
-                </div>
-
-                {capabilities.offersFamilyCoverage === "Yes" && (
-                    <>
-                        {/* Cost per Dependent */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-800">What's the cost per dependent?</label>
-                            <Input
-                                type="text"
-                                className="h-12 border-gray-300 rounded-md"
-                                value={capabilities.costPerDependent}
-                                onChange={(e) =>
-                                    setCapabilities((prev) => ({
-                                        ...prev,
-                                        costPerDependent: e.target.value,
-                                    }))
-                                }
-                                placeholder="e.g., ₦2,500 per month per dependent"
-                            />
-                        </div>
-
-                        {/* Full Benefits for Dependents */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-800">
-                                Do dependents get full benefits?
-                            </label>
-                            <Select
-                                className="h-12 w-full"
-                                style={{ height: "48px" }}
-                                value={capabilities.dependentsFullBenefits}
-                                onChange={(value) =>
-                                    setCapabilities((prev) => ({
-                                        ...prev,
-                                        dependentsFullBenefits: value,
-                                    }))
-                                }
-                            >
-                                <Option value="">Select</Option>
-                                <Option value="Yes">Yes</Option>
-                                <Option value="No">No</Option>
-                                <Option value="Limited">Limited Benefits</Option>
-                            </Select>
-                        </div>
-                    </>
-                )}
             </div>
 
             {/* Pre-authorization Requirements */}
@@ -626,43 +460,26 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 <label className="text-lg font-semibold text-gray-900">Premiums & Co-payments</label>
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">Premiums and Co-payments Structure</label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
+                    <Input
+                        type="text"
+                        className="h-12 border-gray-300 rounded-md"
                         value={capabilities.premiumsCopayments}
-                        onChange={(value) =>
+                        onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                premiumsCopayments: value,
+                                premiumsCopayments: e.target.value,
                             }))
                         }
-                        placeholder="Select premium and co-payment structure"
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Monthly premium of ₦5000, 20% co-pay on medicines">
-                            Monthly premium of ₦5000, 20% co-pay on medicines
-                        </Option>
-                        <Option value="Annual premium of ₦50,000, 10% co-pay on all services">
-                            Annual premium of ₦50,000, 10% co-pay on all services
-                        </Option>
-                        <Option value="Monthly premium of ₦10,000, no co-pay">
-                            Monthly premium of ₦10,000, no co-pay
-                        </Option>
-                        <Option value="Quarterly premium of ₦15,000, 15% co-pay on diagnostics">
-                            Quarterly premium of ₦15,000, 15% co-pay on diagnostics
-                        </Option>
-                        <Option value="No premium, 30% co-pay on all services">
-                            No premium, 30% co-pay on all services
-                        </Option>
-                    </Select>
+                        placeholder="e.g., Monthly premium of ₦5000, 20% co-pay on medicines"
+                    />
                 </div>
             </div>
 
-            {/* Regulatory Compliance */}
+            {/* Regulatory Compliance - UPDATED FIELD NAMES */}
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Regulatory Compliance</label>
 
-                {/* NHIA Registration */}
+                {/* NHIA Registration - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">Are you registered with the NHIA (formerly NHIS)?</label>
                     <Select
@@ -683,7 +500,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     </Select>
                 </div>
 
-                {/* Regulatory Compliance */}
+                {/* Regulatory Compliance - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
                         Do your plans comply with Nigerian healthcare regulations?
@@ -691,11 +508,11 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     <Select
                         className="h-12 w-full"
                         style={{ height: "48px" }}
-                        value={capabilities.compliesWithRegulations}
+                        value={capabilities.complyWithNigerianHealthCare}
                         onChange={(value) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                compliesWithRegulations: value,
+                                complyWithNigerianHealthCare: value,
                             }))
                         }
                     >
@@ -706,7 +523,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     </Select>
                 </div>
 
-                {/* Complaints Handling */}
+                {/* Complaints Handling - UPDATED FIELD NAME */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
                         How do you handle complaints and customer disputes?
@@ -714,128 +531,15 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                     <TextArea
                         rows={3}
                         className="border-gray-300 rounded-md"
-                        value={capabilities.complaintsHandlingProcess}
+                        value={capabilities.handleDisputesOrComplaints}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
                                 ...prev,
-                                complaintsHandlingProcess: e.target.value,
+                                handleDisputesOrComplaints: e.target.value,
                             }))
                         }
                         placeholder="Describe your complaints and dispute resolution process"
                     />
-                </div>
-
-                {/* Document Upload Section */}
-                <div className="space-y-4">
-                    <label className="text-lg font-semibold text-gray-900">Required Documents</label>
-                    <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                        <p className="text-sm text-blue-800 font-medium mb-2">
-                            📋 Please upload the following required documents:
-                        </p>
-                        <ul className="text-sm text-blue-700 space-y-1">
-                            <li>• <strong>NHIA License:</strong> Ensure the company is licensed by NHIA (National Health Insurance Authority)</li>
-                            <li>• <strong>Benefit Schedule/Plan Brochure:</strong> Document showing all services covered, usage frequency, and costs</li>
-                            <li>• <strong>Regulatory Compliance Certificate:</strong> Proof of compliance with Nigerian healthcare regulations</li>
-                        </ul>
-                    </div>
-                    
-                    {/* NHIA License Upload */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-800">
-                            NHIA License <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            onChange={(e) =>
-                                setCapabilities((prev) => ({
-                                    ...prev,
-                                    nhiaLicenseDocument: e.target.files[0],
-                                }))
-                            }
-                            className="w-full h-12 border border-gray-300 rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                        {capabilities.nhiaLicenseDocument && (
-                            <p className="text-sm text-green-600">
-                                ✓ File selected: {capabilities.nhiaLicenseDocument.name}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Benefit Schedule/Plan Brochure Upload */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-800">
-                            Benefit Schedule/Plan Brochure <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            onChange={(e) =>
-                                setCapabilities((prev) => ({
-                                    ...prev,
-                                    benefitScheduleDocument: e.target.files[0],
-                                }))
-                            }
-                            className="w-full h-12 border border-gray-300 rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                        {capabilities.benefitScheduleDocument && (
-                            <p className="text-sm text-green-600">
-                                ✓ File selected: {capabilities.benefitScheduleDocument.name}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Regulatory Compliance Certificate Upload */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-800">
-                            Regulatory Compliance Certificate <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            onChange={(e) =>
-                                setCapabilities((prev) => ({
-                                    ...prev,
-                                    complianceCertificateDocument: e.target.files[0],
-                                }))
-                            }
-                            className="w-full h-12 border border-gray-300 rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                        {capabilities.complianceCertificateDocument && (
-                            <p className="text-sm text-green-600">
-                                ✓ File selected: {capabilities.complianceCertificateDocument.name}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Additional Supporting Documents (Optional) */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-800">
-                            Additional Supporting Documents (Optional)
-                        </label>
-                        <input
-                            type="file"
-                            multiple
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            onChange={(e) =>
-                                setCapabilities((prev) => ({
-                                    ...prev,
-                                    additionalDocuments: Array.from(e.target.files),
-                                }))
-                            }
-                            className="w-full h-12 border border-gray-300 rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
-                        />
-                        {capabilities.additionalDocuments && capabilities.additionalDocuments.length > 0 && (
-                            <div className="text-sm text-green-600">
-                                <p>✓ {capabilities.additionalDocuments.length} additional file(s) selected:</p>
-                                <ul className="ml-4 mt-1 space-y-1">
-                                    {capabilities.additionalDocuments.map((file, index) => (
-                                        <li key={index}>• {file.name}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
 

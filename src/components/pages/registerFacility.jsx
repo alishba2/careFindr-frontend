@@ -26,6 +26,8 @@ import { CheckCircle, Info } from "lucide-react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import Navbar from "./navbar.jsx";
 import { useRef } from "react";
+
+
 const validationSchema = Yup.object({
   facilityType: Yup.string().required("Facility type is required"),
   facilityName: Yup.string().required("Facility name is required"),
@@ -352,7 +354,7 @@ export const RegistrationStep = () => {
                                 {[
                                   "Hospital",
                                   "Laboratory",
-                                  "Specialist Clinic",
+                                  "Specialist Clinic/Center",
                                   "Pharmacy",
                                   "Ambulance",
                                   "Insurance",
@@ -360,7 +362,7 @@ export const RegistrationStep = () => {
                                 ].map((type) => (
                                   <SelectItem
                                     key={type}
-                                    value={type === "Specialist Clinic" ? "SpecialistClinic" : type}
+                                    value={type === "Specialist Clinic/Center" ? "SpecialistClinic" : type}
                                   >
                                     {type}
                                   </SelectItem>
@@ -723,7 +725,7 @@ export const RegistrationStep = () => {
                     <div>
                       <div className="mt-4">
                         <label className="text-sm font-semibold">
-                          Facility Address <span className="text-red-600">*</span>
+                          Facility Address (Full) <span className="text-red-600">*</span>
                         </label>
                         <Field
                           as={Input}

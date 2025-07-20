@@ -157,9 +157,11 @@ export default function DashboardHome() {
           <Card className="rounded-xl shadow border-none relative">
             <p className="text-base text-gray-500">Profile Completion</p>
             <p className="text-2xl font-bold text-primary">
-              {authData?.profileCompletion || 0}%
+              {authData?.profileCompletion === 100 ? "Completed" : `${authData?.profileCompletion || 0}%`}
             </p>
-            <p className="text-base text-gray-800">Continue completing profile</p>
+            <p className="text-base text-gray-800">
+              {authData?.profileCompletion === 100 ? "Your profile is complete" : "Continue completing profile"}
+            </p>
             <div className="w-14 h-14 bg-[#D1E5FF] rounded-full absolute top-5 right-7 flex items-center justify-center">
               <img src={Profile} alt="Profile" />
             </div>

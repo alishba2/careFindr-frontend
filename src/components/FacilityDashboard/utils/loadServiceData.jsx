@@ -100,41 +100,48 @@ export const loadServiceData = (serviceData, capabilities) => {
         case "Insurance":
             newCapabilities = {
                 ...newCapabilities,
-                coveredServices: serviceData.insuranceDetails.coveredServices || [],
-                exclusions: serviceData.insuranceDetails.exclusions || [],
+                // Coverage Details
+                coveredServices: serviceData.insuranceDetails.coveredServices || "",
+                exclusions: serviceData.insuranceDetails.exclusions || "",
                 preExistingConditions: serviceData.insuranceDetails.preExistingConditions ? "Yes" : "No",
                 emergencyCoverage: serviceData.insuranceDetails.emergencyCoverage || "",
-                accreditedHospitals: serviceData.insuranceDetails.accreditedHospitals?.map((h) => h.address) || [""],
+                limitationForCareCoverage: serviceData.insuranceDetails.limitationForCareCoverage || "",
+                
+                // Claim Process - UPDATED FIELD NAMES
+                claimProcessSteps: serviceData.insuranceDetails.claimProcessSteps || "",
+                daysToSettleClaims: serviceData.insuranceDetails.daysToSettleClaims || "",
+                conPayments: serviceData.insuranceDetails.conPayments || false,
+                handleRejectedClaims: serviceData.insuranceDetails.handleRejectedClaims || "",
+                paymentSystem: serviceData.insuranceDetails.paymentSystem || "",
+                
+                // Integration & Technology - UPDATED FIELD NAMES
+                canVerifyCoverage: serviceData.insuranceDetails.canVerifyCoverage || "",
+                supportTechIntegration: serviceData.insuranceDetails.supportTechIntegration || "",
+                
+                // Regulatory Compliance - UPDATED FIELD NAMES
+                registeredWithNHIA: serviceData.insuranceDetails.registeredWithNHIA || "",
+                complyWithNigerianHealthCare: serviceData.insuranceDetails.complyWithNigerianHealthCare || "",
+                handleDisputesOrComplaints: serviceData.insuranceDetails.handleDisputesOrComplaints || "",
+                
+                // Hospital Network - UPDATED STRUCTURE
+                accreditedHospitals: serviceData.insuranceDetails.accreditedHospitals || [{ address: "" }],
                 outOfNetworkReimbursement: serviceData.insuranceDetails.outOfNetworkReimbursement ? "Yes" : "No",
+                
+                // Pre-authorization
                 preAuthorization: serviceData.insuranceDetails.preAuthorization || "",
+                preAuthRequired: serviceData.insuranceDetails.preAuthRequired || "",
                 waitingPeriods: serviceData.insuranceDetails.waitingPeriods || [],
+                
+                // Premiums & Payments
                 premiumsCopayments: serviceData.insuranceDetails.premiumsCopayments || "",
-                operatingDays: [],
+                
+                // Operating Details
+                operatingDays: serviceData.insuranceDetails.operatingDays || [],
                 openingTime: serviceData.insuranceDetails.operatingHours?.openingTime || "",
                 closingTime: serviceData.insuranceDetails.operatingHours?.closingTime || "",
                 hasOtherBranches: serviceData.insuranceDetails.branches?.length > 0 ? "Yes" : "No",
                 branchAddresses: serviceData.insuranceDetails.branches?.map((b) => b.address) || [""],
                 additionalInformation: serviceData.insuranceDetails.additionalInfo || "",
-                claimsProcessingProcedure: capabilities.claimsProcessingProcedure,
-                claimsSettlementTime: capabilities.claimsSettlementTime,
-                hasCopaymentsDeductibles: capabilities.hasCopaymentsDeductibles,
-                rejectedClaimsProcess: capabilities.rejectedClaimsProcess,
-                paymentSystemType: capabilities.paymentSystemType,
-                offersReimbursementPlans: capabilities.offersReimbursementPlans,
-
-                // Integration & Technology
-                supportsApiIntegration: capabilities.supportsApiIntegration,
-                realTimeCoverageVerification: capabilities.realTimeCoverageVerification,
-
-                // Family/Dependent Coverage
-                offersFamilyCoverage: capabilities.offersFamilyCoverage,
-                costPerDependent: capabilities.costPerDependent,
-                dependentsFullBenefits: capabilities.dependentsFullBenefits,
-
-                // Regulatory Compliance
-                registeredWithNHIA: capabilities.registeredWithNHIA,
-                compliesWithRegulations: capabilities.compliesWithRegulations,
-                complaintsHandlingProcess: capabilities.complaintsHandlingProcess,
             };
 
             console.log(newCapabilities, "new capabilities here");

@@ -487,7 +487,7 @@ const Referrals = () => {
             className="bg-primarysolid"
             onClick={() => handleConfirmArrival(record)}
           >
-            Confirm Arrival
+            Confirm referral
           </Button>
         ),
       },

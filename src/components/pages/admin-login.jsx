@@ -7,6 +7,17 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { adminLogin } from "../../services/auth.js";
+import {
+    UserOutlined,
+    LockOutlined,
+    EyeInvisibleOutlined,
+    EyeTwoTone,
+    SafetyOutlined,
+    //   ShieldCheckOutlined,
+    SettingOutlined,
+    DashboardOutlined
+} from "@ant-design/icons";
+
 // Validation schema using Yup
 const validationSchema = Yup.object({
     identifier: Yup.string()
@@ -35,11 +46,12 @@ export const AdminLogin = () => {
     // For navigation after successful login
     const navigate = useNavigate();
 
-    // State for error messages
+    // State for error messages and password visibility
     const [loginError, setLoginError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Handle form submission
-    const handleSubmit = async (values, { setStatus }) => {
+    const handleSubmit = async (values, { setStatus, setSubmitting }) => {
         const loginData = {
             email: values.identifier,
             password: values.password,
@@ -47,148 +59,203 @@ export const AdminLogin = () => {
         try {
             const response = await adminLogin(loginData);
 
-            console.log(response.token,"admin toke is here");
+            console.log(response.token, "admin token is here");
             // Store token in localStorage (or use context/auth provider)
             localStorage.setItem("token", response.token);
             localStorage.setItem("adminData", response.admin)
-            localStorage.setItem("userType","admin")
+            localStorage.setItem("userType", "admin")
 
             setStatus(null); // Clear any previous errors
             setLoginError(null);
+
+            // Show success message
+            toast.success("Login successful! Redirecting to dashboard...");
+
             // Redirect to dashboard or home page
-            navigate("/admin-dashboard");
+            setTimeout(() => {
+                navigate("/admin-dashboard");
+            }, 1000);
         } catch (error) {
             console.error("Login failed:", error);
             const errorMessage = error.response?.data?.error || "Login failed. Please try again.";
             setStatus({ error: errorMessage });
             setLoginError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setSubmitting(false);
         }
     };
 
     return (
-        <main
-            className="flex flex-col min-h-screen items-center relative bg-white"
-            data-model-id="2:1264"
-        >
-            {/* Header */}
-            <header className="flex w-full h-20 items-center justify-around px-20 py-0 relative bg-bgdefault-bg">
-                <div className="flex items-center gap-[775px] relative flex-1 grow">
-                    <div className="inline-flex items-center gap-10 relative flex-[0_0_auto]">
-                        <div className="relative w-[83px] h-9">
-                            <h1 className="text-4xl font-bold text-primarysolid tracking-[-0.36px]">
-                                Logo
-                            </h1>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+
+            <div className="relative w-full max-w-md z-10">
+                {/* Header Section */}
+                <div className="text-center mb-8">
+
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
+                    <p className="text-gray-600">Secure access to your dashboard</p>
                 </div>
-            </header>
 
-            {/* Main content */}
-            <div className="flex flex-col items-center gap-10 pt-10 pb-0 px-0 relative flex-1 self-stretch w-full grow">
-                <div className="flex flex-col w-[480px] items-center gap-6 relative">
-                    {/* Title section */}
-                    <div className="flex flex-col items-center justify-center gap-2.5 relative self-stretch w-full">
-                        <div className="flex flex-col w-full items-start gap-2.5 relative">
-                            <h2 className="text-[30px] font-semibold text-fgtext-contrast tracking-[0.15px] leading-9">
-                                Admin Login
-                            </h2>
-                            <p className="text-base font-medium text-fgtext tracking-[0.08px] leading-6">
-                                Sign in to your account using your phone number or email and password.
-                            </p>
+                {/* Login Card */}
+                <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-2xl rounded-2xl overflow-hidden">
+                    <CardContent className="p-8">
+                        {/* Admin Badge */}
+                        <div className="flex items-center justify-center mb-6">
+                            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-full">
+                                <SafetyOutlined className="text-blue-600" />
+                                <span className="text-sm font-semibold text-primarysolid">Administrator Access</span>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Form card */}
-                    <Card className="w-full border-[#dfe3e6] shadow-rounded-xl">
-                        <CardContent className="flex flex-col gap-6 p-5">
-                            <Formik
-                                initialValues={initialValues}
-                                validationSchema={validationSchema}
-                                onSubmit={handleSubmit}
-                            >
-                                {({ isSubmitting, status }) => (
-                                    <Form>
-                                        <div className="flex flex-col gap-4">
-                                            {/* Display error message if login fails */}
-                                            {status && status.error && (
-                                                <div className="text-red-500 text-[14px] text-center">
-                                                    {status.error}
-                                                </div>
-                                            )}
-
-                                            {/* Identifier field */}
-                                            <div className="flex flex-col gap-2">
-                                                <label
-                                                    htmlFor="identifier"
-                                                    className="text-[14px] font-semibold text-fgtext-contrast tracking-[0.07px]"
-                                                >
-                                                    Phone Number or Email
-                                                </label>
-                                                <Field
-                                                    name="identifier"
-                                                    as={Input}
-                                                    id="identifier"
-                                                    className="h-12 px-4 py-3.5 text-[15px] font-medium text-fgsolid tracking-[0.075px] border-[#d7dbdf]"
-                                                    placeholder="Enter phone number or email"
-                                                />
-                                                <ErrorMessage
-                                                    name="identifier"
-                                                    component="div"
-                                                    className="text-red-500 text-[12px]"
-                                                />
+                        <Formik
+                            initialValues={initialValues}
+                            validationSchema={validationSchema}
+                            onSubmit={handleSubmit}
+                        >
+                            {({ isSubmitting, status, values }) => (
+                                <Form className="space-y-6">
+                                    {/* Error Alert */}
+                                    {status && status.error && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                                            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-xs">!</span>
                                             </div>
-
-                                            {/* Password field */}
-                                            <div className="flex flex-col gap-2">
-                                                <label
-                                                    htmlFor="password"
-                                                    className="text-[14px] font-semibold text-fgtext-contrast tracking-[0.07px]"
-                                                >
-                                                    Password
-                                                </label>
-                                                <Field
-                                                    name="password"
-                                                    type="password"
-                                                    as={Input}
-                                                    id="password"
-                                                    className="h-12 px-4 py-3.5 text-[15px] font-medium text-fgsolid tracking-[0.075px] border-[#d7dbdf]"
-                                                    placeholder="Enter password"
-                                                />
-                                                <ErrorMessage
-                                                    name="password"
-                                                    component="div"
-                                                    className="text-red-500 text-[12px]"
-                                                />
+                                            <div className="text-red-700 text-sm font-medium">
+                                                {status.error}
                                             </div>
                                         </div>
+                                    )}
 
-                                        {/* Forgot Password link */}
-                                        <div className="flex justify-end mt-2">
-                                            <Link
-                                                to="/forgot-password"
-                                                className="text-[14px] font-medium text-primarysolid hover:underline"
+                                    {/* Email/Phone Field */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">
+                                            Email or Phone Number
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <UserOutlined className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <Field
+                                                name="identifier"
+                                                as={Input}
+                                                className="block w-full pl-10 pr-3 py-6 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/70 backdrop-blur-sm transition-all duration-200"
+                                                placeholder="Enter your email or phone"
+                                            />
+                                        </div>
+                                        <ErrorMessage
+                                            name="identifier"
+                                            component="div"
+                                            className="text-red-500 text-xs mt-1"
+                                        />
+                                    </div>
+
+                                    {/* Password Field */}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">
+                                            Password
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <LockOutlined className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <Field
+                                                name="password"
+                                                type={showPassword ? "text" : "password"}
+                                                as={Input}
+                                                className="block w-full pl-10 pr-12 py-6 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/70 backdrop-blur-sm transition-all duration-200"
+                                                placeholder="Enter your password"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                                onClick={() => setShowPassword(!showPassword)}
                                             >
-                                                Forgot Password?
-                                            </Link>
+                                                {showPassword ? (
+                                                    <EyeInvisibleOutlined className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                                ) : (
+                                                    <EyeTwoTone className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                                )}
+                                            </button>
                                         </div>
+                                        <ErrorMessage
+                                            name="password"
+                                            component="div"
+                                            className="text-red-500 text-xs mt-1"
+                                        />
+                                    </div>
 
-                                        {/* Submit button */}
-                                        <Button
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                            className="h-12 w-full bg-primarysolid text-primaryon-primary rounded-xl hover:bg-primarysolid/90 mt-4"
+                                    {/* Forgot Password */}
+                                    <div className="flex justify-end">
+                                        <Link
+                                            to="/forgot-password"
+                                            className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200"
                                         >
-                                            <span className="text-[15px] font-semibold tracking-[0.075px]">
-                                                {isSubmitting ? "Logging in..." : "Login"}
-                                            </span>
-                                        </Button>
-                                    </Form>
-                                )}
-                            </Formik>
-                        </CardContent>
-                    </Card>
-                </div>
+                                            Forgot your password?
+                                        </Link>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-primarysolid  hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-6 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                    >
+                                        <div className="flex items-center justify-center gap-2">
+                                            {isSubmitting ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                    <span>Authenticating...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <DashboardOutlined />
+                                                    <span>Access Dashboard</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </Button>
+                                </Form>
+                            )}
+                        </Formik>
+
+                    </CardContent>
+                </Card>
+
+             
             </div>
-        </main>
+
+            <style jsx>{`
+                @keyframes blob {
+                    0% {
+                        transform: translate(0px, 0px) scale(1);
+                    }
+                    33% {
+                        transform: translate(30px, -50px) scale(1.1);
+                    }
+                    66% {
+                        transform: translate(-20px, 20px) scale(0.9);
+                    }
+                    100% {
+                        transform: translate(0px, 0px) scale(1);
+                    }
+                }
+                .animate-blob {
+                    animation: blob 7s infinite;
+                }
+                .animation-delay-2000 {
+                    animation-delay: 2s;
+                }
+                .animation-delay-4000 {
+                    animation-delay: 4s;
+                }
+                .bg-grid-pattern {
+                    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234f46e5' fill-opacity='0.4'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                }
+            `}</style>
+        </div>
     );
 };

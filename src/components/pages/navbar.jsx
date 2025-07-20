@@ -13,6 +13,7 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
+
     let userType = localStorage.getItem("userType");
 
     // Fetch token from localStorage on component mount
@@ -55,7 +56,7 @@ export default function Navbar() {
         localStorage.clear();
         setToken(null);
         setIsMenuOpen(false);
-        
+
         // Redirect based on user type
         if (userType === "admin") {
             navigate("/admin-login");
@@ -160,9 +161,27 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* Mobile Menu Toggle - Only show if there are menu items or user is not logged in */}
-                    {(shouldShowMenuItems || !token) && (
-                        <div className="md:hidden ml-2">
+                    {/* Mobile Right Side - Get Started + Menu Toggle */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {/* Show Get Started button directly on mobile when not logged in */}
+                        {!token ? (
+                            <Button
+                                onClick={() => navigate("/register")}
+                                className="bg-primarysolid text-sm hover:bg-primarysolid text-white shadow-sm px-3 py-2 rounded-lg"
+                            >
+                                Get Started
+                            </Button>
+                        ) : (
+                            <button
+                                onClick={() => handleNavigation(getDashboardPath())}
+                                className="bg-primarysolid text-sm hover:bg-primarysolid text-white shadow-sm px-3 py-2 rounded-lg"
+                            >
+                                Dashboard
+                            </button>
+                        )}
+
+                        {/* Menu Toggle - Show when there are items to show in menu */}
+                        {(token || shouldShowMenuItems) && (
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -171,12 +190,12 @@ export default function Navbar() {
                             >
                                 {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                             </Button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
-                {/* Mobile Navigation - Only show for non-admin users */}
-                {isMenuOpen && (shouldShowMenuItems || !token) && (
+                {/* Mobile Navigation - Show when menu is open AND there are items to show */}
+                {isMenuOpen && (token || shouldShowMenuItems) && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
                             {/* Navigation Items - Only show for non-admin users */}
@@ -190,40 +209,30 @@ export default function Navbar() {
                                 </button>
                             ))}
 
-                            {/* Authentication Buttons in Mobile Menu */}
-                            <div className={`border-t border-gray-200 pt-3 ${shouldShowMenuItems ? 'mt-3' : ''}`}>
-                                {token ? (
-                                    <>
-                                        <button
-                                            onClick={() => handleNavigation(getDashboardPath())}
-                                            className="bg-primarysolid text-white block px-3 py-2 text-base font-medium w-full text-left rounded-md mb-2 hover:bg-primarysolid/90 transition-colors"
-                                        >
-                                            Dashboard
-                                        </button>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="text-red-600 hover:text-red-800 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
-                                        >
-                                            Logout
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={() => handleNavigation("/login")}
-                                            className="text-primarysolid hover:text-primarysolid/80 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
-                                        >
-                                            Login
-                                        </button>
-                                        <button
-                                            onClick={() => handleNavigation("/register")}
-                                            className="bg-primarysolid text-white block px-3 py-2 text-base font-medium w-full text-left rounded-md mt-2 hover:bg-primarysolid/90 transition-colors"
-                                        >
-                                            Get Started
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+                            {/* Authentication Buttons in Mobile Menu - Only when logged in */}
+                            {token && (
+                                <div className={`border-t border-gray-200 pt-3 ${shouldShowMenuItems ? 'mt-3' : ''}`}>
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="text-red-600 hover:text-red-800 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Login button in mobile menu - Only when not logged in and menu items exist */}
+                            {!token && shouldShowMenuItems && (
+                                <div className="border-t border-gray-200 pt-3 mt-3">
+                                    <button
+                                        onClick={() => handleNavigation("/login")}
+                                        className="text-primarysolid hover:text-primarysolid/80 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
+                                    >
+                                        Login
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

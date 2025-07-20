@@ -1,6 +1,6 @@
 
 // ===== 11. hospitalServices/forms/PharmacyForm.jsx =====
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Select } from 'antd';
 import { OperatingHours } from '../operatingHours';
 import { BranchAddresses } from '../BranchAddresses';
@@ -9,6 +9,13 @@ import { AdditionalInfo } from '../AdditionalInfo';
 const { Option } = Select;
 
 const PharmacyForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours }) => {
+
+
+    useEffect(()=>{
+
+        console.log(capabilities, "capabilities");
+
+    },[capabilities])
     const handleToggleCompliance = (value) => {
         setCapabilities((prev) => {
             const updated = prev.complianceDocuments.includes(value)
