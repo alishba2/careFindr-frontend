@@ -2,7 +2,7 @@ export const loadServiceData = (serviceData, capabilities) => {
     let newCapabilities = { ...capabilities };
     let subSpecialities = [];
 
-    console.log(serviceData, "facility type is here");
+    console.log(capabilities, "capabilities type is here");
 
     switch (serviceData.facilityType) {
         case "Hospital":
@@ -54,7 +54,7 @@ export const loadServiceData = (serviceData, capabilities) => {
                 hasOtherBranches: serviceData.labDetails.branches.length > 0 ? "Yes" : "No",
                 branchAddresses: serviceData.labDetails.branches.map((b) => b.address) || [""],
                 additionalInformation: serviceData.labDetails.additionalInfo || "",
-                operatingDays: [],
+                operatingDays: serviceData.labDetails.operatingDays || [],
             };
             break;
 
@@ -70,7 +70,7 @@ export const loadServiceData = (serviceData, capabilities) => {
                 hasOtherBranches: serviceData.pharmacyDetails.branches.length > 0 ? "Yes" : "No",
                 branchAddresses: serviceData.pharmacyDetails.branches.map((b) => b.address) || [""],
                 additionalInformation: serviceData.pharmacyDetails.additionalInfo || "",
-                operatingDays: [],
+                operatingDays: serviceData.pharmacyDetails.operatingDays || [],
             };
             break;
 
@@ -93,7 +93,7 @@ export const loadServiceData = (serviceData, capabilities) => {
                 hasOtherBranches: serviceData.ambulanceDetails.branches.length > 0 ? "Yes" : "No",
                 branchAddresses: serviceData.ambulanceDetails.branches.map((b) => b.address) || [""],
                 additionalInformation: serviceData.ambulanceDetails.additionalInfo || "",
-                operatingDays: [],
+                operatingDays: serviceData.ambulanceDetails.operatingDays || [],
             };
             break;
 
@@ -186,6 +186,13 @@ export const loadServiceData = (serviceData, capabilities) => {
                 
                 // Inventory and Capacity
                 currentBloodInventoryCapacity: serviceData.bloodBankDetails.currentBloodInventoryCapacity || "",
+                providesPriorityDispatch: serviceData.bloodBankDetails.providesPriorityDispatch || "",
+
+
+                averageTurnaroundTimes: serviceData.bloodBankDetails.averageTurnaroundTimes || "",
+                
+                typicalRequestVolume: serviceData.bloodBankDetails.typicalRequestVolume || "",
+
                 maxStorageCapacityPerComponent: serviceData.bloodBankDetails.maxStorageCapacityPerComponent || "",
                 shortageManagement: serviceData.bloodBankDetails.shortageManagement || "",
                 expiryDateTracking: serviceData.bloodBankDetails.expiryDateTracking || "",

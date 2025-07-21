@@ -75,9 +75,9 @@ const LaboratoryForm = ({ capabilities, setCapabilities, timeError, validateOper
                 </div>
             </div>
 
-            <OperatingHours 
-                capabilities={capabilities} 
-                setCapabilities={setCapabilities} 
+            <OperatingHours
+                capabilities={capabilities}
+                setCapabilities={setCapabilities}
                 timeError={timeError}
                 validateOperatingHours={validateOperatingHours}
             />

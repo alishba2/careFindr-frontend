@@ -157,7 +157,7 @@ export default function DashboardHome() {
           <Card className="rounded-xl shadow border-none relative">
             <p className="text-base text-gray-500">Profile Completion</p>
             <p className="text-2xl font-bold text-primary">
-              {authData?.profileCompletion === 100 ? "Completed" : `${authData?.profileCompletion || 0}%`}
+              {authData?.profileCompletion === 100 ? "100%" : `${authData?.profileCompletion || 0}%`}
             </p>
             <p className="text-base text-gray-800">
               {authData?.profileCompletion === 100 ? "Your profile is complete" : "Continue completing profile"}

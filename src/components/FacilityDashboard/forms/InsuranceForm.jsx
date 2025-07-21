@@ -122,7 +122,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 {/* Emergency Coverage */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
-                        Coverage for Emergency Services and Ambulance Transport
+                       What is the coverage for emergency services and ambulance transport?
                     </label>
                     <Select
                         className="h-12 w-full"
@@ -201,7 +201,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 </div>
 
                 {/* Co-payments or Deductibles - UPDATED TO BOOLEAN */}
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col">
                     <label className="text-sm font-bold text-gray-800">Are there co-payments or deductibles involved?</label>
                     <Checkbox
                         checked={capabilities.conPayments}
@@ -445,7 +445,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                                 </div>
                             ))}
                             <Button
-                                className="h-10 px-4 bg-cyan-500 text-white rounded-md"
+                                className="h-10 px-4 bg-primarysolid text-white rounded-md"
                                 onClick={addWaitingPeriod}
                             >
                                 + Add Service

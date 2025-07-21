@@ -37,12 +37,11 @@ const PharmacyForm = ({ capabilities, setCapabilities, timeError, validateOperat
     return (
         <>
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-800">
+                <label className="text-sm font-bold text-gray-800">
                     Do you have a licensed pharmacist on-site?
                 </label>
                 <Select
                     className="h-12 w-full"
-                    style={{ height: "48px" }}
                     value={capabilities.hasLicensedPharmacist}
                     onChange={(value) =>
                         setCapabilities((prev) => ({
@@ -58,10 +57,9 @@ const PharmacyForm = ({ capabilities, setCapabilities, timeError, validateOperat
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-800">Do you offer delivery?</label>
+                <label className="text-sm font-bold text-gray-800">Do you offer delivery?</label>
                 <Select
                     className="h-12 w-full"
-                    style={{ height: "48px" }}
                     value={capabilities.offersDelivery}
                     onChange={(value) =>
                         setCapabilities((prev) => ({

@@ -7,6 +7,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { adminLogin } from "../../services/auth.js";
+import logo from "../../assets/logo.png";
+
 import {
     UserOutlined,
     LockOutlined,
@@ -69,7 +71,6 @@ export const AdminLogin = () => {
             setLoginError(null);
 
             // Show success message
-            toast.success("Login successful! Redirecting to dashboard...");
 
             // Redirect to dashboard or home page
             setTimeout(() => {
@@ -87,17 +88,23 @@ export const AdminLogin = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
 
             <div className="relative w-full max-w-md z-10">
+
+                  <div className="flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
+                            <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
+                
+                          </div>
                 {/* Header Section */}
+
+                
                 <div className="text-center mb-8">
 
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
-                    <p className="text-gray-600">Secure access to your dashboard</p>
+                    <p className="text-gray-600">Secure access to admin dashboard</p>
                 </div>
 
                 {/* Login Card */}

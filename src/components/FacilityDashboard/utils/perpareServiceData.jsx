@@ -11,6 +11,7 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
             subSpecialities: subSpecialities,
             facilityFeatures: capabilities.facilityFeatures,
             operationDays: capabilities.operatingDays.filter((day) => day !== "24/7"),
+
             openingTime: capabilities.openingTime,
             closingTime: capabilities.closingTime,
             admissionFee: Number(capabilities.admissionFee) || 0,
@@ -34,6 +35,8 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                     openingTime: capabilities.openingTime,
                     closingTime: capabilities.closingTime,
                 },
+                operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
+
                 branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                 additionalInfo: capabilities.additionalInformation,
             };
@@ -49,6 +52,8 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                     openingTime: capabilities.openingTime,
                     closingTime: capabilities.closingTime,
                 },
+                operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
+
                 branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                 additionalInfo: capabilities.additionalInformation,
             };
@@ -68,9 +73,12 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                 insuranceAccepted: capabilities.nhisInsuranceAccepted === "Yes",
                 registeredWithFederalHealth: capabilities.registeredWithFMOH === "Yes",
                 operatingHours: {
+
                     openingTime: capabilities.openingTime,
                     closingTime: capabilities.closingTime,
                 },
+                operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
+
                 branches: capabilities.hasOtherBranches === "Yes" ? capabilities.branchAddresses.map((address) => ({ address })) : [],
                 additionalInfo: capabilities.additionalInformation,
             };
@@ -84,43 +92,44 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                 preExistingConditions: capabilities.preExistingConditions === "Yes",
                 emergencyCoverage: capabilities.emergencyCoverage || "",
                 limitationForCareCoverage: capabilities.limitationForCareCoverage || "",
-                
+
                 // Claim Process - UPDATED FIELD NAMES
                 claimProcessSteps: capabilities.claimProcessSteps || "",
                 daysToSettleClaims: capabilities.daysToSettleClaims || "",
                 conPayments: capabilities.conPayments || false, // Boolean field
                 handleRejectedClaims: capabilities.handleRejectedClaims || "",
                 paymentSystem: capabilities.paymentSystem || "",
-                
+
                 // Integration & Technology - UPDATED FIELD NAMES
                 canVerifyCoverage: capabilities.canVerifyCoverage || "",
                 supportTechIntegration: capabilities.supportTechIntegration || "",
-                
+
                 // Regulatory Compliance - UPDATED FIELD NAMES
                 registeredWithNHIA: capabilities.registeredWithNHIA || "",
                 complyWithNigerianHealthCare: capabilities.complyWithNigerianHealthCare || "",
                 handleDisputesOrComplaints: capabilities.handleDisputesOrComplaints || "",
-                
+
                 // Hospital Network - FIXED STRUCTURE
                 accreditedHospitals: capabilities.accreditedHospitals || [{ address: "" }],
                 outOfNetworkReimbursement: capabilities.outOfNetworkReimbursement === "Yes",
-                
+
                 // Pre-authorization
                 preAuthorization: capabilities.preAuthorization || "",
                 preAuthRequired: capabilities.preAuthRequired || "",
                 waitingPeriods: capabilities.waitingPeriods || [],
-                
+
                 // Premiums & Payments
                 premiumsCopayments: capabilities.premiumsCopayments || "",
-                
+                operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
+
+
                 // Operating Details
                 operatingHours: {
                     openingTime: capabilities.openingTime || "",
                     closingTime: capabilities.closingTime || "",
                 },
-                operatingDays: capabilities.operatingDays?.filter((day) => day !== "24/7") || [],
-                branches: capabilities.hasOtherBranches === "Yes" 
-                    ? capabilities.branchAddresses.map((address) => ({ address })) 
+                branches: capabilities.hasOtherBranches === "Yes"
+                    ? capabilities.branchAddresses.map((address) => ({ address }))
                     : [],
                 additionalInfo: capabilities.additionalInformation || "",
             };
@@ -160,18 +169,25 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
             serviceData.bloodBankDetails = {
                 // Blood Products and Types
                 bloodProductsProvided: capabilities.bloodProductsProvided || [],
-                
+
                 // Screening and Safety
                 infectionsTestedFor: capabilities.infectionsTestedFor || "",
-                
+
                 // Inventory and Capacity
                 currentBloodInventoryCapacity: capabilities.currentBloodInventoryCapacity || "",
+                typicalRequestVolume: capabilities.typicalRequestVolume || "",
+
+                providesPriorityDispatch: capabilities.providesPriorityDispatch || "",
+                averageTurnaroundTimes: capabilities.averageTurnaroundTimes || "",
+
+
+
                 maxStorageCapacityPerComponent: capabilities.maxStorageCapacityPerComponent || "",
                 shortageManagement: capabilities.shortageManagement || "",
                 expiryDateTracking: capabilities.expiryDateTracking || "",
                 hasMobileDonationUnits: capabilities.hasMobileDonationUnits === "Yes",
                 averageBloodCollectionTime: capabilities.averageBloodCollectionTime || "",
-                
+
                 // Operational Standards
                 acceptsReturnedBlood: capabilities.acceptsReturnedBlood === "Yes",
                 returnTimeFrame: capabilities.returnTimeFrame || "",
@@ -180,7 +196,7 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                 dailyWeeklyRequestVolume: capabilities.dailyWeeklyRequestVolume || "",
                 bloodExpiryManagement: capabilities.bloodExpiryManagement || "",
                 allowsDirectPatientRequests: capabilities.allowsDirectPatientRequests === "Yes",
-                
+
                 // Logistics & Delivery
                 providesEmergencyDelivery: capabilities.providesEmergencyDelivery === "Yes",
                 emergencyResponseTime: capabilities.emergencyResponseTime || "",
@@ -191,27 +207,27 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
                 priorityDispatchAvailable: capabilities.priorityDispatchAvailable === "Yes",
                 turnaroundTimeEmergency: capabilities.turnaroundTimeEmergency || "",
                 turnaroundTimeNonEmergency: capabilities.turnaroundTimeNonEmergency || "",
-                
+
                 // Pricing & Payment
                 bloodProductCosts: capabilities.bloodProductCosts || "",
                 acceptsInsurance: capabilities.bloodBankAcceptsInsurance === "Yes",
-                
+
                 // Donor Recruitment & Retention
                 donorRecruitmentMethods: capabilities.donorRecruitmentMethods || "",
                 hasDonorRetentionStrategy: capabilities.hasDonorRetentionStrategy === "Yes",
                 donationSystems: capabilities.donationSystems || [],
-                
+
                 // Certification
                 accreditationsCertifications: capabilities.bloodBankAccreditations || "",
-                
+
                 // General fields
                 operatingHours: {
                     openingTime: capabilities.openingTime,
                     closingTime: capabilities.closingTime,
                 },
                 operatingDays: capabilities.operatingDays.filter((day) => day !== "24/7") || [],
-                branches: capabilities.hasOtherBranches === "Yes" 
-                    ? capabilities.branchAddresses.map((address) => ({ address })) 
+                branches: capabilities.hasOtherBranches === "Yes"
+                    ? capabilities.branchAddresses.map((address) => ({ address }))
                     : [],
                 additionalInfo: capabilities.additionalInformation || "",
             };

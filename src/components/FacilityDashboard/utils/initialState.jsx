@@ -103,6 +103,7 @@ export const initialCapabilitiesState = {
 
     // 🩸 NEW: Blood Bank Fields
     // Blood Products and Types
+    
     bloodProductsProvided: [],
     
     // Screening and Safety
@@ -110,11 +111,14 @@ export const initialCapabilitiesState = {
     
     // Inventory and Capacity
     currentBloodInventoryCapacity: "",
+    providesPriorityDispatch:"",
+    typicalRequestVolume:" ",
     maxStorageCapacityPerComponent: "",
     shortageManagement: "",
     expiryDateTracking: "",
     hasMobileDonationUnits: "",
     averageBloodCollectionTime: "",
+    averageTurnaroundTimes:" ",
     
     // Operational Standards
     acceptsReturnedBlood: "",

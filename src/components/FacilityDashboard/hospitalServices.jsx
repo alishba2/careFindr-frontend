@@ -22,6 +22,53 @@ import { loadServiceData } from "./utils/loadServiceData";
 import { prepareServiceData } from "./utils/perpareServiceData";
 import BloodBankForm from "./forms/BloodbankFrom";
 
+// Confirmation Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onSave, onDiscard, saving }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Unsaved Changes
+                </h3>
+                <p className="text-gray-600 mb-6">
+                    You have unsaved changes. What would you like to do?
+                </p>
+                <div className="flex gap-3 justify-end">
+                    <Button
+                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                        onClick={onDiscard}
+                        disabled={saving}
+                    >
+                        Discard Changes
+                    </Button>
+                    <Button
+                        className="px-4 py-2 bg-primarysolid text-white rounded-md hover:bg-blue-600"
+                        onClick={onSave}
+                        disabled={saving}
+                    >
+                        {saving ? (
+                            <>
+                                <span className="loader mr-2" /> Saving...
+                            </>
+                        ) : (
+                            "Save Changes"
+                        )}
+                    </Button>
+                    <Button
+                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        onClick={onClose}
+                        disabled={saving}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const HospitalServices = () => {
     const { authData, facilityType, fetchAuthData, setIsAmbulance } = useAuth();
     const [progress, setProgress] = useState(0);
@@ -32,6 +79,7 @@ export const HospitalServices = () => {
     const [initialSubSpecialities, setInitialSubSpecialities] = useState([]);
     const [isServiceSaved, setIsServiceSaved] = useState(false);
     const [timeError, setTimeError] = useState("");
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     const location = useLocation();
     const type = location.state?.type;
     const [typeFacility, setTypeFacility] = useState(null);
@@ -162,12 +210,49 @@ export const HospitalServices = () => {
             setSaving(false);
             fetchAuthData();
             message.success("Service Updated Successfully!");
+            setShowConfirmModal(false); // Close modal after successful save
             navigate("/facility-dashboard/document-upload");
         } catch (error) {
             console.error("Error submitting service:", error);
             setSaving(false);
             message.error("Failed to update service. Please try again.");
         }
+    };
+
+    const handleButtonClick = () => {
+        if (hasChanges) {
+            setShowConfirmModal(true);
+        } else {
+            // No changes, just navigate
+            if (userType === "admin") {
+                // For admin, just show a message or handle differently
+                message.info("No changes to save.");
+            } else {
+                navigate("/facility-dashboard/document-upload");
+            }
+        }
+    };
+
+    const handleDiscardChanges = () => {
+        // Reset to initial state
+        setCapabilities(JSON.parse(JSON.stringify(initialCapabilities)));
+        setSubspecialities([...initialSubSpecialities]);
+        setTimeError("");
+        setShowConfirmModal(false);
+        
+        if (userType !== "admin") {
+            navigate("/facility-dashboard/document-upload");
+        } else {
+            message.info("Changes discarded.");
+        }
+    };
+
+    const handleSaveChanges = () => {
+        handleSubmit();
+    };
+
+    const handleModalClose = () => {
+        setShowConfirmModal(false);
     };
 
     const renderForm = () => {
@@ -180,6 +265,7 @@ export const HospitalServices = () => {
         };
 
         console.log(commonProps, 'common props here')
+
 
         switch (facility) {
             case "Hospital":
@@ -202,7 +288,6 @@ export const HospitalServices = () => {
                 return <InsuranceForm {...commonProps} />;
             case "SpecialistClinic":
                 return <SpecialistClinicForm {...commonProps} />;
-            
             case "Blood Bank":
                 return <BloodBankForm {...commonProps} />;
             default:
@@ -211,10 +296,9 @@ export const HospitalServices = () => {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
-
-            {
-                userType != "admin" ? (
+        <>
+            <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border">
+                {userType != "admin" ? (
                     <>
                         <StepProgress currentStep={authData?.onBoardingStep} />
                         <div className=" p-6 h-24 flex flex-col gap-2">
@@ -235,26 +319,21 @@ export const HospitalServices = () => {
                                 ? "Ambulance Details"
                                 : "Service & Capacity"}
                         </h2>
-
                     </div>
-                )
-            }
+                )}
 
-            <Card className="border-none shadow-none ">
-                <div className="p-6 space-y-6 border-none">
-                    {renderForm()}
-                </div>
-            </Card>
+                <Card className="border-none shadow-none ">
+                    <div className="p-6 space-y-6 border-none">
+                        {renderForm()}
+                    </div>
+                </Card>
 
-            {
-                userType == "admin" ? (
-
+                {userType == "admin" ? (
                     <div className="flex my-3 mb-8 gap-5 p-6">
-
                         <Button
                             className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
-                            onClick={handleSubmit}
-                            disabled={saving || !hasChanges}
+                            onClick={handleButtonClick}
+                            disabled={saving}
                         >
                             {saving ? (
                                 <>
@@ -266,7 +345,6 @@ export const HospitalServices = () => {
                         </Button>
                     </div>
                 ) : (
-
                     <div className="flex my-3 mb-8 gap-5 p-6">
                         <Button
                             className="h-12 flex-1 px-6 bg-gray-300 font-bold hover:bg-gray-400 hover:text-white text-black rounded-md flex items-center justify-center"
@@ -276,8 +354,8 @@ export const HospitalServices = () => {
                         </Button>
                         <Button
                             className="h-12 flex-1 px-6 bg-primarysolid text-white rounded-md flex items-center justify-center"
-                            onClick={handleSubmit}
-                            disabled={saving || !hasChanges}
+                            onClick={handleButtonClick}
+                            disabled={saving}
                         >
                             {saving ? (
                                 <>
@@ -288,10 +366,17 @@ export const HospitalServices = () => {
                             )}
                         </Button>
                     </div>
-                )
-            }
+                )}
+            </div>
 
-
-        </div>
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showConfirmModal}
+                onClose={handleModalClose}
+                onSave={handleSaveChanges}
+                onDiscard={handleDiscardChanges}
+                saving={saving}
+            />
+        </>
     );
 };
