@@ -216,3 +216,13 @@ export const checkFacilityStatus = async (facilityId) => {
         throw error;
     }
 };
+
+export const getProfileStatus = async () => {
+    try {
+        const response = await axios.get(`${backendUrl}/api/facilities/profile-completion-status`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching profile completion status:", error);
+        throw error;
+    }
+};

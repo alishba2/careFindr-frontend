@@ -12,6 +12,7 @@ import { updateFacility } from "../../services/auth.js";
 import { FacilityServices, GetFacilityService } from "../../services/service.js";
 import axios from "axios";
 
+import { getProfileStatus } from "../../services/facility.js";
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
 export default function DashboardHome() {
@@ -46,6 +47,17 @@ export default function DashboardHome() {
         return "You have a new update or activity in your account.";
     }
   };
+
+  const [profilePercentage, setProfilePercentage] = useState(null);
+
+  useEffect(() => {
+    const fetchProfileStatus = async () => {
+      const res = await getProfileStatus();
+      console.log(res, "profile status is here");
+      setProfilePercentage(res?.totalPoints || 0);
+    };
+    fetchProfileStatus();
+  }, []);
 
 
   const fetchNotifications = async () => {
@@ -157,10 +169,10 @@ export default function DashboardHome() {
           <Card className="rounded-xl shadow border-none relative">
             <p className="text-base text-gray-500">Profile Completion</p>
             <p className="text-2xl font-bold text-primary">
-              {authData?.profileCompletion === 100 ? "100%" : `${authData?.profileCompletion || 0}%`}
+              {profilePercentage === 100 ? "100%" : `${profilePercentage || 0}%`}
             </p>
             <p className="text-base text-gray-800">
-              {authData?.profileCompletion === 100 ? "Your profile is complete" : "Continue completing profile"}
+              {profilePercentage === 100 ? "Your profile is complete" : "Continue completing profile"}
             </p>
             <div className="w-14 h-14 bg-[#D1E5FF] rounded-full absolute top-5 right-7 flex items-center justify-center">
               <img src={Profile} alt="Profile" />
