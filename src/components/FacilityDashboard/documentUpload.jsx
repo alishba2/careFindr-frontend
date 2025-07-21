@@ -7,8 +7,6 @@ import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
 import { useNavigate } from "react-router-dom";
 const { Dragger } = Upload;
 
-
-
 export const DocumentUpload = () => {
   const { facilityType, authData, fetchAuthData } = useAuth();
 
@@ -69,7 +67,7 @@ export const DocumentUpload = () => {
     const fetchFacilityDocs = async () => {
       try {
         const response = await GetFacilityDocs();
-        console.log(response, "respone hsere");
+        console.log(response, "response here");
         if (response) {
           setUpdate(true);
         }
@@ -87,15 +85,33 @@ export const DocumentUpload = () => {
               status: 'done',
               url: path,
             })) || [],
-            priceList: response.priceListFile
+            // Changed to handle multiple price list files
+            priceList: response.priceListFiles?.map((path) => ({
+              uid: path,
+              name: path.split('/').pop(),
+              status: 'done',
+              url: path,
+            })) || (response.priceListFile
               ? [{ uid: response.priceListFile, name: response.priceListFile.split('/').pop(), status: 'done', url: response.priceListFile }]
-              : [],
-            facilityDetails: response.facilityDetailsDoc
+              : []),
+            // Changed to handle multiple facility details files
+            facilityDetails: response.facilityDetailsFiles?.map((path) => ({
+              uid: path,
+              name: path.split('/').pop(),
+              status: 'done',
+              url: path,
+            })) || (response.facilityDetailsDoc
               ? [{ uid: response.facilityDetailsDoc, name: response.facilityDetailsDoc.split('/').pop(), status: 'done', url: response.facilityDetailsDoc }]
-              : [],
-            licenseRegistration: response.licenseRegistrationFile
+              : []),
+            // Changed to handle multiple license registration files
+            licenseRegistration: response.licenseRegistrationFiles?.map((path) => ({
+              uid: path,
+              name: path.split('/').pop(),
+              status: 'done',
+              url: path,
+            })) || (response.licenseRegistrationFile
               ? [{ uid: response.licenseRegistrationFile, name: response.licenseRegistrationFile.split('/').pop(), status: 'done', url: response.licenseRegistrationFile }]
-              : [],
+              : []),
           };
           setFileList(newFileList);
           setInitialFiles(newFileList);
@@ -148,7 +164,8 @@ export const DocumentUpload = () => {
   const uploadProps = (field) => ({
     name: field,
     onChange: (info) => handleUpload(info, field),
-    multiple: field === "facilityPhotos" || field === "specialistSchedules",
+    // All fields now support multiple files
+    multiple: true,
     beforeUpload: () => false,
     fileList: fileList[field],
     accept: field === "facilityPhotos"
@@ -185,21 +202,20 @@ export const DocumentUpload = () => {
         });
       }
 
-      // Append single documents with correct standardized names
-      [
-        { field: "priceList", key: "priceListFile" },
-        { field: "facilityDetails", key: "facilityDetailsDoc" },
-        { field: "licenseRegistration", key: "licenseRegistrationFile" },
-      ].forEach(({ field, key }) => {
-        const existingFile = initialFiles?.[key]?.[0]?.url;
-        if (
-          fileList[field]?.[0]?.originFileObj &&
-          (!existingFile || existingFile !== fileList[field][0].url)
-        ) {
-          formData.append(field, fileList[field][0].originFileObj);
-        }
-      });
+      // Append multiple documents for each field
+      const multipleDocumentFields = [
+        { field: "priceList", key: "priceListFiles" },
+        { field: "facilityDetails", key: "facilityDetailsFiles" },
+        { field: "licenseRegistration", key: "licenseRegistrationFiles" },
+      ];
 
+      multipleDocumentFields.forEach(({ field, key }) => {
+        fileList[field].forEach((file) => {
+          if (!initialFiles?.[field]?.find((f) => f.url === (file.url || file.name))) {
+            formData.append(field, file.originFileObj || new File([], file.name));
+          }
+        });
+      });
 
       await FacilityDocs(formData, update);
       message.success("Facility documents uploaded successfully!");
@@ -240,7 +256,7 @@ export const DocumentUpload = () => {
             </Dragger>
           </div>
 
-          {/* Other Files */}
+          {/* Other Files - Updated to show multiple file support */}
           <div className="flex flex-wrap gap-6 sm:basis-[45%] md:basis-[48%] lg:basis-[47%]">
             {[
               { field: "facilityDetails", label: "Upload Documents with Details about your Facility" },
@@ -255,13 +271,35 @@ export const DocumentUpload = () => {
                 className="w-full md:basis-[48%] lg:basis-[47%] flex-grow space-y-2 md:space-x-0 md:flex md:flex-col md:items-start md:w-auto"
               >
                 <h1 className="text-sm font-semibold text-gray-900">{label}</h1>
+                
+                {/* Display current files if any */}
+                {fileList[field]?.length > 0 && (
+                  <div className="mb-2 space-y-1">
+                    {fileList[field].map((file, index) => (
+                      <div key={file.uid} className="flex items-center justify-between bg-gray-50 p-2 rounded text-xs">
+                        <span className="truncate flex-1">{file.name}</span>
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          onClick={() => handleDelete(file, field)}
+                          className="text-red-500 hover:text-red-700"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <Upload {...uploadProps(field)} className="w-full md:w-auto">
                   <Button
                     icon={<UploadOutlined className="ml-auto text-gray-500 text-[20px]" />}
                     className="w-full h-11 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
                   >
                     <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate md:text-[13px] md:leading-[1.2] md:tracking-[0.2px]">
-                      {fileList[field]?.[0]?.name || "Accepts DOC, DOCX, PDF, XLS, XLSX"}
+                      {fileList[field]?.length > 0 
+                        ? `${fileList[field].length} file(s) selected`
+                        : "Accepts DOC, DOCX, PDF, XLS, XLSX"
+                      }
                     </p>
                   </Button>
                 </Upload>

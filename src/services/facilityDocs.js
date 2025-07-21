@@ -66,11 +66,14 @@ export const getFacilityDocsByFacilityId = async (facilityId) => {
 // ===== DOCUMENT VERIFICATION APIs =====
 
 // Verify a single document
-export const verifyDocument = async (facilityId, documentType, notes = '') => {
+export const verifyDocument = async (facilityId, documentType,  filePath,notes=''
+) => {
   try {
     const response = await axios.post(`${backendUrl}/api/facility-docs/${facilityId}/verify-document`, {
       documentType,
+      filePath,
       notes
+      
     });
     return response.data;
   } catch (error) {
@@ -80,10 +83,11 @@ export const verifyDocument = async (facilityId, documentType, notes = '') => {
 };
 
 // Reject a single document
-export const rejectDocument = async (facilityId, documentType, notes) => {
+export const rejectDocument = async (facilityId, documentType,notes,filePath) => {
   try {
     const response = await axios.post(`${backendUrl}/api/facility-docs/${facilityId}/reject-document`, {
       documentType,
+      filePath,
       notes
     });
     return response.data;
@@ -172,7 +176,7 @@ export const getAllExtractedData = async (facilityType = null, verificationStatu
     const params = {};
     if (facilityType) params.facilityType = facilityType;
     if (verificationStatus) params.verificationStatus = verificationStatus;
-    
+
     const response = await axios.get(`${backendUrl}/api/facility-docs/extracted-data`, { params });
     return response.data;
   } catch (error) {
@@ -185,7 +189,10 @@ export const getAllExtractedData = async (facilityType = null, verificationStatu
 
 // Check if document type supports extraction
 export const isExtractableDocument = (documentType) => {
-  return ['facilityDetailsDoc', 'priceListFile'].includes(documentType);
+  return ['facilityDetailsDoc', 'priceListFile',,
+    'facilityDetailsFiles',
+    'priceListFiles',
+   ,].includes(documentType);
 };
 
 // Get document display name

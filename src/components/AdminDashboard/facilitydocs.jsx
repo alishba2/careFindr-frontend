@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Files
 } from "lucide-react";
 import {
   GetFacilityDocsAdmin,
@@ -34,19 +35,19 @@ import {
   getExtractionStatusText,
   getExtractionStatusColor
 } from "../../services/facilityDocs";
+import { toast } from "react-toastify";
 
 export const FacilityDoc = ({ facilityId }) => {
   const [docs, setDocs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState('');
+  const [selectedFilePath, setSelectedFilePath] = useState('');
   const [rejectNotes, setRejectNotes] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [verificationSummary, setVerificationSummary] = useState(null);
   const [extractionSummary, setExtractionSummary] = useState(null);
   const [extractionLoading, setExtractionLoading] = useState({});
-
-  // New states for data viewing
   const [viewDataModal, setViewDataModal] = useState(false);
   const [selectedExtractedData, setSelectedExtractedData] = useState(null);
   const [selectedDataType, setSelectedDataType] = useState('');
@@ -60,12 +61,12 @@ export const FacilityDoc = ({ facilityId }) => {
         getVerificationSummary(facilityId).catch(() => null),
         getExtractionSummary(facilityId).catch(() => null)
       ]);
-      console.log(docsRes, "response is here");
       setDocs(docsRes);
       setVerificationSummary(summaryRes);
       setExtractionSummary(extractionRes);
     } catch (error) {
       console.error("Failed to fetch facility documents", error);
+      toast.error("Failed to load documents. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -100,9 +101,9 @@ export const FacilityDoc = ({ facilityId }) => {
   const getDocumentIcon = (docType) => {
     switch (docType) {
       case 'facilityPhotos': return <Image className="w-5 h-5" />;
-      case 'facilityDetailsDoc': return <FileText className="w-5 h-5" />;
-      case 'priceListFile': return <DollarSign className="w-5 h-5" />;
-      case 'licenseRegistrationFile': return <FileText className="w-5 h-5" />;
+      case 'facilityDetailsFiles': return <FileText className="w-5 h-5" />;
+      case 'priceListFiles': return <DollarSign className="w-5 h-5" />;
+      case 'licenseRegistrationFiles': return <FileText className="w-5 h-5" />;
       case 'specialistScheduleFiles': return <Calendar className="w-5 h-5" />;
       default: return <FileText className="w-5 h-5" />;
     }
@@ -111,9 +112,9 @@ export const FacilityDoc = ({ facilityId }) => {
   const getDocumentTitle = (docType) => {
     switch (docType) {
       case 'facilityPhotos': return 'Facility Photos';
-      case 'facilityDetailsDoc': return 'Facility Details Document';
-      case 'priceListFile': return 'Price List';
-      case 'licenseRegistrationFile': return 'License & Registration';
+      case 'facilityDetailsFiles': return 'Facility Details Documents';
+      case 'priceListFiles': return 'Price Lists';
+      case 'licenseRegistrationFiles': return 'License & Registration Documents';
       case 'specialistScheduleFiles': return 'Specialist Schedules';
       default: return docType;
     }
@@ -129,36 +130,43 @@ export const FacilityDoc = ({ facilityId }) => {
     }
   };
 
-  const handleVerifyDocument = async (documentType) => {
+  const handleVerifyFile = async (documentType, filePath) => {
     setActionLoading(true);
+    console.log(filePath,"filepath is here");
     try {
-      await verifyDocument(facilityId, documentType, '');
-      getFacilityDocs();
+      await verifyDocument(facilityId, documentType, filePath);
+      await getFacilityDocs();
+      toast.success(`File ${getFileName(filePath)} verified successfully.`);
     } catch (error) {
-      console.error('Error verifying document:', error);
+      console.error('Error verifying file:', error);
+      toast.error('Failed to verify file. Please try again.');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleRejectDocument = (documentType) => {
+  const handleRejectDocument = (documentType, filePath) => {
     setSelectedDocument(documentType);
+    setSelectedFilePath(filePath);
     setRejectNotes('');
     setModalVisible(true);
   };
 
   const handleRejectSubmit = async () => {
     if (!rejectNotes.trim()) {
+      toast.error('Please provide a rejection reason.');
       return;
     }
 
     setActionLoading(true);
     try {
-      await rejectDocument(facilityId, selectedDocument, rejectNotes);
+      await rejectDocument(facilityId, selectedDocument, rejectNotes, selectedFilePath);
       setModalVisible(false);
-      getFacilityDocs();
+      await getFacilityDocs();
+      toast.success(`File ${getFileName(selectedFilePath)} rejected successfully.`);
     } catch (error) {
-      console.error('Error rejecting document:', error);
+      console.error('Error rejecting file:', error);
+      toast.error('Failed to reject file. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -168,9 +176,11 @@ export const FacilityDoc = ({ facilityId }) => {
     setActionLoading(true);
     try {
       await verifyAllDocuments(facilityId, '');
-      getFacilityDocs();
+      await getFacilityDocs();
+      toast.success('All documents verified successfully.');
     } catch (error) {
       console.error('Error verifying all documents:', error);
+      toast.error('Failed to verify all documents. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -183,43 +193,67 @@ export const FacilityDoc = ({ facilityId }) => {
     }
   };
 
-  const handleExtract = async (docType, isReExtraction = false) => {
+  const pollExtractionStatus = async (docType, filePath) => {
+    const key = filePath ? `${docType}-${filePath}` : docType;
+    const interval = setInterval(async () => {
+      try {
+        const status = await getExtractionStatus(facilityId, docType, filePath);
+        if (status !== 'processing' && status !== 'queued') {
+          clearInterval(interval);
+          setExtractionLoading(prev => ({ ...prev, [key]: false }));
+          await getFacilityDocs();
+          toast.success(`Extraction completed for ${getDocumentTitle(docType)}.`);
+        }
+      } catch (error) {
+        console.error('Error polling extraction status:', error);
+        clearInterval(interval);
+        setExtractionLoading(prev => ({ ...prev, [key]: false }));
+        toast.error('Failed to check extraction status.');
+      }
+    }, 2000);
+  };
+
+  const handleExtract = async (docType, filePath, isReExtraction = false) => {
     if (!isExtractableDocument(docType)) {
-      console.warn('Document type not extractable:', docType);
+      toast.warn(`${getDocumentTitle(docType)} is not eligible for data extraction.`);
       return;
     }
 
-    setExtractionLoading(prev => ({ ...prev, [docType]: true }));
+    const key = filePath ? `${docType}-${filePath}` : docType;
+    setExtractionLoading(prev => ({ ...prev, [key]: true }));
+    
     try {
-      await triggerExtraction(facilityId, docType);
-      // Refresh extraction summary after triggering
-      const updatedSummary = await getExtractionSummary(facilityId);
-      setExtractionSummary(updatedSummary);
-
-      if (isReExtraction) {
-        // Also refresh the full docs to get updated extracted data
-        setTimeout(() => getFacilityDocs(), 2000); // Give some time for processing
-      }
+      await triggerExtraction(facilityId, docType, filePath);
+      await pollExtractionStatus(docType, filePath);
     } catch (error) {
       console.error('Error triggering extraction:', error);
-    } finally {
-      setExtractionLoading(prev => ({ ...prev, [docType]: false }));
+      toast.error('Failed to trigger extraction. Please try again.');
+      setExtractionLoading(prev => ({ ...prev, [key]: false }));
     }
   };
 
-  const handleViewExtractedData = (docType) => {
-    const extractedData = docs?.extractedData?.[docType];
+  const handleViewExtractedData = (docType, filePath = null) => {
+    let extractedData = null;
+    
+    if (docs?.extractedData?.[docType]) {
+      extractedData = docs.extractedData[docType].find(item => item.filePath === filePath);
+    }
+
     if (extractedData && extractedData.success) {
       setSelectedExtractedData(extractedData);
       setSelectedDataType(docType);
+      setSelectedFilePath(filePath);
       setViewDataModal(true);
+    } else {
+      toast.error('No extracted data available for this file.');
     }
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      // You could add a toast notification here
-      console.log('Copied to clipboard');
+      toast.success('Copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard.');
     });
   };
 
@@ -242,23 +276,38 @@ export const FacilityDoc = ({ facilityId }) => {
     }));
   };
 
+  const getFileName = (filePath) => {
+    if (!filePath) return 'Unknown file';
+    return filePath.split('/').pop() || filePath;
+  };
+
   const renderExtractedDataContent = (data) => {
     if (!data) return <p className="text-gray-500">No data available</p>;
 
-    const { type, content, ...otherData } = data;
+    const content = data.data || data;
+    const { type, content: extractedContent, ...otherData } = content;
+
+    let displayContent;
+    try {
+      displayContent = typeof extractedContent === 'string' 
+        ? extractedContent 
+        : JSON.stringify(extractedContent, null, 2);
+    } catch (error) {
+      console.error('Invalid extracted content format:', extractedContent);
+      displayContent = 'Error parsing extracted content';
+      toast.error('Failed to parse extracted data.');
+    }
 
     return (
       <div className="space-y-4">
-
-
-        {/* Main Content */}
-        {content && (
+        {extractedContent && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-medium text-gray-900">Extracted Content</h4>
               <button
                 onClick={() => toggleSection('content')}
                 className="text-gray-600 hover:text-gray-800"
+                aria-label={expandedSections.content ? 'Collapse content' : 'Expand content'}
               >
                 {expandedSections.content ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
@@ -267,11 +316,12 @@ export const FacilityDoc = ({ facilityId }) => {
             {expandedSections.content && (
               <div className="bg-gray-50 p-3 rounded border max-h-64 overflow-y-auto">
                 <pre className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-                  {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
+                  {displayContent}
                 </pre>
                 <button
-                  onClick={() => copyToClipboard(typeof content === 'string' ? content : JSON.stringify(content, null, 2))}
+                  onClick={() => copyToClipboard(displayContent)}
                   className="mt-2 text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                  aria-label="Copy extracted content"
                 >
                   <Copy className="w-3 h-3 mr-1" />
                   Copy content
@@ -280,130 +330,196 @@ export const FacilityDoc = ({ facilityId }) => {
             )}
           </div>
         )}
-
-
       </div>
     );
   };
 
-  const renderFileDisplay = (files, isArray = false) => {
-    if (isArray) {
-      if (!files || files.length === 0) {
-        return <span className="text-gray-500 text-sm">No files uploaded</span>;
-      }
-      return (
-        <div className="space-y-2">
-          <span className="text-sm text-gray-700">{files.length} file(s) uploaded</span>
-          <div className="flex flex-wrap gap-2">
-            {files.map((file, index) => (
-              <button
-                key={index}
-                onClick={() => handleFileView(file)}
-                className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
-              >
-                <Eye className="w-3 h-3 mr-1" />
-                File {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    } else {
-      if (!files) {
-        return <span className="text-gray-500 text-sm">No file uploaded</span>;
-      }
-      return (
-        <div className="space-y-2">
-          <span className="text-sm text-gray-700">File uploaded</span>
-          <button
-            onClick={() => handleFileView(files)}
-            className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="w-3 h-3 mr-1" />
-            View File
-          </button>
-        </div>
-      );
+  const renderFileDisplay = (files, docType) => {
+    if (!files || (Array.isArray(files) && files.length === 0)) {
+      return <span className="text-gray-500 text-sm">No files uploaded</span>;
     }
+
+    const fileArray = Array.isArray(files) ? files : [files];
+    const verification = docs?.documentVerification?.[docType];
+    
+    return (
+      <div className="space-y-3">
+        <span className="text-sm text-gray-700">{fileArray.length} file(s) uploaded</span>
+        <div className="space-y-2">
+          {fileArray.map((file, index) => {
+            const fileName = getFileName(file);
+            const fileVerification = verification?.files?.find(f => f.filePath === file) || { status: 'pending', notes: '' };
+            const fileStatus = fileVerification.status;
+            const extractedDataEntry = docs?.extractedData?.[docType]?.find(item => item.filePath === file);
+            const hasExtractedData = !!extractedDataEntry && extractedDataEntry.success;
+            const fileExtraction = extractionSummary?.extractionStatus?.[docType]?.find(f => f.filePath === file);
+            const extractionStatus = hasExtractedData ? 'extracted' : (fileExtraction?.status || 'pending');
+            
+            return (
+              <div key={index} className="border rounded-lg p-3 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Files className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">{fileName}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(fileStatus)}`}>
+                      {getStatusText(fileStatus)}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleFileView(file)}
+                      className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
+                      aria-label={`View file ${fileName}`}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </button>
+                    {fileStatus !== 'verified' && (
+                      <button
+                        onClick={() => handleVerifyFile(docType, file)}
+                        disabled={actionLoading}
+                        className="inline-flex items-center px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        aria-label={`Verify file ${fileName}`}
+                      >
+                        <Check className="w-3 h-3 mr-1" />
+                        Verify
+                      </button>
+                    )}
+                    {fileStatus !== 'rejected' && (
+                      <button
+                        onClick={() => handleRejectDocument(docType, file)}
+                        disabled={actionLoading}
+                        className="inline-flex items-center px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        aria-label={`Reject file ${fileName}`}
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        Reject
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {isExtractableDocument(docType) && fileStatus === 'verified' && (
+                  <div className="mt-2 pt-2 border-t">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {getExtractionIcon(extractionStatus)}
+                        <span className={`text-xs ${getExtractionStatusColor(extractionStatus)}`}>
+                          {getExtractionStatusText(extractionStatus)}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleExtract(docType, file)}
+                          disabled={hasExtractedData || extractionLoading[`${docType}-${file}`]}
+                          className="inline-flex items-center px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                          aria-label={`Extract data from ${fileName}`}
+                        >
+                          {extractionLoading[`${docType}-${file}`] ? (
+                            <Loader className="w-3 h-3 mr-1 animate-spin" />
+                          ) : (
+                            <Download className="w-3 h-3 mr-1" />
+                          )}
+                          Extract
+                        </button>
+                        {hasExtractedData && (
+                          <>
+                            <button
+                              onClick={() => handleViewExtractedData(docType, file)}
+                              className="inline-flex items-center px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                              aria-label={`View extracted data for ${fileName}`}
+                            >
+                              <Database className="w-3 h-3 mr-1" />
+                              View Data
+                            </button>
+                            <button
+                              onClick={() => handleExtract(docType, file, true)}
+                              disabled={extractionLoading[`${docType}-${file}`]}
+                              className="inline-flex items-center px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
+                              aria-label={`Re-extract data for ${fileName}`}
+                            >
+                              {extractionLoading[`${docType}-${file}`] ? (
+                                <Loader className="w-3 h-3 mr-1 animate-spin" />
+                              ) : (
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                              )}
+                              Re-extract
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {fileExtraction?.error && (
+                      <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                        Error: {fileExtraction.error}
+                      </div>
+                    )}
+                    {(fileExtraction?.updatedAt || extractedDataEntry?.extractedAt) && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        Last updated: {formatDate(fileExtraction?.updatedAt || extractedDataEntry?.extractedAt)}
+                      </div>
+                    )}
+                    {!hasExtractedData && extractionStatus === 'pending' && (
+                      <div className="mt-1 text-xs text-gray-500">
+                        No extracted data available for this file.
+                      </div>
+                    )}
+                  </div>
+                )}
+                {fileVerification?.notes && fileStatus === 'rejected' && (
+                  <div className="mt-2 pt-2 border-t">
+                    <span className="text-xs text-gray-600">Rejection reason:</span>
+                    <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                      {fileVerification.notes}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   const renderExtractionStatus = (docType) => {
     if (!isExtractableDocument(docType)) {
-      return null;
+      return (
+        <div className="border-t pt-3 text-sm text-gray-500 italic">
+          This document type is not eligible for data extraction.
+        </div>
+      );
     }
 
-    const extractionData = extractionSummary?.extractionSummary?.[docType];
-    const status = extractionData?.status || 'pending';
-    const hasData = extractionData?.hasData || false;
-    const error = extractionData?.error;
-    const actualExtractedData = docs?.extractedData?.[docType];
-
-    return (
-      <div className="border-t pt-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Data Extraction:</span>
-          <div className="flex items-center space-x-2">
-            {getExtractionIcon(status)}
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getExtractionStatusColor(status)}`}>
-              {getExtractionStatusText(status)}
-            </span>
+    const verification = docs?.documentVerification?.[docType];
+    const hasVerifiedFiles = verification?.files?.some(f => f.status === 'verified');
+    
+    if (!hasVerifiedFiles) {
+      return (
+        <div className="border-t pt-3 space-y-2">
+          <div className="text-sm text-gray-500 italic">
+            Data extraction available after verification
           </div>
         </div>
+      );
+    }
 
-        {hasData && actualExtractedData?.success && (
-          <div className="space-y-2">
-            <div className="text-sm text-green-600 flex items-center">
-              <Database className="w-4 h-4 mr-1" />
-              Data extracted successfully
-            </div>
-            <div className="text-xs text-gray-500">
-              Extracted: {formatDate(actualExtractedData.extractedAt)}
-            </div>
-            <div className="text-xs text-gray-500">
-              File type: {actualExtractedData.fileExtension}
-            </div>
-            {actualExtractedData.data?.type && (
-              <div className="text-xs text-gray-500">
-                Content type: {actualExtractedData.data.type}
-              </div>
-            )}
-          </div>
-        )}
-
-        {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-            Error: {error}
-          </div>
-        )}
-
-        {extractionData?.lastUpdated && (
-          <div className="text-xs text-gray-500">
-            Last updated: {new Date(extractionData.lastUpdated).toLocaleString()}
-          </div>
-        )}
-      </div>
-    );
+    return null;
   };
 
   const renderDocumentCard = (docType) => {
     const verification = docs?.documentVerification?.[docType];
-    const hasFiles = docType === 'facilityPhotos' || docType === 'specialistScheduleFiles'
-      ? docs?.[docType]?.length > 0
-      : !!docs?.[docType];
+    const files = docs?.[docType];
+    const hasFiles = Array.isArray(files) ? files.length > 0 : !!files;
 
-    // Don't show specialist schedules for non-hospital facilities
     if (docType === 'specialistScheduleFiles' && docs?.facilityType !== 'Hospital') {
       return null;
     }
 
     const canExtract = isExtractableDocument(docType);
-    const isExtracting = extractionLoading[docType];
-    const hasExtractedData = docs?.extractedData?.[docType]?.success;
-    const extractionStatus = extractionSummary?.extractionSummary?.[docType]?.status;
 
     return (
       <div key={docType} className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {getDocumentIcon(docType)}
@@ -413,125 +529,32 @@ export const FacilityDoc = ({ facilityId }) => {
                 Extractable
               </span>
             )}
-            {hasExtractedData && (
-              <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">
-                Data Available
-              </span>
-            )}
           </div>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(verification?.status)}`}>
             {getStatusText(verification?.status)}
           </span>
         </div>
-
-        {/* File Display */}
         <div className="border-t pt-3">
-          {renderFileDisplay(
-            docs?.[docType],
-            docType === 'facilityPhotos' || docType === 'specialistScheduleFiles'
-          )}
+          {renderFileDisplay(files, docType)}
         </div>
-
-        {/* Extraction Status */}
-        {canExtract && hasFiles && verification?.verifiedAt && renderExtractionStatus(docType)}
-
-        {/* Verification Details */}
+        {canExtract && hasFiles && renderExtractionStatus(docType)}
         {verification?.verifiedAt && (
           <div className="border-t pt-3 space-y-1">
             <div className="text-sm">
-              <span className="text-gray-600">Verified by: </span>
+              <span className="text-gray-600">Last verified by: </span>
               <span className="text-gray-900">{verification.verifiedBy?.name || 'Admin'}</span>
             </div>
             <div className="text-xs text-gray-500">
-              {new Date(verification.verifiedAt).toLocaleString()}
+              {formatDate(verification.verifiedAt)}
             </div>
           </div>
         )}
-
-        {/* Rejection Notes */}
         {verification?.notes && verification?.status === 'rejected' && (
           <div className="border-t pt-3">
             <span className="text-sm text-gray-600">Rejection reason:</span>
             <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
               {verification.notes}
             </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        {hasFiles && (
-          <div className="border-t pt-3 flex gap-2 flex-wrap">
-            {verification?.status === 'verified' ? (
-              <>
-                {canExtract && (
-                  <div className="flex gap-2 flex-wrap">
-                    {!hasExtractedData ? (
-                      <button
-                        onClick={() => handleExtract(docType)}
-                        disabled={isExtracting}
-                        className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                      >
-                        {isExtracting ? (
-                          <Loader className="w-4 h-4 mr-1 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4 mr-1" />
-                        )}
-                        {isExtracting ? 'Extracting...' : 'Extract Data'}
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleViewExtractedData(docType)}
-                          className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                        >
-                          <Database className="w-4 h-4 mr-1" />
-                          View Data
-                        </button>
-                        <button
-                          onClick={() => handleExtract(docType, true)}
-                          disabled={isExtracting}
-                          className="inline-flex items-center px-3 py-1.5 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors"
-                        >
-                          {isExtracting ? (
-                            <Loader className="w-4 h-4 mr-1 animate-spin" />
-                          ) : (
-                            <RotateCcw className="w-4 h-4 mr-1" />
-                          )}
-                          {isExtracting ? 'Re-extracting...' : 'Re-extract'}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => handleVerifyDocument(docType)}
-                  disabled={actionLoading}
-                  className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
-                >
-                  <Check className="w-4 h-4 mr-1" />
-                  Verify
-                </button>
-                <button
-                  onClick={() => handleRejectDocument(docType)}
-                  disabled={actionLoading}
-                  className="inline-flex items-center px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Reject
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* No Files Message */}
-        {!hasFiles && (
-          <div className="border-t pt-3 text-center py-4">
-            <AlertTriangle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No documents uploaded yet</p>
           </div>
         )}
       </div>
@@ -555,29 +578,28 @@ export const FacilityDoc = ({ facilityId }) => {
     );
   }
 
-  const documentTypes = ['facilityPhotos', 'facilityDetailsDoc', 'priceListFile', 'licenseRegistrationFile'];
+  const documentTypes = ['facilityPhotos', 'facilityDetailsFiles', 'priceListFiles', 'licenseRegistrationFiles'];
   if (docs.facilityType === 'Hospital') {
     documentTypes.push('specialistScheduleFiles');
   }
 
   const hasAnyDocs = documentTypes.some(docType => {
-    const hasFiles = docType === 'facilityPhotos' || docType === 'specialistScheduleFiles'
-      ? docs?.[docType]?.length > 0
-      : !!docs?.[docType];
-    return hasFiles;
+    const files = docs?.[docType];
+    return Array.isArray(files) ? files.length > 0 : !!files;
   });
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-    
+          <h2 className="text-xl font-semibold text-gray-900">Document Management</h2>
+          <p className="text-sm text-gray-600">Facility Type: {docs.facilityType}</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={getFacilityDocs}
             className="inline-flex items-center px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            aria-label="Refresh documents"
           >
             <RefreshCw className="w-4 h-4 mr-1" />
             Refresh
@@ -587,6 +609,7 @@ export const FacilityDoc = ({ facilityId }) => {
               onClick={handleVerifyAll}
               disabled={actionLoading}
               className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              aria-label="Verify all documents"
             >
               <Check className="w-4 h-4 mr-2" />
               Verify All Documents
@@ -594,55 +617,16 @@ export const FacilityDoc = ({ facilityId }) => {
           )}
         </div>
       </div>
-
-      {/* Verification Summary */}
-      {verificationSummary && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Verification Summary</h3>
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">
-                {verificationSummary.summary?.totalDocuments || 0}
-              </div>
-              <div className="text-sm text-gray-600">Total Documents</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">
-                {verificationSummary.summary?.verified || 0}
-              </div>
-              <div className="text-sm text-gray-600">Verified</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {verificationSummary.summary?.pending || 0}
-              </div>
-              <div className="text-sm text-gray-600">Pending</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-red-600">
-                {verificationSummary.summary?.rejected || 0}
-              </div>
-              <div className="text-sm text-gray-600">Rejected</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-     
-      {/* Document Grid */}
+   
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {documentTypes.map(docType => renderDocumentCard(docType))}
       </div>
-
-      {/* Additional Info */}
       {docs.additionalInfo && (
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <h3 className="font-medium text-gray-900 mb-2">Additional Information</h3>
           <p className="text-gray-700">{docs.additionalInfo}</p>
         </div>
       )}
-
-      {/* Reject Modal */}
       {modalVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
@@ -650,7 +634,7 @@ export const FacilityDoc = ({ facilityId }) => {
               Reject Document
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              You are about to reject "{getDocumentTitle(selectedDocument)}". Please provide a reason.
+              You are about to reject "{getDocumentTitle(selectedDocument)}" file: {getFileName(selectedFilePath)}. Please provide a reason.
             </p>
             <textarea
               placeholder="Rejection reason (required)"
@@ -659,6 +643,7 @@ export const FacilityDoc = ({ facilityId }) => {
               rows={4}
               maxLength={500}
               className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              aria-label="Rejection reason"
             />
             <div className="text-xs text-gray-500 mb-4">
               {rejectNotes.length}/500 characters
@@ -667,6 +652,7 @@ export const FacilityDoc = ({ facilityId }) => {
               <button
                 onClick={() => setModalVisible(false)}
                 className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                aria-label="Cancel rejection"
               >
                 Cancel
               </button>
@@ -674,6 +660,7 @@ export const FacilityDoc = ({ facilityId }) => {
                 onClick={handleRejectSubmit}
                 disabled={!rejectNotes.trim() || actionLoading}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                aria-label="Confirm rejection"
               >
                 {actionLoading ? 'Rejecting...' : 'Reject'}
               </button>
@@ -681,12 +668,9 @@ export const FacilityDoc = ({ facilityId }) => {
           </div>
         </div>
       )}
-
-      {/* View Extracted Data Modal */}
       {viewDataModal && selectedExtractedData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b">
               <div className="flex items-center space-x-3">
                 <Database className="w-6 h-6 text-blue-600" />
@@ -695,15 +679,19 @@ export const FacilityDoc = ({ facilityId }) => {
                     Extracted Data - {getDocumentTitle(selectedDataType)}
                   </h3>
                   <p className="text-sm text-gray-600">
+                    File: {getFileName(selectedFilePath || selectedExtractedData.filePath)}
+                  </p>
+                  <p className="text-sm text-gray-600">
                     Extracted on {formatDate(selectedExtractedData.extractedAt)}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {selectedExtractedData.filePath && (
+                {(selectedFilePath || selectedExtractedData.filePath) && (
                   <button
-                    onClick={() => handleFileView(selectedExtractedData.filePath)}
+                    onClick={() => handleFileView(selectedFilePath || selectedExtractedData.filePath)}
                     className="p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+                    aria-label="View original file"
                     title="View original file"
                   >
                     <ExternalLink className="w-5 h-5" />
@@ -712,53 +700,40 @@ export const FacilityDoc = ({ facilityId }) => {
                 <button
                   onClick={() => setViewDataModal(false)}
                   className="p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+                  aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
-
-            {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-6">
-              {/* Extraction Metadata */}
-
-
-
-              {/* Extracted Data Content */}
-              {selectedExtractedData.success && selectedExtractedData.data && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => copyToClipboard(JSON.stringify(selectedExtractedData.data, null, 2))}
-                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
-                      >
-                        <Copy className="w-4 h-4 mr-1" />
-                        Copy All
-                      </button>
-                      <button
-                        onClick={() => handleExtract(selectedDataType, true)}
-                        disabled={extractionLoading[selectedDataType]}
-                        className="px-3 py-1.5 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center"
-                      >
-                        {extractionLoading[selectedDataType] ? (
-                          <Loader className="w-4 h-4 mr-1 animate-spin" />
-                        ) : (
-                          <RotateCcw className="w-4 h-4 mr-1" />
-                        )}
-                        Re-extract
-                      </button>
-                    </div>
-                  </div>
-
-                  {renderExtractedDataContent(selectedExtractedData.data)}
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(JSON.stringify(selectedExtractedData.data || selectedExtractedData, null, 2))}
+                    className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
+                    aria-label="Copy all extracted data"
+                  >
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy All
+                  </button>
+                  <button
+                    onClick={() => handleExtract(selectedDataType, selectedFilePath, true)}
+                    disabled={extractionLoading[selectedFilePath ? `${selectedDataType}-${selectedFilePath}` : selectedDataType]}
+                    className="px-3 py-1.5 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center"
+                    aria-label="Re-extract data"
+                  >
+                    {extractionLoading[selectedFilePath ? `${selectedDataType}-${selectedFilePath}` : selectedDataType] ? (
+                      <Loader className="w-4 h-4 mr-1 animate-spin" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4 mr-1" />
+                    )}
+                    Re-extract
+                  </button>
                 </div>
-              )}
-
-
+                {renderExtractedDataContent(selectedExtractedData)}
+              </div>
             </div>
-
-            {/* Modal Footer */}
             <div className="border-t p-4 bg-gray-50">
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <div>
@@ -770,6 +745,7 @@ export const FacilityDoc = ({ facilityId }) => {
                 <button
                   onClick={() => setViewDataModal(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  aria-label="Close extracted data modal"
                 >
                   Close
                 </button>

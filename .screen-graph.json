@@ -33,14 +33,14 @@
       ]
     },
     {
-      "id": "src/components/FacilityDashboard/services.jsx",
+      "id": "src/components/AdminDashboard/services.jsx",
       "label": "services",
       "routes": [
         "service-capacity"
       ]
     },
     {
-      "id": "src/components/FacilityDashboard/referrals.jsx",
+      "id": "src/components/AdminDashboard/referrals.jsx",
       "label": "referrals",
       "routes": [
         "referrals",
@@ -124,15 +124,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:414:20-to-src/components/AdminDashboard/notifications.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:448:20-to-src/components/AdminDashboard/notifications.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/notifications.jsx",
       "data": {
         "viaRoute": "notifications",
         "trigger": {
           "element": "<img src={notifications} alt=\"notifications\" />",
-          "line": 414,
-          "endLine": 414,
+          "line": 448,
+          "endLine": 448,
           "column": 20,
           "endColumn": 67,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -140,15 +140,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:558:14-to-src/components/AdminDashboard/allFacilities.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:583:14-to-src/components/AdminDashboard/allFacilities.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/allFacilities.jsx",
       "data": {
         "viaRoute": "/facilities",
         "trigger": {
           "element": "<Route path=\"/facilities\" element={<AllFacilities />} />",
-          "line": 558,
-          "endLine": 558,
+          "line": 583,
+          "endLine": 583,
           "column": 14,
           "endColumn": 70,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -156,15 +156,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:559:14-to-src/components/AdminDashboard/facility-detail.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:584:14-to-src/components/AdminDashboard/facility-detail.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/facility-detail.jsx",
       "data": {
         "viaRoute": "/facilities/:id",
         "trigger": {
           "element": "<Route path=\"/facilities/:id\" element={<FacilityDetail />} />",
-          "line": 559,
-          "endLine": 559,
+          "line": 584,
+          "endLine": 584,
           "column": 14,
           "endColumn": 75,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -172,15 +172,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:560:14-to-src/components/AdminDashboard/admin.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:585:14-to-src/components/AdminDashboard/admin.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/admin.jsx",
       "data": {
         "viaRoute": "/admins",
         "trigger": {
           "element": "<Route path=\"/admins\" element={<AdminList />} />",
-          "line": 560,
-          "endLine": 560,
+          "line": 585,
+          "endLine": 585,
           "column": 14,
           "endColumn": 62,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -188,15 +188,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:561:14-to-src/components/AdminDashboard/users.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:586:14-to-src/components/AdminDashboard/users.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/users.jsx",
       "data": {
         "viaRoute": "/users",
         "trigger": {
           "element": "<Route path=\"/users\" element={<Users />} />",
-          "line": 561,
-          "endLine": 561,
+          "line": 586,
+          "endLine": 586,
           "column": 14,
           "endColumn": 57,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -204,15 +204,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:562:14-to-src/components/FacilityDashboard/referrals.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:587:14-to-src/components/AdminDashboard/referrals.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
-      "target": "src/components/FacilityDashboard/referrals.jsx",
+      "target": "src/components/AdminDashboard/referrals.jsx",
       "data": {
         "viaRoute": "/referrals",
         "trigger": {
           "element": "<Route path=\"/referrals\" element={<Referrals />} />",
-          "line": 562,
-          "endLine": 562,
+          "line": 587,
+          "endLine": 587,
           "column": 14,
           "endColumn": 65,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -220,15 +220,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:563:14-to-src/components/AdminDashboard/converstaions.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:588:14-to-src/components/AdminDashboard/converstaions.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/converstaions.jsx",
       "data": {
         "viaRoute": "/conversations",
         "trigger": {
           "element": "<Route path=\"/conversations\" element={<AdminChatPage />} />",
-          "line": 563,
-          "endLine": 563,
+          "line": 588,
+          "endLine": 588,
           "column": 14,
           "endColumn": 73,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -236,15 +236,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:564:14-to-src/components/AdminDashboard/converstaions.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:589:14-to-src/components/AdminDashboard/converstaions.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/converstaions.jsx",
       "data": {
         "viaRoute": "/conversations/:chatId",
         "trigger": {
           "element": "<Route path=\"/conversations/:chatId\" element={<AdminChatPage />} />",
-          "line": 564,
-          "endLine": 564,
+          "line": 589,
+          "endLine": 589,
           "column": 14,
           "endColumn": 81,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -252,15 +252,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:565:14-to-src/components/AdminDashboard/blog.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:590:14-to-src/components/AdminDashboard/blog.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/blog.jsx",
       "data": {
         "viaRoute": "blogs",
         "trigger": {
           "element": "<Route path=\"blogs\" element={<AddBlogPost />} />",
-          "line": 565,
-          "endLine": 565,
+          "line": 590,
+          "endLine": 590,
           "column": 14,
           "endColumn": 62,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -268,15 +268,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:566:14-to-src/components/AdminDashboard/notifications.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:591:14-to-src/components/AdminDashboard/notifications.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/notifications.jsx",
       "data": {
         "viaRoute": "notifications",
         "trigger": {
           "element": "<Route path=\"notifications\" element={<Notifications />} />",
-          "line": 566,
-          "endLine": 566,
+          "line": 591,
+          "endLine": 591,
           "column": 14,
           "endColumn": 72,
           "sourceFile": "src/components/AdminDashboard/dasboard.jsx"
@@ -284,15 +284,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:63:12-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:64:12-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 63,
-          "endLine": 63,
+          "line": 64,
+          "endLine": 64,
           "column": 12,
           "endColumn": 30,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -300,15 +300,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:148:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:149:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 148,
-          "endLine": 148,
+          "line": 149,
+          "endLine": 149,
           "column": 51,
           "endColumn": 69,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -316,17 +316,33 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:154:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:155:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 154,
-          "endLine": 154,
+          "line": 155,
+          "endLine": 155,
           "column": 51,
           "endColumn": 72,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:169:47-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "navigate(\"/register\")",
+          "line": 169,
+          "endLine": 169,
+          "column": 47,
+          "endColumn": 68,
           "sourceFile": "src/components/pages/navbar.jsx"
         }
       }

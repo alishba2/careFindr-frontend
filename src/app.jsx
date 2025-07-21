@@ -99,7 +99,7 @@ export const App = () => {
             />
 
             {/* Admin routes */}
-            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/carefindr/admin-access-0923" element={<AdminLogin />} />
             <Route path="/register-admin" element={<AdminRegister />} />
             <Route
               path="/admin-dashboard/*"
