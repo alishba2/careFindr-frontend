@@ -66,7 +66,6 @@ export const FacilityDoc = ({ facilityId }) => {
       setExtractionSummary(extractionRes);
     } catch (error) {
       console.error("Failed to fetch facility documents", error);
-      toast.error("Failed to load documents. Please try again.");
     } finally {
       setLoading(false);
     }
