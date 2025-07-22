@@ -33,14 +33,14 @@
       ]
     },
     {
-      "id": "src/components/AdminDashboard/services.jsx",
+      "id": "src/components/FacilityDashboard/services.jsx",
       "label": "services",
       "routes": [
         "service-capacity"
       ]
     },
     {
-      "id": "src/components/AdminDashboard/referrals.jsx",
+      "id": "src/components/FacilityDashboard/referrals.jsx",
       "label": "referrals",
       "routes": [
         "referrals",
@@ -204,9 +204,9 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/dasboard.jsx:587:14-to-src/components/AdminDashboard/referrals.jsx",
+      "id": "src/components/AdminDashboard/dasboard.jsx:587:14-to-src/components/FacilityDashboard/referrals.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
-      "target": "src/components/AdminDashboard/referrals.jsx",
+      "target": "src/components/FacilityDashboard/referrals.jsx",
       "data": {
         "viaRoute": "/referrals",
         "trigger": {

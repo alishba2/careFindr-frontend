@@ -59,7 +59,7 @@ export default function Navbar() {
 
         // Redirect based on user type
         if (userType === "admin") {
-            navigate("/carefindr/admin-access-0923");
+            navigate("/admin-access-0923");
         } else {
             navigate("/login");
         }

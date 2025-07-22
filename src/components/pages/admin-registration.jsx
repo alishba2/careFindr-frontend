@@ -57,7 +57,7 @@ export const AdminRegister = () => {
       setLoading(true);
       const response = await createAdmin(payload);
       console.log("Admin created:", response);
-      naviagte("/carefindr/admin-access-0923")
+      naviagte("/admin-access-0923")
 
       // Optional: redirect or toast success
     } catch (error) {
@@ -216,7 +216,7 @@ export const AdminRegister = () => {
         <div className="text-center text-fgtext-muted text-sm">
           Already have an account?{" "}
           <a
-            href="/carefindr/admin-access-0923"
+            href="/admin-access-0923"
             className="text-primarysolid font-medium hover:underline"
           >
             Sign In
