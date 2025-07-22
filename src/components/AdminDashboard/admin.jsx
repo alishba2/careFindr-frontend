@@ -196,7 +196,6 @@ const AdminList = () => {
       }
     } catch (error) {
       console.error("Error saving admin:", error);
-      message.error(error.message || "Operation failed");
     } finally {
       setLoading(false);
     }
