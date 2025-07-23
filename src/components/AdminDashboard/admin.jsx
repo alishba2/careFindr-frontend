@@ -17,7 +17,7 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  EyeOutlined,
+  KeyOutlined,
 } from "@ant-design/icons";
 import {
   getAdmins,
@@ -42,6 +42,55 @@ const AdminList = () => {
 
   const [form] = Form.useForm();
 
+  // Generate random password function
+  const generateRandomPassword = () => {
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  };
+
+  // Copy password to clipboard
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success("Password copied to clipboard!");
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        message.success("Password copied to clipboard!");
+      } catch (err) {
+        message.error("Failed to copy password");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  // Handle generate password
+  const handleGeneratePassword = () => {
+    const newPassword = generateRandomPassword();
+    console.log("Generated Password:", newPassword); // Debug
+    // Use setTimeout to ensure form updates after modal renders
+    setTimeout(() => {
+      form.setFieldsValue({ password: newPassword });
+      console.log("Form Values After Set:", form.getFieldsValue()); // Debug
+      form.validateFields(['password']).then(() => {
+        copyToClipboard(newPassword);
+        // message.success("Password generated and copied to clipboard!");
+      }).catch((error) => {
+        message.error("Failed to validate generated password");
+      });
+    }, 0);
+  };
+
   // Fetch admins from API
   const fetchAdmins = async (params = {}) => {
     setLoading(true);
@@ -53,8 +102,6 @@ const AdminList = () => {
         ...params,
       });
 
-      console.log(response, "Admin API response");
-
       // Handle different response structures
       let adminsData = [];
       let paginationData = {
@@ -64,7 +111,6 @@ const AdminList = () => {
       };
 
       if (response.success && response.admins) {
-        // Structure: { success: true, admins: [...], pagination: {...} }
         adminsData = response.admins;
         if (response.pagination) {
           paginationData = {
@@ -76,11 +122,9 @@ const AdminList = () => {
           paginationData.total = response.admins.length;
         }
       } else if (response.admins) {
-        // Structure: { admins: [...] }
         adminsData = response.admins;
         paginationData.total = response.admins.length;
       } else if (Array.isArray(response)) {
-        // Structure: [admin1, admin2, ...]
         adminsData = response;
         paginationData.total = response.length;
       } else {
@@ -89,21 +133,17 @@ const AdminList = () => {
         return;
       }
 
-      // Process admin data and add missing fields
+      // Process admin data
       const processedData = adminsData.map((admin) => ({
         ...admin,
         key: admin._id,
-        // Add default status if missing
         status: admin.status || 'active',
-        // Ensure accessFunctions is array
         accessFunctions: admin.accessFunctions || [],
-        // Add display name for better UX
         displayName: admin.fullName || `${admin.firstName || ''} ${admin.lastName || ''}`.trim(),
       }));
 
       setData(processedData);
       setPagination(paginationData);
-
     } catch (error) {
       console.error("Error fetching admins:", error);
       message.error(error.message || "Failed to fetch admins");
@@ -170,26 +210,21 @@ const AdminList = () => {
       let response;
 
       if (editingAdmin) {
-        // Update existing admin
         response = await updateAdmin(editingAdmin._id, values);
       } else {
-        // Create new admin
         response = await createAdmin(values);
       }
 
-      // Handle different response structures
       if (response && (response.success !== false)) {
         message.success(
-          editingAdmin 
-            ? "Admin updated successfully!" 
+          editingAdmin
+            ? "Admin updated successfully!"
             : "Admin created successfully!"
         );
-        
         await fetchAdmins({
           current: pagination.current,
           pageSize: pagination.pageSize,
         });
-        
         handleCancel();
       } else {
         throw new Error(response?.message || "Operation failed");
@@ -206,7 +241,7 @@ const AdminList = () => {
     try {
       setLoading(true);
       const response = await deleteAdmin(adminId);
-      
+
       if (response && (response.success !== false)) {
         message.success("Admin deleted successfully!");
         await fetchAdmins({
@@ -240,7 +275,6 @@ const AdminList = () => {
       dataIndex: "email",
       key: "email",
     },
-  
     {
       title: "Access Type",
       dataIndex: "accessType",
@@ -278,19 +312,6 @@ const AdminList = () => {
         }
       },
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (status) => {
-    //     const statusValue = status || 'active';
-    //     return (
-    //       <Tag color={statusValue === "active" ? "green" : "red"}>
-    //         {statusValue.charAt(0).toUpperCase() + statusValue.slice(1)}
-    //       </Tag>
-    //     );
-    //   },
-    // },
     {
       title: "Actions",
       key: "actions",
@@ -314,9 +335,9 @@ const AdminList = () => {
             okButtonProps={{ loading: loading }}
           >
             <Tooltip title="Delete">
-              <Button 
-                type="text" 
-                danger 
+              <Button
+                type="text"
+                danger
                 icon={<DeleteOutlined />}
                 loading={loading}
               />
@@ -377,6 +398,8 @@ const AdminList = () => {
         footer={null}
         className="text-center"
         destroyOnClose={true}
+        forceRender={true}
+        key={editingAdmin ? editingAdmin._id : 'add-admin'}
       >
         <Form
           form={form}
@@ -428,32 +451,49 @@ const AdminList = () => {
           >
             <Select placeholder="Select access type" className="h-12">
               <Option value="admin">Admin</Option>
-              <Option value="superAdmin">Super Admin</Option>
+              {/* <Option value="superAdmin">Super Admin</Option> */}
               <Option value="editor">Editor</Option>
-              {/* <Option value="moderator">Moderator</Option> */}
             </Select>
           </Form.Item>
 
           {!editingAdmin && (
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: "Please input the password!" },
-                { min: 6, message: "Password must be at least 6 characters!" },
-              ]}
-            >
-              <Input.Password className="py-3" placeholder="Enter password" />
-            </Form.Item>
+
+            <>
+
+
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  { required: true, message: "Please input the password!" },
+                  { min: 6, message: "Password must be at least 6 characters!" },
+                ]}
+              >
+                <Input.Password className="py-3" placeholder="Enter password" />
+              </Form.Item>
+
+              <div className="flex justify-end mb-4">
+                <Tooltip title="Generate Password">
+                  <Button
+                    type="default"
+                    icon={<KeyOutlined />}
+                    onClick={handleGeneratePassword}
+                    className="h-10"
+                  >
+                    Generate
+                  </Button>
+                </Tooltip>
+              </div>
+            </>
+
           )}
 
           <Form.Item>
-            <Button 
-            
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               className="w-full h-12 bg-primarysolid"
               loading={loading}
-              
             >
               {editingAdmin ? "Update Admin" : "Add Admin"}
             </Button>

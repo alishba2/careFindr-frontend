@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { GetFacilityService } from "../../services/service";
 
+
+import { FileText } from "lucide-react";
 const FacilityServiceComponent = ({ facilityId }) => {
     const [serviceData, setServiceData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +15,6 @@ const FacilityServiceComponent = ({ facilityId }) => {
                 setIsLoading(false);
                 return;
             }
-
             try {
                 setIsLoading(true);
                 const response = await GetFacilityService(facilityId);
@@ -382,11 +383,11 @@ const FacilityServiceComponent = ({ facilityId }) => {
                     </div>
                     <div className="p-4 bg-gray-50 rounded border">
                         <p className="text-sm text-gray-600">Admission Fee</p>
-                        <p className="font-semibold text-green-600">${details.admissionFee}</p>
+                        <p className="font-semibold text-green-600">₦{details.admissionFee}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded border">
                         <p className="text-sm text-gray-600">Consultation Fee</p>
-                        <p className="font-semibold text-green-600">${details.consultationFee}</p>
+                        <p className="font-semibold text-green-600">₦{details.consultationFee}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded border">
                         <p className="text-sm text-gray-600">Total Bed Space</p>
@@ -1183,10 +1184,11 @@ const FacilityServiceComponent = ({ facilityId }) => {
         </div>
     );
 
-    if (error) return (
-        <div className="bg-red-50 border border-red-200 rounded p-4 text-center">
-            <p className="text-red-700">Error: {error.message}</p>
-        </div>
+    if (!serviceData) return (
+      <div className="text-center py-8">
+        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500">No facility service found</p>
+      </div>
     );
 
     return (

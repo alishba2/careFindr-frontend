@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Upload, Card, message } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Upload, Card, message, Tag, Tooltip } from "antd";
+import { UploadOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import StepProgress from "./stepProgress";
 import { useAuth } from "../hook/auth";
 import { FacilityDocs, GetFacilityDocs } from "../../services/facilityDocs";
@@ -23,7 +23,45 @@ export const DocumentUpload = () => {
   const [initialFiles, setInitialFiles] = useState(null);
   const [initialAdditionalInfo, setInitialAdditionalInfo] = useState("");
   const [saving, setSaving] = useState(false);
+  const [documentVerification, setDocumentVerification] = useState({});
+  // Track deleted files
+  const [deletedFiles, setDeletedFiles] = useState({
+    facilityPhotos: [],
+    specialistSchedules: [],
+    priceList: [],
+    facilityDetails: [],
+    licenseRegistration: [],
+  });
   const navigate = useNavigate();
+
+  // Get verification status for a file
+  const getFileVerificationStatus = (field, filePath) => {
+    const fieldKey = field === 'specialistSchedules' ? 'specialistScheduleFiles' :
+      field === 'priceList' ? 'priceListFiles' :
+        field === 'facilityDetails' ? 'facilityDetailsFiles' :
+          field === 'licenseRegistration' ? 'licenseRegistrationFiles' :
+            field;
+
+    const verification = documentVerification[fieldKey];
+    if (!verification?.files) return { status: 'pending', notes: '' };
+
+    const fileVerification = verification.files.find(f => f.filePath === filePath);
+    return fileVerification || { status: 'pending', notes: '' };
+  };
+
+  // Get status color and icon
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'verified':
+        return { color: 'green', icon: <CheckCircleOutlined />, text: 'Verified' };
+      case 'rejected':
+        return { color: 'red', icon: <CloseCircleOutlined />, text: 'Rejected' };
+      case 'pending':
+        return { color: 'orange', icon: <ClockCircleOutlined />, text: 'Pending' };
+      default:
+        return { color: 'default', icon: <ClockCircleOutlined />, text: 'Pending' };
+    }
+  };
 
   // Deep comparison function for file lists
   const areFileListsEqual = (current, initial) => {
@@ -51,16 +89,22 @@ export const DocumentUpload = () => {
     );
   };
 
-  // Memoized hasChanges
+  // Check if there are any deleted files
+  const hasDeletedFiles = useMemo(() => {
+    return Object.values(deletedFiles).some(arr => arr.length > 0);
+  }, [deletedFiles]);
+
+  // Memoized hasChanges - now includes deleted files check
   const hasChanges = useMemo(() => {
     if (initialFiles === null && !additionalInfo && areFileListsEqual(fileList, {})) {
-      return false; // No changes if no initial data, no files, and no additional info
+      return false;
     }
     return (
       !areFileListsEqual(fileList, initialFiles) ||
-      additionalInfo !== initialAdditionalInfo
+      additionalInfo !== initialAdditionalInfo ||
+      hasDeletedFiles
     );
-  }, [fileList, additionalInfo, initialFiles, initialAdditionalInfo]);
+  }, [fileList, additionalInfo, initialFiles, initialAdditionalInfo, hasDeletedFiles]);
 
   // Fetch existing documents on mount
   useEffect(() => {
@@ -70,6 +114,7 @@ export const DocumentUpload = () => {
         console.log(response, "response here");
         if (response) {
           setUpdate(true);
+          setDocumentVerification(response.documentVerification || {});
         }
         if (response) {
           const newFileList = {
@@ -78,64 +123,68 @@ export const DocumentUpload = () => {
               name: path.split('/').pop(),
               status: 'done',
               url: path,
+              isExisting: true,
             })) || [],
             specialistSchedules: response.specialistScheduleFiles?.map((path) => ({
               uid: path,
               name: path.split('/').pop(),
               status: 'done',
               url: path,
+              isExisting: true,
             })) || [],
-            // Changed to handle multiple price list files
             priceList: response.priceListFiles?.map((path) => ({
               uid: path,
               name: path.split('/').pop(),
               status: 'done',
               url: path,
+              isExisting: true,
             })) || (response.priceListFile
-              ? [{ uid: response.priceListFile, name: response.priceListFile.split('/').pop(), status: 'done', url: response.priceListFile }]
+              ? [{ uid: response.priceListFile, name: response.priceListFile.split('/').pop(), status: 'done', url: response.priceListFile, isExisting: true }]
               : []),
-            // Changed to handle multiple facility details files
             facilityDetails: response.facilityDetailsFiles?.map((path) => ({
               uid: path,
               name: path.split('/').pop(),
               status: 'done',
               url: path,
+              isExisting: true,
             })) || (response.facilityDetailsDoc
-              ? [{ uid: response.facilityDetailsDoc, name: response.facilityDetailsDoc.split('/').pop(), status: 'done', url: response.facilityDetailsDoc }]
+              ? [{ uid: response.facilityDetailsDoc, name: response.facilityDetailsDoc.split('/').pop(), status: 'done', url: response.facilityDetailsDoc, isExisting: true }]
               : []),
-            // Changed to handle multiple license registration files
             licenseRegistration: response.licenseRegistrationFiles?.map((path) => ({
               uid: path,
               name: path.split('/').pop(),
               status: 'done',
               url: path,
+              isExisting: true,
             })) || (response.licenseRegistrationFile
-              ? [{ uid: response.licenseRegistrationFile, name: response.licenseRegistrationFile.split('/').pop(), status: 'done', url: response.licenseRegistrationFile }]
+              ? [{ uid: response.licenseRegistrationFile, name: response.licenseRegistrationFile.split('/').pop(), status: 'done', url: response.licenseRegistrationFile, isExisting: true }]
               : []),
           };
           setFileList(newFileList);
-          setInitialFiles(newFileList);
+          setInitialFiles(JSON.parse(JSON.stringify(newFileList)));
           setAdditionalInfo(response.additionalInfo || "");
           setInitialAdditionalInfo(response.additionalInfo || "");
         } else {
-          setInitialFiles({
+          const emptyFileList = {
             facilityPhotos: [],
             specialistSchedules: [],
             priceList: [],
             facilityDetails: [],
             licenseRegistration: [],
-          });
+          };
+          setInitialFiles(emptyFileList);
           setInitialAdditionalInfo("");
         }
       } catch (error) {
         console.error("Error fetching facility documents:", error);
-        setInitialFiles({
+        const emptyFileList = {
           facilityPhotos: [],
           specialistSchedules: [],
           priceList: [],
           facilityDetails: [],
           licenseRegistration: [],
-        });
+        };
+        setInitialFiles(emptyFileList);
         setInitialAdditionalInfo("");
       }
     };
@@ -145,26 +194,19 @@ export const DocumentUpload = () => {
   const handleUpload = (info, field) => {
     const newFileList = [...info.fileList].map((file) => {
       if (file.status === "done") {
-        return { ...file, url: file.response?.url || file.url };
+        return { ...file, url: file.response?.url || file.url, isExisting: false };
       }
-      return file;
+      return { ...file, isExisting: false };
     });
     setFileList((prev) => ({ ...prev, [field]: newFileList }));
     return newFileList;
   };
 
-  const handleDelete = (fileToRemove, field) => {
-    setFileList((prev) => ({
-      ...prev,
-      [field]: prev[field].filter((file) => file.uid !== fileToRemove.uid),
-    }));
-    message.success(`${fileToRemove.name} removed`);
-  };
+ 
 
   const uploadProps = (field) => ({
     name: field,
     onChange: (info) => handleUpload(info, field),
-    // All fields now support multiple files
     multiple: true,
     beforeUpload: () => false,
     fileList: fileList[field],
@@ -174,62 +216,166 @@ export const DocumentUpload = () => {
     onRemove: (file) => handleDelete(file, field),
   });
 
-  const handleSubmit = async () => {
-    if (!hasChanges) {
-      message.info("No changes to save.");
-      return;
+  // Fix the field name mapping in your React component
+ // FRONTEND: Complete Fix for File Deletion
+// FRONTEND: Simple deletion approach - just send deleted files
+
+const handleSubmit = async () => {
+  if (!hasChanges) {
+    message.info("No changes to save.");
+    return;
+  }
+  
+  try {
+    setSaving(true);
+    const formData = new FormData();
+    formData.append("facilityId", authData?._id);
+    formData.append("facilityType", facilityType);
+    formData.append("additionalInfo", additionalInfo);
+
+    // Simple approach: just send the deleted files as a single field
+    const mappedDeletedFiles = {
+      facilityPhotos: deletedFiles.facilityPhotos || [],
+      facilityDetails: deletedFiles.facilityDetails || [], 
+      priceList: deletedFiles.priceList || [], 
+      licenseRegistration: deletedFiles.licenseRegistration || [], 
+      specialistSchedules: deletedFiles.specialistSchedules || [] 
+    };
+
+    console.log('Sending deleted files:', mappedDeletedFiles);
+
+    // Only send deletedFiles if there are actually deleted files
+    if (hasDeletedFiles) {
+      formData.append("deletedFiles", JSON.stringify(mappedDeletedFiles));
     }
-    try {
-      setSaving(true);
-      const formData = new FormData();
-      formData.append("facilityId", authData?._id);
-      formData.append("facilityType", facilityType);
-      formData.append("additionalInfo", additionalInfo);
 
-      // Append Facility Photos
-      fileList.facilityPhotos.forEach((file) => {
-        if (!initialFiles?.facilityPhotos?.find((f) => f.url === (file.url || file.name))) {
-          formData.append("facilityPhotos", file.originFileObj || new File([], file.name));
-        }
+    // Helper function to append files
+    const appendFiles = (frontendField, backendFieldName) => {
+      console.log(`Processing ${frontendField} -> ${backendFieldName}`);
+      
+      // Append new files only (files with originFileObj are new uploads)
+      const newFiles = fileList[frontendField].filter(file => file.originFileObj);
+      newFiles.forEach((file) => {
+        formData.append(backendFieldName, file.originFileObj);
+        console.log(`Added new file: ${file.name}`);
       });
+    };
 
-      // Append Specialist Schedules (if Hospital)
-      if (facilityType === "Hospital") {
-        fileList.specialistSchedules.forEach((file) => {
-          if (!initialFiles?.specialistSchedules?.find((f) => f.url === (file.url || file.name))) {
-            formData.append("specialistSchedules", file.originFileObj || new File([], file.name));
-          }
-        });
+    // Append new files only - let backend handle existing files by removing deleted ones
+    appendFiles("facilityPhotos", "facilityPhotos");
+    appendFiles("facilityDetails", "facilityDetails");
+    appendFiles("priceList", "priceList");
+    appendFiles("licenseRegistration", "licenseRegistration");
+
+    if (facilityType === "Hospital") {
+      appendFiles("specialistSchedules", "specialistSchedules");
+    }
+
+    // Debug: Log FormData contents
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}: File - ${value.name} (${value.size} bytes)`);
+      } else {
+        console.log(`${key}: ${value}`);
       }
-
-      // Append multiple documents for each field
-      const multipleDocumentFields = [
-        { field: "priceList", key: "priceListFiles" },
-        { field: "facilityDetails", key: "facilityDetailsFiles" },
-        { field: "licenseRegistration", key: "licenseRegistrationFiles" },
-      ];
-
-      multipleDocumentFields.forEach(({ field, key }) => {
-        fileList[field].forEach((file) => {
-          if (!initialFiles?.[field]?.find((f) => f.url === (file.url || file.name))) {
-            formData.append(field, file.originFileObj || new File([], file.name));
-          }
-        });
-      });
-
-      await FacilityDocs(formData, update);
-      message.success("Facility documents uploaded successfully!");
-      setInitialFiles(JSON.parse(JSON.stringify(fileList)));
-      setInitialAdditionalInfo(additionalInfo);
-      await fetchAuthData();
-      setSaving(false);
-    } catch (error) {
-      setSaving(false);
-      console.error("Error uploading:", error);
-      message.error("Failed to upload documents. Please try again.");
     }
-  };
 
+    const response = await FacilityDocs(formData, update);
+    message.success("Facility documents updated successfully!");
+    
+    // Update verification status if returned
+    if (response?.data?.documentVerification) {
+      setDocumentVerification(response.data.documentVerification);
+    }
+    
+    // Reset file list to match server response
+    const updatedFileList = {
+      facilityPhotos: response?.data?.facilityPhotos?.map((path) => ({
+        uid: path,
+        name: path.split('/').pop(),
+        status: 'done',
+        url: path,
+        isExisting: true,
+      })) || [],
+      facilityDetails: response?.data?.facilityDetailsFiles?.map((path) => ({
+        uid: path,
+        name: path.split('/').pop(),
+        status: 'done',
+        url: path,
+        isExisting: true,
+      })) || [],
+      priceList: response?.data?.priceListFiles?.map((path) => ({
+        uid: path,
+        name: path.split('/').pop(),
+        status: 'done',
+        url: path,
+        isExisting: true,
+      })) || [],
+      licenseRegistration: response?.data?.licenseRegistrationFiles?.map((path) => ({
+        uid: path,
+        name: path.split('/').pop(),
+        status: 'done',
+        url: path,
+        isExisting: true,
+      })) || [],
+      specialistSchedules: response?.data?.specialistScheduleFiles?.map((path) => ({
+        uid: path,
+        name: path.split('/').pop(),
+        status: 'done',
+        url: path,
+        isExisting: true,
+      })) || []
+    };
+
+    setFileList(updatedFileList);
+    setInitialFiles(JSON.parse(JSON.stringify(updatedFileList)));
+    setInitialAdditionalInfo(additionalInfo);
+    
+    // Reset deleted files tracking
+    setDeletedFiles({
+      facilityPhotos: [],
+      specialistSchedules: [],
+      priceList: [],
+      facilityDetails: [],
+      licenseRegistration: [],
+    });
+    
+    await fetchAuthData();
+    setSaving(false);
+  } catch (error) {
+    setSaving(false);
+    console.error("Error uploading:", error);
+    message.error("Failed to upload documents. Please try again.");
+  }
+};
+
+// Keep the existing handleDelete function as is
+const handleDelete = (fileToRemove, field) => {
+  console.log(`Deleting file: ${fileToRemove.name} from ${field}, isExisting: ${fileToRemove.isExisting}`);
+  
+  // If it's an existing file, add it to deleted files list
+  if (fileToRemove.isExisting) {
+    setDeletedFiles((prev) => {
+      const updated = {
+        ...prev,
+        [field]: [...prev[field], fileToRemove.uid],
+      };
+      console.log(`Updated deleted files for ${field}:`, updated[field]);
+      return updated;
+    });
+  }
+
+  // Remove from current file list
+  setFileList((prev) => ({
+    ...prev,
+    [field]: prev[field].filter((file) => file.uid !== fileToRemove.uid),
+  }));
+  
+  message.success(`${fileToRemove.name} removed`);
+};
+
+// ALSO FIX: Make sure handleDelete properly tracks deleted files
   return (
     <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border ">
       <StepProgress currentStep={authData?.onBoardingStep} />
@@ -256,7 +402,7 @@ export const DocumentUpload = () => {
             </Dragger>
           </div>
 
-          {/* Other Files - Updated to show multiple file support */}
+          {/* Other Files */}
           <div className="flex flex-wrap gap-6 sm:basis-[45%] md:basis-[48%] lg:basis-[47%]">
             {[
               { field: "facilityDetails", label: "Upload Documents with Details about your Facility" },
@@ -271,22 +417,61 @@ export const DocumentUpload = () => {
                 className="w-full md:basis-[48%] lg:basis-[47%] flex-grow space-y-2 md:space-x-0 md:flex md:flex-col md:items-start md:w-auto"
               >
                 <h1 className="text-sm font-semibold text-gray-900">{label}</h1>
-                
+
                 {/* Display current files if any */}
                 {fileList[field]?.length > 0 && (
                   <div className="mb-2 space-y-1">
-                    {fileList[field].map((file, index) => (
-                      <div key={file.uid} className="flex items-center justify-between bg-gray-50 p-2 rounded text-xs">
-                        <span className="truncate flex-1">{file.name}</span>
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleDelete(file, field)}
-                          className="text-red-500 hover:text-red-700"
-                        />
-                      </div>
-                    ))}
+                    {fileList[field].map((file, index) => {
+                      const verification = getFileVerificationStatus(field, file.uid);
+                      const statusDisplay = getStatusDisplay(verification.status);
+
+                      return (
+                        <div key={file.uid} className="flex items-center justify-between bg-gray-50 p-2 rounded text-xs border">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="truncate text-gray-700 font-medium">
+                                {file.name}
+                              </span>
+                              {file.isExisting && (
+                                <span className="text-blue-500 text-xs">(existing)</span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Tag
+                                color={statusDisplay.color}
+                                icon={statusDisplay.icon}
+                                className="text-xs"
+                              >
+                                {statusDisplay.text}
+                              </Tag>
+
+                              {verification.status === 'rejected' && verification.notes && (
+                                <Tooltip title={verification.notes} placement="top">
+                                  <span className="text-red-500 text-xs cursor-help underline">
+                                    View Notes
+                                  </span>
+                                </Tooltip>
+                              )}
+                            </div>
+
+                            {verification.status === 'rejected' && verification.notes && (
+                              <div className="mt-1 text-red-600 text-xs bg-red-50 p-1 rounded">
+                                <strong>Rejection Notes:</strong> {verification.notes}
+                              </div>
+                            )}
+                          </div>
+
+                          <Button
+                            size="small"
+                            type="text"
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleDelete(file, field)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -296,7 +481,7 @@ export const DocumentUpload = () => {
                     className="w-full h-11 py-7 bg-gray-50 border-dashed border-gray-300 text-gray-700 rounded-md text-sm flex items-center justify-between px-4 hover:border-cyan-400 hover:shadow-sm"
                   >
                     <p className="text-[15px] font-['Inter'] font-medium leading-[100%] tracking-[0.5px] text-[#889096] truncate md:text-[13px] md:leading-[1.2] md:tracking-[0.2px]">
-                      {fileList[field]?.length > 0 
+                      {fileList[field]?.length > 0
                         ? `${fileList[field].length} file(s) selected`
                         : "Accepts DOC, DOCX, PDF, XLS, XLSX"
                       }

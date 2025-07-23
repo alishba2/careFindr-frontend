@@ -12,6 +12,8 @@ import {
   DatabaseOutlined,
   CameraOutlined,
   CarOutlined,
+  CheckCircleFilled,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Button } from "antd";
 import { Outlet } from "react-router-dom";
@@ -21,6 +23,7 @@ import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../hook/auth";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
+
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
 const FacilityDashboard = () => {
@@ -31,9 +34,14 @@ const FacilityDashboard = () => {
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState("home");
   const { facilityType } = authData || {};
+  const [isVerified, setIsVerified] = useState(false);
+  
   useEffect(() => {
     if (authData?.profileImage) {
       setProfileImage(`${import.meta.env.VITE_APP_BASE_URL}/${authData.profileImage}`);
+    }
+    if (authData?.status == "Verified") {
+      setIsVerified(true);
     }
   }, [authData])
 
@@ -161,21 +169,51 @@ const FacilityDashboard = () => {
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
-                    <span className="text-gray-500 text-sm">No Image</span>
+                    <UserOutlined 
+                      style={{ 
+                        fontSize: 60, 
+                        color: '#9ca3af'
+                      }} 
+                    />
                   )}
                 </div>
-                <CameraOutlined
+                
+                {/* Camera Icon */}
+                {/* <CameraOutlined
                   className="absolute bottom-0 right-3 bg-black bg-opacity-40 text-white p-2 rounded-full"
                   style={{ fontSize: 20 }} // Reduced from 24
-                />
+                /> */}
+                
+                {/* Verified Badge */}
+                {/* {isVerified && (
+                  <CheckCircleFilled
+                    className="absolute top-0 right-0 text-blue-500 bg-white rounded-full"
+                    style={{ 
+                      fontSize: 24, 
+                      zIndex: 2,
+                      transform: 'translate(23%, -23%)'
+                    }}
+                    title="Verified"
+                  />
+                )}
+                 */}
+                {/* Delete Image Button */}
                 {profileImage && (
                   <span
                     onClick={handleDeleteImage}
                     title="Delete"
-                    className="absolute top-0 right-0 text-black rounded-full p-1 cursor-pointer text-xs"
-                    style={{ zIndex: 1 }}
+                    className="absolute top-0 left-0 text-red-500 bg-white rounded-full p-1 cursor-pointer text-xs font-bold shadow-md"
+                    style={{ 
+                      zIndex: 2,
+                      transform: 'translate(-25%, -25%)',
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
-                    X
+                    ✕
                   </span>
                 )}
               </div>
@@ -193,6 +231,13 @@ const FacilityDashboard = () => {
               />
               <h3 className="mt-3 text-center font-semibold text-[18px] sm:text-[20px] text-gray-800 px-2">
                 {authData?.name || "Facility"}
+                {isVerified && (
+                  <CheckCircleFilled 
+                    className="ml-2 text-blue-500" 
+                    style={{ fontSize: 16 }}
+                    title="Verified"
+                  />
+                )}
               </h3>
             </div>
           )}

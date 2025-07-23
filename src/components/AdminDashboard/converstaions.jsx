@@ -45,6 +45,7 @@ const AdminChatPage = () => {
   const typingTimeoutRef = useRef(null);
   const [facilities, setFacilities] = useState([]);
   const [allItems, setAllItems] = useState([]); // Combined chats and facilities
+  const [hasAutoSelected, setHasAutoSelected] = useState(false); // Track if auto-selection happened
 
   // Helper functions (defined before they're used)
   const getCurrentTypingForChat = (chatId) => {
@@ -168,25 +169,76 @@ const AdminChatPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Handle URL routing - load chat when chatId changes
+  // Auto-select facility/chat based on URL parameter
   useEffect(() => {
-    if (chatId && allItems.length > 0) {
+    if (chatId && allItems.length > 0 && !hasAutoSelected) {
+      // First check if this is an existing chat ID
+      const existingChat = allItems.find(item => 
+        item.type === 'chat' && (item._id === chatId || item.facilityId?._id === chatId || item.facilityId === chatId)
+      );
+      
+      if (existingChat) {
+        console.log('Found existing chat for ID:', chatId);
+        handleSelectChatInternal(existingChat);
+        setHasAutoSelected(true);
+        return;
+      }
+
+      // If not found in existing chats, check if it's a facility ID
+      const facility = allItems.find(item => 
+        item.type === 'facility' && item._id === chatId
+      );
+      
+      if (facility) {
+        console.log('Found facility for ID:', chatId);
+        handleSelectChatInternal(facility);
+        setHasAutoSelected(true);
+        return;
+      }
+
+      // If still not found, try to find by facility ID in existing chats
+      const chatByFacility = allItems.find(item => 
+        item.type === 'chat' && 
+        (item.facilityId?._id === chatId || item.facilityId === chatId)
+      );
+      
+      if (chatByFacility) {
+        console.log('Found chat by facility ID:', chatId);
+        handleSelectChatInternal(chatByFacility);
+        setHasAutoSelected(true);
+        return;
+      }
+
+      console.log('No chat or facility found for ID:', chatId);
+    }
+  }, [chatId, allItems, hasAutoSelected]);
+
+  // Reset auto-selection flag when chatId changes
+  useEffect(() => {
+    setHasAutoSelected(false);
+  }, [chatId]);
+
+  // Handle URL routing - load chat when chatId changes (legacy support)
+  useEffect(() => {
+    if (chatId && allItems.length > 0 && !hasAutoSelected) {
       if (chatId.startsWith('new_')) {
         // This is a new facility chat
         const facilityId = chatId.replace('new_', '');
         const facility = allItems.find(item => item.type === 'facility' && item._id === facilityId);
         if (facility) {
           handleSelectChatInternal(facility);
+          setHasAutoSelected(true);
         }
       } else {
         // This is an existing chat
         const chat = allItems.find(item => item.type === 'chat' && item._id === chatId);
         if (chat) {
           handleSelectChatInternal(chat);
+          setHasAutoSelected(true);
         }
       }
     }
-  }, [chatId, allItems]);
+  }, [chatId, allItems, hasAutoSelected]);
 
   // Load chats on component mount and when filters change
   useEffect(() => {
@@ -319,19 +371,6 @@ const AdminChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Show loading or error states for non-admin users
-  // if (role !== "admin") {
-  //   return (
-  //     <div className="h-screen flex items-center justify-center bg-gray-50">
-  //       <div className="text-center">
-  //         <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
-  //         <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-  //         <p className="text-gray-600">You need admin privileges to access this page.</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="h-screen flex bg-gray-50">
       {/* Sidebar */}
@@ -442,7 +481,9 @@ const AdminChatPage = () => {
             filteredItems.map((item) => {
               const typingUser = item.type === 'chat' ? getCurrentTypingForChat(item._id) : null;
               const isActive = activeChat?._id === item._id || 
-                              (activeChat?.type === 'new_chat' && activeChat?.facilityId?._id === item._id);
+                              (activeChat?.type === 'new_chat' && activeChat?.facilityId === item._id) ||
+                              (activeChat?.facilityId?._id === item._id) ||
+                              (activeChat?.facilityId === item._id);
               
               return (
                 <div

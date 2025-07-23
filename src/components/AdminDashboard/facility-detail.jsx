@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Info, Upload, Check, Trash2, AlertTriangle, Edit, X, CheckCircle, Power, PowerOff } from "lucide-react";
+import { Info, Upload, Check, Trash2, AlertTriangle, Edit, X, CheckCircle, Power, PowerOff, MessageCircle } from "lucide-react";
 import Select from "react-select";
 import { Button } from "../../components/button";
 import { Card, CardContent } from "../../components/card";
@@ -25,7 +25,6 @@ import { HospitalServices } from "../FacilityDashboard/hospitalServices";
 import { FacilityDoc } from "./facilitydocs";
 import FacilityInfo from "./facilityInfo";
 import {
-
   message,
 } from "antd";
 
@@ -100,7 +99,7 @@ const ConfirmationModal = ({
 const FacilityDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { authData } = useAuth();
+  const { adminAccessType } = useAuth();
   const [facility, setFacility] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -110,7 +109,8 @@ const FacilityDetail = () => {
     verify: { open: false, notes: '' },
     deactivate: { open: false, reason: '' },
     reactivate: { open: false, notes: '' },
-    delete: { open: false, hardDelete: false }
+    delete: { open: false, hardDelete: false },
+    chat: { open: false }
   });
 
   useEffect(() => {
@@ -132,7 +132,8 @@ const FacilityDetail = () => {
       verify: { open: false, notes: '' },
       deactivate: { open: false, reason: '' },
       reactivate: { open: false, notes: '' },
-      delete: { open: false, hardDelete: false }
+      delete: { open: false, hardDelete: false },
+      chat: { open: false }
     });
   };
 
@@ -144,6 +145,11 @@ const FacilityDetail = () => {
     } catch (err) {
       console.error("Failed to refresh facility details", err);
     }
+  };
+
+  // Handle Chat
+  const handleChat = () => {
+    navigate(`/admin-dashboard/conversations/${id}`);
   };
 
   // Handle Verify
@@ -244,8 +250,22 @@ const FacilityDetail = () => {
     const status = facility.status?.toLowerCase();
     const buttons = [];
 
+    // Chat button - always show
+    buttons.push(
+      <Button
+        key="chat"
+        variant="outline"
+        size="sm"
+        onClick={handleChat}
+        className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+      >
+        <MessageCircle className="w-4 h-4" />
+        <span>Chat</span>
+      </Button>
+    );
+
     // Verify button - show if not verified
-    if (status !== 'verified') {
+    if (status !== 'verified' && adminAccessType !== 'editor') {
       buttons.push(
         <Button
           key="verify"
@@ -261,7 +281,7 @@ const FacilityDetail = () => {
     }
 
     // Deactivate/Reactivate button
-    if (status === 'deactivated') {
+    if (status === 'deactivated'  && adminAccessType !== 'editor') {
       buttons.push(
         <Button
           key="reactivate"

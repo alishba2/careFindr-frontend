@@ -9,9 +9,7 @@ import {
   ExperimentOutlined,
   CarOutlined,
   BankOutlined,
-  LoadingOutlined,
   UserOutlined,
-  // Add status-specific icons
   CheckCircleOutlined,
   ClockCircleOutlined,
   StopOutlined,
@@ -19,14 +17,9 @@ import {
   DatabaseOutlined,
   HeartOutlined,
   SafetyOutlined,
-  TeamOutlined,
-  ShoppingOutlined,
-  PhoneOutlined,
-  MediumOutlined,
-  ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, Button, Spin, Alert, Skeleton } from "antd";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { Layout, Menu, Button, Alert, Skeleton } from "antd";
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 
 import AllFacilities from "./allFacilities";
 import AdminList from "./admin";
@@ -37,15 +30,11 @@ import Navbar from "../pages/navbar";
 import Notifications from "./notifications";
 import { AdminAnalytics } from "./analytics";
 import AdminChatPage from "./converstaions";
-import BlogUI from "./blog";
 import AddBlogPost from "./blog";
-
-// Import stats service
+import { useAuth } from "../hook/auth";
 import statsService from "../../services/statsService";
 
-// Import your existing icons
 import falities from "../../components/asstes/falities.png";
-import doucment from "../../components/asstes/doucment.png";
 import users from "../../components/asstes/users.png";
 import referrels from "../../components/asstes/referrels.png";
 import message from "../../components/asstes/message.png";
@@ -63,9 +52,7 @@ import time from "../../components/asstes/time.png";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
-// Enhanced icon mapping with status-specific icons
 const iconMap = {
-  // Existing image icons
   color: <img src={color} alt="color" />,
   file: <img src={file} alt="file" />,
   hospital: <img src={falities} alt="hospital" />,
@@ -74,15 +61,11 @@ const iconMap = {
   register: <img src={register} alt="register" />,
   time: <img src={time} alt="time" />,
   facilities: <img src={falities} alt="facilities" />,
-  
-  // Status-specific Ant Design icons
   total: <DatabaseOutlined className="text-blue-600" style={{ fontSize: '24px' }} />,
   active: <PlayCircleOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
   pending: <ClockCircleOutlined className="text-yellow-600" style={{ fontSize: '24px' }} />,
   verified: <CheckCircleOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
   deactivated: <StopOutlined className="text-red-600" style={{ fontSize: '24px' }} />,
-  
-  // Facility type specific icons
   hospitalIcon: <BankOutlined className="text-blue-600" style={{ fontSize: '24px' }} />,
   laboratoryIcon: <ExperimentOutlined className="text-purple-600" style={{ fontSize: '24px' }} />,
   pharmacyIcon: <MedicineBoxOutlined className="text-green-600" style={{ fontSize: '24px' }} />,
@@ -97,11 +80,16 @@ const AdminDashboard = () => {
   const [activeMenu, setActiveMenu] = useState("1");
   const [statCards, setStatCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [websiteTheme, setWebsiteTheme] = useState("light");
   const [error, setError] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { adminAccessType } = useAuth();
+
+  // Log adminAccessType for debugging
+  console.log("adminAccessType:", adminAccessType);
 
   // Fetch statistics on component mount
   useEffect(() => {
@@ -113,7 +101,6 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
       
-      // Get comprehensive admin stats
       const adminStatsResponse = await statsService.getAdminStats();
       
       console.log('Admin Stats Response:', adminStatsResponse);
@@ -121,7 +108,6 @@ const AdminDashboard = () => {
       if (adminStatsResponse?.stats) {
         const { stats } = adminStatsResponse;
         
-        // Create stat cards with appropriate icons
         const facilityTypeStats = [
           {
             label: "Total Facilities",
@@ -209,7 +195,6 @@ const AdminDashboard = () => {
           }
         ];
 
-        // Map icons and set the stats
         const mappedStats = facilityTypeStats.map(stat => ({
           ...stat,
           icon: iconMap[stat.icon] || iconMap.total
@@ -221,15 +206,12 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
       setError(`Failed to load dashboard statistics: ${err.message}`);
-      
-      // Fallback to default stats if API fails
       setStatCards(getDefaultStats());
     } finally {
       setLoading(false);
     }
   };
 
-  // Fallback default stats with proper icons
   const getDefaultStats = () => [
     {
       label: "Total Facilities",
@@ -373,7 +355,7 @@ const AdminDashboard = () => {
           collapsible
           collapsed={collapsed}
           trigger={null}
-          className="bg-white shadow-md mt-6  mx-2 rounded-xl px-4 pt-6"
+          className="bg-white shadow-md mt-6 mx-2 rounded-xl px-4 pt-6"
           breakpoint="md"
           collapsedWidth={60}
           onBreakpoint={(broken) => setCollapsed(broken)}
@@ -434,9 +416,11 @@ const AdminDashboard = () => {
               </Menu.Item>
             </SubMenu>
 
-            <Menu.Item key="5" icon={<img src={users} alt="users" />}>
-              {!collapsed && "Users"}
-            </Menu.Item>
+            {adminAccessType !== "editor" && (
+              <Menu.Item key="5" icon={<img src={users} alt="users" />}>
+                {!collapsed && "Users"}
+              </Menu.Item>
+            )}
             <Menu.Item key="6" icon={<img src={referrels} alt="referrels" />}>
               {!collapsed && "Referrals"}
             </Menu.Item>
@@ -455,9 +439,11 @@ const AdminDashboard = () => {
             <Menu.Item key="11" icon={<img src={Analytics} alt="Analytics" />}>
               {!collapsed && "Analytics"}
             </Menu.Item>
-            <Menu.Item key="4" icon={<img src={Vector} alt="Vector" />}>
-              {!collapsed && "Admins & Roles"}
-            </Menu.Item>
+            {adminAccessType === "superAdmin" && (
+              <Menu.Item key="4" icon={<img src={Vector} alt="Vector" />}>
+                {!collapsed && "Admins & Roles"}
+              </Menu.Item>
+            )}
             <Menu.Item key="13" icon={<SettingOutlined />}>
               {!collapsed && "Settings"}
             </Menu.Item>
@@ -490,7 +476,6 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Error Alert */}
                     {error && (
                       <Alert
                         message="Error Loading Data"
@@ -502,10 +487,8 @@ const AdminDashboard = () => {
                       />
                     )}
 
-                    {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-5 mb-6">
                       {loading ? (
-                        // Loading skeletons
                         Array.from({ length: 12 }).map((_, index) => (
                           <div
                             key={index}
@@ -515,13 +498,11 @@ const AdminDashboard = () => {
                           </div>
                         ))
                       ) : (
-                        // Actual stats cards
                         statCards.map((card, index) => (
                           <div
                             key={index}
                             className="bg-white rounded-xl shadow px-6 py-8 flex items-center justify-between w-full hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                             onClick={() => {
-                              // Navigate to relevant section based on card type
                               if (card.label.includes('Pending')) {
                                 navigate('/admin-dashboard/facilities?type=all&status=Pending');
                               } else if (card.label.includes('Active')) {
@@ -570,26 +551,41 @@ const AdminDashboard = () => {
                       )}
                     </div>
 
-                    {/* Summary Section */}
                     <div className="bg-white rounded-xl shadow p-6">
                       <h3 className="text-2xl font-bold mb-4">Recent Activity</h3>
-
                       <Notifications loc={"dashboard"}/>
-                     
                     </div>
                   </div>
                 }
               />
               <Route path="/facilities" element={<AllFacilities />} />
               <Route path="/facilities/:id" element={<FacilityDetail />} />
-              <Route path="/admins" element={<AdminList />} />
-              <Route path="/users" element={<Users />} />
+              <Route
+                path="/admins"
+                element={
+                  adminAccessType === "superAdmin" ? (
+                    <AdminList />
+                  ) : (
+                    <Navigate to="/admin-dashboard" replace />
+                  )
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  adminAccessType !== "editor" ? (
+                    <Users />
+                  ) : (
+                    <Navigate to="/admin-dashboard" replace />
+                  )
+                }
+              />
               <Route path="/referrals" element={<Referrals />} />
               <Route path="/conversations" element={<AdminChatPage />} />
               <Route path="/conversations/:chatId" element={<AdminChatPage />} />
-              <Route path="blogs" element={<AddBlogPost />} />
-              <Route path="notifications" element={<Notifications />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="/blogs" element={<AddBlogPost />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/analytics" element={<AdminAnalytics />} />
             </Routes>
           </Content>
         </Layout>

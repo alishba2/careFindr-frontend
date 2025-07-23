@@ -286,8 +286,7 @@ export const ChatProvider = ({ children }) => {
       setChats(chatsWithMessages);
       setError(null);
     } catch (error) {
-      console.error("Error fetching chats:", error);
-      setError("Failed to fetch chats");
+      return;
     } finally {
       setLoading(false);
     }
@@ -318,8 +317,7 @@ export const ChatProvider = ({ children }) => {
       setUnreadCount(chat.unreadCount?.facility || 0);
       setError(null);
     } catch (error) {
-      console.error("Error fetching facility chat:", error);
-      setError("Failed to fetch chat");
+      return;
     } finally {
       setLoading(false);
     }
@@ -357,8 +355,7 @@ export const ChatProvider = ({ children }) => {
       setError(null);
       return chat;
     } catch (error) {
-      console.error("Error fetching facility chat:", error);
-      setError("Failed to fetch chat");
+      return;
       throw error;
     } finally {
       setLoading(false);

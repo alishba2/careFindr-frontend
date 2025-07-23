@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [hasLab, setHasLab] = useState(false);
   const [isAmbulance, setIsAmbulance] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [adminAccessType, setAdminAccessType] = useState(null); // Default to 'admin'
 
   const updateIsAmbulance = (value) => {
     setIsAmbulance(value);
@@ -55,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       const res = await getCurrentAdmin();
       console.log(res, "respons ere");
       if (res && res.admin) {
+        setAdminAccessType(res?.admin?.accessType)
         setAuthData(res.admin);
         setRole(res.admin.role);
       }
@@ -82,7 +84,7 @@ export const AuthProvider = ({ children }) => {
         setIsAmbulance(res.facility.type === 'Ambulance');
       }
     } catch (err) {
-      console.error('Failed to fetch facility data:', err);
+      return;
       // If facility fetch fails, might need to logout
       if (err.status === 401 || err.status === 403) {
         logout();
@@ -228,6 +230,7 @@ export const AuthProvider = ({ children }) => {
     isPharmacy,
     hasLab,
     isAmbulance,
+    adminAccessType,
     
     // Actions
     login,

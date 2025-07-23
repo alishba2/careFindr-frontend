@@ -5,12 +5,23 @@ const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 // ===== DOCUMENT UPLOAD/UPDATE APIs =====
 
 export const FacilityDocs = async (formData, isUpdate = false) => {
-  console.log(isUpdate, "is update here");
+  console.log(formData, "is update llllllllllhere");
   try {
     const url = isUpdate
       ? `${backendUrl}/api/facility-docs/${formData.get('facilityId')}`
       : `${backendUrl}/api/facility-docs`;
     const method = isUpdate ? 'put' : 'post';
+    
+    // Log what we're sending for debugging
+    console.log("Sending FormData with the following entries:");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`${key}: File - ${value.name} (${value.size} bytes)`);
+      } else {
+        console.log(`${key}: ${value}`);
+      }
+    }
+    
     const response = await axios[method](
       url,
       formData,
@@ -36,7 +47,8 @@ export const GetFacilityDocs = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching facility documents:", error);
-    throw error;
+    // Return null instead of throwing to handle gracefully
+    return null;
   }
 };
 
@@ -66,14 +78,12 @@ export const getFacilityDocsByFacilityId = async (facilityId) => {
 // ===== DOCUMENT VERIFICATION APIs =====
 
 // Verify a single document
-export const verifyDocument = async (facilityId, documentType,  filePath,notes=''
-) => {
+export const verifyDocument = async (facilityId, documentType, filePath, notes = '') => {
   try {
     const response = await axios.post(`${backendUrl}/api/facility-docs/${facilityId}/verify-document`, {
       documentType,
       filePath,
       notes
-      
     });
     return response.data;
   } catch (error) {
@@ -83,7 +93,7 @@ export const verifyDocument = async (facilityId, documentType,  filePath,notes='
 };
 
 // Reject a single document
-export const rejectDocument = async (facilityId, documentType,notes,filePath) => {
+export const rejectDocument = async (facilityId, documentType, notes, filePath) => {
   try {
     const response = await axios.post(`${backendUrl}/api/facility-docs/${facilityId}/reject-document`, {
       documentType,
@@ -189,19 +199,16 @@ export const getAllExtractedData = async (facilityType = null, verificationStatu
 
 // Check if document type supports extraction
 export const isExtractableDocument = (documentType) => {
-  return ['facilityDetailsDoc', 'priceListFile',,
-    'facilityDetailsFiles',
-    'priceListFiles',
-   ,].includes(documentType);
+  return ['facilityDetailsFiles', 'priceListFiles'].includes(documentType);
 };
 
 // Get document display name
 export const getDocumentDisplayName = (documentType) => {
   const displayNames = {
     facilityPhotos: 'Facility Photos',
-    facilityDetailsDoc: 'Facility Details Document',
-    priceListFile: 'Price List',
-    licenseRegistrationFile: 'License & Registration',
+    facilityDetailsFiles: 'Facility Details Documents',
+    priceListFiles: 'Price List Documents',
+    licenseRegistrationFiles: 'License & Registration Documents',
     specialistScheduleFiles: 'Specialist Schedules'
   };
   return displayNames[documentType] || documentType;
