@@ -311,7 +311,7 @@ export default function Landing() {
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
                             Simple, secure, and Personalized Healthcare Referrals                        </h2>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            In three easy steps
+                            In three simple steps
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
