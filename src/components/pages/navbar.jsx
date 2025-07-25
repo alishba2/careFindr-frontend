@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Heart, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hook/auth";
-import icon from "../../assets/vector2.png";
-import icon2 from "../../assets/Vector.png";
+
 import logo from "../../assets/logo.png";
 
 export default function Navbar() {
@@ -91,7 +89,7 @@ export default function Navbar() {
         return null;
     }
 
-    return (
+   return (
         <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
@@ -102,7 +100,11 @@ export default function Navbar() {
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                <img src={logo} className="h-10 mr-2" alt="CareFindr Logo" />
+                                <img 
+                                    src={logo} 
+                                    className="h-10 md:h-10 h-8 mr-2" 
+                                    alt="CareFindr Logo" 
+                                />
                             </div>
                         </div>
                     </div>
@@ -161,45 +163,63 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* Mobile Right Side - Get Started + Menu Toggle */}
+                    {/* Mobile Right Side - Auth Buttons + Menu Toggle */}
                     <div className="md:hidden flex items-center gap-2">
-                        {/* Show Get Started button directly on mobile when not logged in */}
-                        {!token ? (
-                            <Button
-                                onClick={() => navigate("/register")}
-                                className="bg-primarysolid text-sm hover:bg-primarysolid text-white shadow-sm px-3 py-2 rounded-lg"
-                            >
-                                Get Started
-                            </Button>
+                        {/* Authentication Buttons for Mobile */}
+                        {token ? (
+                            <>
+                                <Button
+                                    onClick={() => navigate(getDashboardPath())}
+                                    className="bg-primarysolid text-xs px-2 py-1.5 hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Dashboard
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleLogout}
+                                    className="text-red-600 hover:text-red-800 text-xs px-2 py-1.5"
+                                >
+                                    Logout
+                                </Button>
+                            </>
                         ) : (
-                            <button
-                                onClick={() => handleNavigation(getDashboardPath())}
-                                className="bg-primarysolid text-sm hover:bg-primarysolid text-white shadow-sm px-3 py-2 rounded-lg"
-                            >
-                                Dashboard
-                            </button>
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => navigate("/login")}
+                                    className="text-primarysolid hover:primarysolid text-xs px-2 py-1.5"
+                                >
+                                    Login
+                                </Button>
+                                <Button
+                                    onClick={() => navigate("/register")}
+                                    className="bg-primarysolid text-xs px-2 py-1.5 hover:bg-primarysolid text-white shadow-sm"
+                                >
+                                    Get Started
+                                </Button>
+                            </>
                         )}
 
-                        {/* Menu Toggle - Show when there are items to show in menu */}
-                        {(token || shouldShowMenuItems) && (
+                        {/* Menu Toggle - Show only when there are nav items for non-admin users */}
+                        {shouldShowMenuItems && (
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="text-gray-700 hover:primarysolid"
+                                className="text-gray-700 hover:primarysolid p-1"
                             >
-                                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                                {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                             </Button>
                         )}
                     </div>
                 </div>
 
                 {/* Mobile Navigation - Show when menu is open AND there are items to show */}
-                {isMenuOpen && (token || shouldShowMenuItems) && (
+                {isMenuOpen && shouldShowMenuItems && (
                     <div className="md:hidden">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
                             {/* Navigation Items - Only show for non-admin users */}
-                            {shouldShowMenuItems && navItems.map((item) => (
+                            {navItems.map((item) => (
                                 <button
                                     key={item.id}
                                     onClick={() => scrollToSection(item.id)}
@@ -208,31 +228,6 @@ export default function Navbar() {
                                     {item.label}
                                 </button>
                             ))}
-
-                            {/* Authentication Buttons in Mobile Menu - Only when logged in */}
-                            {token && (
-                                <div className={`border-t border-gray-200 pt-3 ${shouldShowMenuItems ? 'mt-3' : ''}`}>
-
-                                    <button
-                                        onClick={handleLogout}
-                                        className="text-red-600 hover:text-red-800 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
-                                    >
-                                        Logout
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Login button in mobile menu - Only when not logged in and menu items exist */}
-                            {!token && shouldShowMenuItems && (
-                                <div className="border-t border-gray-200 pt-3 mt-3">
-                                    <button
-                                        onClick={() => handleNavigation("/login")}
-                                        className="text-primarysolid hover:text-primarysolid/80 block px-3 py-2 text-base font-medium w-full text-left transition-colors"
-                                    >
-                                        Login
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     </div>
                 )}
