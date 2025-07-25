@@ -412,6 +412,17 @@ export default function Landing() {
 
                                     </div>
                                 </div>
+                                 <div className="flex items-start space-x-4">
+                                    <div className="flex-shrink-0">
+                                        <CheckCircle className="w-6 h-6  text-gray-900 mt-1" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900 ">
+                                            Add Seamless offline access
+                                        </h3>
+
+                                    </div>
+                                </div>
                             </div>
 
 
