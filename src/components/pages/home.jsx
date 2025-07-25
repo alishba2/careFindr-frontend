@@ -125,7 +125,7 @@ export default function Landing() {
                     </div>
 
                     {/* Desktop Layout - All in one row */}
-                    <div className=" md:grid md:grid-cols-5 gap-8 mb-16">
+                    <div className="hidden md:grid md:grid-cols-5 gap-8 mb-16 md:block">
                         <div className="text-center">
                             <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <Hospital className="w-8 h-8 text-blue-600" />
