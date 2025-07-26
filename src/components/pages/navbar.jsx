@@ -76,14 +76,23 @@ export default function Navbar() {
     };
 
     const navItems = [
-        { label: "How It Works", id: "how-it-works" },
-        { label: "Benefits", id: "benefits" },
-        { label: "Hospitals", id: "hospitals" },
-        { label: "FAQ", id: "faq" },
+        { label: "How It Works", id: "how-it-works", type: "scroll" },
+        { label: "Benefits", id: "benefits", type: "scroll" },
+        { label: "Testimonials", id: "hospitals", type: "scroll" },
+        { label: "FAQ", id: "faq", type: "scroll" },
+        { label: "Blog", id: "/blog", type: "navigate" },
     ];
 
     // Don't show menu items for admin users
     const shouldShowMenuItems = userType !== "admin";
+
+    const handleNavItemClick = (item) => {
+        if (item.type === "navigate") {
+            handleNavigation(item.id);
+        } else {
+            scrollToSection(item.id);
+        }
+    };
 
     if (loading) {
         return null;
@@ -116,7 +125,7 @@ export default function Navbar() {
                                 {navItems.map((item) => (
                                     <button
                                         key={item.id}
-                                        onClick={() => scrollToSection(item.id)}
+                                        onClick={() => handleNavItemClick(item)}
                                         className="text-gray-700 hover:text-primarysolid px-3 py-2 text-sm font-medium transition-colors"
                                     >
                                         {item.label}
@@ -222,7 +231,7 @@ export default function Navbar() {
                             {navItems.map((item) => (
                                 <button
                                     key={item.id}
-                                    onClick={() => scrollToSection(item.id)}
+                                    onClick={() => handleNavItemClick(item)}
                                     className="text-gray-700 hover:text-primarysolid block px-3 py-2 text-base font-medium w-full text-left transition-colors"
                                 >
                                     {item.label}

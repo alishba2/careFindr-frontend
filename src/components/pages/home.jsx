@@ -418,7 +418,7 @@ export default function Landing() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-900 ">
-                                            Add Seamless offline access
+                                            Seamless offline access
                                         </h3>
 
                                     </div>

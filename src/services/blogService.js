@@ -8,9 +8,9 @@ const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 export const createBlog = async (blogData) => {
   try {
     console.log("Creating blog post with data:", blogData);
-    
+
     const formData = new FormData();
-        Object.keys(blogData).forEach(key => {
+    Object.keys(blogData).forEach(key => {
       if (key === 'tags' && Array.isArray(blogData[key])) {
         formData.append(key, blogData[key].join(','));
       } else if (key === 'seo' && typeof blogData[key] === 'object') {
@@ -27,7 +27,7 @@ export const createBlog = async (blogData) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error("Error creating blog:", error);
@@ -118,10 +118,10 @@ export const getPublishedBlogById = async (id) => {
 export const updateBlog = async (id, blogData) => {
   try {
     console.log(`Updating blog ${id} with data:`, blogData);
-    
+
     // Create FormData for file upload support
     const formData = new FormData();
-    
+
     // Append all blog fields to FormData
     Object.keys(blogData).forEach(key => {
       if (key === 'tags' && Array.isArray(blogData[key])) {
@@ -140,7 +140,7 @@ export const updateBlog = async (id, blogData) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error("Error updating blog:", error);
@@ -260,10 +260,10 @@ export const bulkPublishBlogs = async (blogIds) => {
   try {
     const promises = blogIds.map(id => publishBlog(id));
     const results = await Promise.allSettled(promises);
-    
+
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
-    
+
     console.log(`Bulk publish completed: ${successful} successful, ${failed} failed`);
     return { successful, failed, results };
   } catch (error) {
@@ -277,10 +277,10 @@ export const bulkUnpublishBlogs = async (blogIds) => {
   try {
     const promises = blogIds.map(id => unpublishBlog(id));
     const results = await Promise.allSettled(promises);
-    
+
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
-    
+
     console.log(`Bulk unpublish completed: ${successful} successful, ${failed} failed`);
     return { successful, failed, results };
   } catch (error) {
@@ -294,10 +294,10 @@ export const bulkDeleteBlogs = async (blogIds) => {
   try {
     const promises = blogIds.map(id => deleteBlog(id));
     const results = await Promise.allSettled(promises);
-    
+
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
-    
+
     console.log(`Bulk delete completed: ${successful} successful, ${failed} failed`);
     return { successful, failed, results };
   } catch (error) {
@@ -311,10 +311,10 @@ export const bulkArchiveBlogs = async (blogIds) => {
   try {
     const promises = blogIds.map(id => archiveBlog(id));
     const results = await Promise.allSettled(promises);
-    
+
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
-    
+
     console.log(`Bulk archive completed: ${successful} successful, ${failed} failed`);
     return { successful, failed, results };
   } catch (error) {
@@ -352,12 +352,12 @@ export const checkBlogStatus = async (blogId) => {
 // Get available categories
 export const getAvailableCategories = () => {
   return [
-    'Technology', 
-    'Design', 
-    'Business', 
-    'Marketing', 
-    'Lifestyle', 
-    'Health', 
+    'Technology',
+    'Design',
+    'Business',
+    'Marketing',
+    'Lifestyle',
+    'Health',
     'Travel',
     'Food',
     'Fashion',
@@ -409,10 +409,6 @@ export const validateBlogData = (blogData) => {
     errors.content = 'Content is required';
   }
 
-  if (!blogData.category) {
-    errors.category = 'Category is required';
-  }
-
   if (blogData.excerpt && blogData.excerpt.length > 500) {
     errors.excerpt = 'Excerpt must be less than 500 characters';
   }
@@ -430,26 +426,26 @@ export const validateBlogData = (blogData) => {
 // Generate blog excerpt from content
 export const generateExcerpt = (content, maxLength = 150) => {
   if (!content) return '';
-  
+
   // Remove HTML tags
   const textContent = content.replace(/<[^>]*>/g, '');
-  
+
   // Truncate to maxLength
   if (textContent.length <= maxLength) {
     return textContent;
   }
-  
+
   return textContent.substring(0, maxLength).trim() + '...';
 };
 
 // Calculate reading time from content
 export const calculateReadingTime = (content) => {
   if (!content) return '1 min read';
-  
+
   const textContent = content.replace(/<[^>]*>/g, '');
   const wordCount = textContent.split(' ').filter(word => word.length > 0).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-  
+
   return `${readingTime} min read`;
 };
 
@@ -463,27 +459,27 @@ export default {
   getPublishedBlogById,
   updateBlog,
   deleteBlog,
-  
+
   // Status Management
   publishBlog,
   unpublishBlog,
   archiveBlog,
-  
+
   // Analytics
   getBlogStats,
-  
+
   // Helper Functions
   getBlogsByCategory,
   searchBlogs,
   getBlogsByStatus,
   getUserBlogs,
-  
+
   // Bulk Operations
   bulkPublishBlogs,
   bulkUnpublishBlogs,
   bulkDeleteBlogs,
   bulkArchiveBlogs,
-  
+
   // Utilities
   checkBlogStatus,
   getAvailableCategories,

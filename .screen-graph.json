@@ -62,6 +62,13 @@
       ]
     },
     {
+      "id": "src/components/FacilityDashboard/blogs.jsx",
+      "label": "blogs",
+      "routes": [
+        "/blog"
+      ]
+    },
+    {
       "id": "src/components/AdminDashboard/facility-detail.jsx",
       "label": "facility-detail",
       "routes": [
@@ -261,15 +268,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:151:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:160:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 151,
-          "endLine": 151,
+          "line": 160,
+          "endLine": 160,
           "column": 51,
           "endColumn": 69,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -277,15 +284,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:157:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:166:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 157,
-          "endLine": 157,
+          "line": 166,
+          "endLine": 166,
           "column": 51,
           "endColumn": 72,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -293,15 +300,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:189:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:198:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 189,
-          "endLine": 189,
+          "line": 198,
+          "endLine": 198,
           "column": 51,
           "endColumn": 69,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -309,15 +316,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:195:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:204:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 195,
-          "endLine": 195,
+          "line": 204,
+          "endLine": 204,
           "column": 51,
           "endColumn": 72,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -325,15 +332,15 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/facility-detail.jsx:228:8-to-src/components/AdminDashboard/allFacilities.jsx",
+      "id": "src/components/AdminDashboard/facility-detail.jsx:227:8-to-src/components/AdminDashboard/allFacilities.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/AdminDashboard/allFacilities.jsx",
       "data": {
         "viaRoute": "/facilities",
         "trigger": {
           "element": "navigate('/facilities')",
-          "line": 228,
-          "endLine": 228,
+          "line": 227,
+          "endLine": 227,
           "column": 8,
           "endColumn": 31,
           "sourceFile": "src/components/AdminDashboard/facility-detail.jsx"
@@ -357,15 +364,159 @@
       }
     },
     {
-      "id": "src/components/AdminDashboard/facility-detail.jsx:228:8-to-src/components/AdminDashboard/allFacilities.jsx",
+      "id": "src/components/pages/navbar.jsx:62:12-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 62,
+          "endLine": 62,
+          "column": 12,
+          "endColumn": 30,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:160:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 160,
+          "endLine": 160,
+          "column": 51,
+          "endColumn": 69,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:166:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "navigate(\"/register\")",
+          "line": 166,
+          "endLine": 166,
+          "column": 51,
+          "endColumn": 72,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:198:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 198,
+          "endLine": 198,
+          "column": 51,
+          "endColumn": 69,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:204:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "navigate(\"/register\")",
+          "line": 204,
+          "endLine": 204,
+          "column": 51,
+          "endColumn": 72,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/footer.jsx:36:18-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/FacilityDashboard/blogs.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "<a href=\"/register\" className=\"hover:text-white transition-colors\">Join Network</a>",
+          "line": 36,
+          "endLine": 36,
+          "column": 18,
+          "endColumn": 101,
+          "sourceFile": "src/components/pages/footer.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/footer.jsx:37:18-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/FacilityDashboard/blogs.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "<a href=\"/register\" className=\"hover:text-white transition-colors\">Referral Dashboard</a>",
+          "line": 37,
+          "endLine": 37,
+          "column": 18,
+          "endColumn": 107,
+          "sourceFile": "src/components/pages/footer.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/footer.jsx:38:18-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/FacilityDashboard/blogs.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "<a href=\"/register\" className=\"hover:text-white transition-colors\">Brand Visibility</a>",
+          "line": 38,
+          "endLine": 38,
+          "column": 18,
+          "endColumn": 105,
+          "sourceFile": "src/components/pages/footer.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/footer.jsx:39:18-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/FacilityDashboard/blogs.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/register",
+        "trigger": {
+          "element": "<a href=\"/register\" className=\"hover:text-white transition-colors\">Training & Support</a>",
+          "line": 39,
+          "endLine": 39,
+          "column": 18,
+          "endColumn": 107,
+          "sourceFile": "src/components/pages/footer.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/AdminDashboard/facility-detail.jsx:227:8-to-src/components/AdminDashboard/allFacilities.jsx",
       "source": "src/components/AdminDashboard/facility-detail.jsx",
       "target": "src/components/AdminDashboard/allFacilities.jsx",
       "data": {
         "viaRoute": "/facilities",
         "trigger": {
           "element": "navigate('/facilities')",
-          "line": 228,
-          "endLine": 228,
+          "line": 227,
+          "endLine": 227,
           "column": 8,
           "endColumn": 31,
           "sourceFile": "src/components/AdminDashboard/facility-detail.jsx"

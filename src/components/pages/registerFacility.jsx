@@ -942,7 +942,7 @@ export const RegistrationStep = () => {
                       disabled={isSubmitting || !phoneVerified || !whatsappVerified}
                       className="w-full h-12 bg-primarysolid text-white rounded-xl"
                     >
-                      {isSubmitting ? "Registering..." : "Create Hospital Account"}
+                      {isSubmitting ? "Registering..." : "Create Account"}
                     </Button>
                   </Form>
                 )}

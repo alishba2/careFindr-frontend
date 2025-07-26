@@ -28,6 +28,9 @@ import Notifications from "./components/FacilityDashboard/notification";
 import Users from "./components/AdminDashboard/users";
 import Landing from "./components/pages/home";
 
+
+import BlogPage from "./components/FacilityDashboard/blogs";
+
 import { ChatProvider } from "./components/hook/chatContext";
 export const App = () => {
   return (
@@ -124,9 +127,14 @@ export const App = () => {
               <Route path="document-upload" element={<DocumentUpload />} />
               <Route path="referrals" element={<Referrals />} />
               <Route path="notifications" element={<Notifications />} />
+
               <Route path="support" element={<Feedback />} />
               <Route path="*" element={<Navigate to="home" replace />} />
+
+
             </Route>
+            <Route path="/blog" element={<BlogPage />} />
+
           </Routes>
         </BrowserRouter>
       </ChatProvider>
