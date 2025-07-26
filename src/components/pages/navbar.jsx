@@ -76,6 +76,7 @@ export default function Navbar() {
     };
 
     const navItems = [
+        { label: "Features", id: "features", type: "scroll" },
         { label: "How It Works", id: "how-it-works", type: "scroll" },
         { label: "Benefits", id: "benefits", type: "scroll" },
         { label: "Testimonials", id: "hospitals", type: "scroll" },
@@ -98,7 +99,7 @@ export default function Navbar() {
         return null;
     }
 
-   return (
+    return (
         <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
@@ -109,10 +110,10 @@ export default function Navbar() {
                                 className="md:text-2xl text-lg font-bold text-primarysolid cursor-pointer"
                                 onClick={() => navigate("/")}
                             >
-                                <img 
-                                    src={logo} 
-                                    className="h-10 md:h-10 h-8 mr-2" 
-                                    alt="CareFindr Logo" 
+                                <img
+                                    src={logo}
+                                    className="h-10 md:h-10 h-8 mr-2"
+                                    alt="CareFindr Logo"
                                 />
                             </div>
                         </div>

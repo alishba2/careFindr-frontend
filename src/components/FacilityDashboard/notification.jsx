@@ -5,7 +5,6 @@ import {
   Alert,
   Typography,
   Badge,
-
   Tooltip,
   message,
 } from "antd";
@@ -16,13 +15,12 @@ import { Button } from "../button";
 const { Title, Text } = Typography;
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
-
 const getNotificationMessage = (action) => {
   switch (action) {
     case "ACCOUNT_CREATED":
-      return "Your account has been successfully created. Let’s complete your onboarding to get started!";
+      return "Your account has been successfully created. Let's complete your onboarding to get started!";
     case "RESET_PASSWORD":
-      return "Your password has been reset. If this wasn’t you, please secure your account immediately.";
+      return "Your password has been reset. If this wasn't you, please secure your account immediately.";
     case "FACILITY_INFO_UPDATED":
       return "Your facility information has been successfully updated.";
     case "SERVICES_UPDATE":
@@ -32,14 +30,61 @@ const getNotificationMessage = (action) => {
     case "UPDATED_PROFILE_PROGRESS":
       return "Your profile setup is progressing. Keep going to complete it!";
     case "ONBOARDING_COMPLETED":
-      return "Congratulations! You’ve successfully completed your onboarding process.";
+      return "Congratulations! You've successfully completed your onboarding process.";
     case "PROFILE_IMAGE_UPDATED":
       return "Your profile picture has been updated.";
+    case "PROFILE_VERIFIED":
+      return "Congratulations! Your profile has been successfully verified.";
+    case "PROFILE_DEACTIVATED":
+      return "Your profile has been deactivated. Please contact support if you believe this is an error.";
+    case "PROFILE_ACTIVATED":
+      return "Your profile has been activated and is now live on the platform.";
     default:
       return "You have a new update or activity in your account.";
   }
 };
 
+// Function to get notification colors based on action type
+const getNotificationStyle = (action, isRead) => {
+  let backgroundColor = !isRead ? "transparent" : "#c1e3ff";
+  let borderColor = "#AADEE6";
+
+  switch (action) {
+    case "PROFILE_VERIFIED":
+    case "PROFILE_ACTIVATED":
+      backgroundColor = !isRead ? "transparent" : "#d4edda"; // Light green for verified/activated
+      borderColor = "#52c41a"; // Green border
+      break;
+    case "PROFILE_DEACTIVATED":
+      backgroundColor = !isRead ? "transparent" : "#f8d7da"; // Light red for deactivated
+      borderColor = "#ff4d4f"; // Red border
+      break;
+    default:
+      backgroundColor = !isRead ? "transparent" : "#c1e3ff";
+      borderColor = "#AADEE6";
+  }
+
+  return {
+    backgroundColor,
+    borderColor,
+    borderRadius: 8,
+    marginBottom: 8,
+    padding: 16,
+  };
+};
+
+// Function to get badge color based on action type
+const getBadgeColor = (action) => {
+  switch (action) {
+    case "PROFILE_VERIFIED":
+    case "PROFILE_ACTIVATED":
+      return "#52c41a"; // Green
+    case "PROFILE_DEACTIVATED":
+      return "#ff4d4f"; // Red
+    default:
+      return "#1890ff"; // Default blue
+  }
+};
 
 /*************  ✨ Windsurf Command ⭐  *************/
 /**
@@ -54,7 +99,8 @@ const getNotificationMessage = (action) => {
  *
  * @returns {React.Component} A React component that displays a list of notifications.
  */
-/*******  ad980468-22c9-486f-9644-3c5d55993ab8  *******/const Notifications = () => {
+/*******  ad980468-22c9-486f-9644-3c5d55993ab8  *******/
+const Notifications = () => {
   const { authData } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -145,22 +191,14 @@ const getNotificationMessage = (action) => {
           dataSource={notifications}
           renderItem={(item) => (
             <List.Item
-              className="bg-[#c1e3ff] p-4 rounded-lg shadow-sm border border-[#AADEE6]"
-
-              style={{
-                backgroundColor: !item.isRead ? "transparent" : "#c1e3ff",
-                borderRadius: 8,
-                marginBottom: 8,
-                padding: 16,
-              }}
-
+              style={getNotificationStyle(item.action, item.isRead)}
             >
               <List.Item.Meta
                 avatar={
                   !item.isRead ? (
                     <Badge
                       status="processing"
-                      color="#1890ff"
+                      color={getBadgeColor(item.action)}
                       style={{
                         width: 10,
                         height: 10,

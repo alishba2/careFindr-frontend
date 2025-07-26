@@ -124,14 +124,7 @@ export default function BlogPage() {
       {/* Blog Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Results Summary */}
-          {!loading && totalBlogs > 0 && (
-            <div className="mb-8 text-center">
-              <p className="text-gray-600 text-lg">
-                Discover our collection of {totalBlogs} articles
-              </p>
-            </div>
-          )}
+   
 
           {error ? (
             <div className="text-center py-20">

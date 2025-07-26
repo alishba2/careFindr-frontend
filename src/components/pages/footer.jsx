@@ -5,7 +5,8 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo and Description */}
           <div className="text-center md:text-left">
             <div className="text-2xl font-bold text-primarysolid mb-4">
               <Heart className="w-6 h-6 inline mr-2" />
@@ -20,7 +21,33 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="text-center md:text-left">
+          {/* Mobile: Side by side layout for Patients and Facilities */}
+          <div className="md:hidden grid pl-6 grid-cols-2 gap-8 col-span-1">
+            {/* For Patients - Justified spacing */}
+            <div className="text-left pr-2">
+              <h4 className="text-lg font-semibold mb-4">For Patients</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><a href="#" className="hover:text-white transition-colors">Find Healthcare</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Smart Triage Support</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Appointment Booking</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Transparency in Care</a></li>
+              </ul>
+            </div>
+
+            {/* For Facilities - Justified spacing */}
+            <div className="text-left pl-2">
+              <h4 className="text-lg font-semibold mb-4">For Facilities</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><a href="/register" className="hover:text-white transition-colors">Join Network</a></li>
+                <li><a href="/register" className="hover:text-white transition-colors">Referral Dashboard</a></li>
+                <li><a href="/register" className="hover:text-white transition-colors">Brand Visibility</a></li>
+                <li><a href="/register" className="hover:text-white transition-colors">Training & Support</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Desktop: Original layout for Patients and Facilities */}
+          <div className="hidden md:block text-center md:text-left">
             <h4 className="text-lg font-semibold mb-4">For Patients</h4>
             <ul className="space-y-2 text-gray-300">
               <li><a href="#" className="hover:text-white transition-colors">Find Healthcare</a></li>
@@ -30,7 +57,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="text-center md:text-left">
+          <div className="hidden md:block text-center md:text-left">
             <h4 className="text-lg font-semibold mb-4">For Facilities</h4>
             <ul className="space-y-2 text-gray-300">
               <li><a href="/register" className="hover:text-white transition-colors">Join Network</a></li>
@@ -40,6 +67,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Contact & Support - Center aligned on mobile, left on desktop */}
           <div className="text-center md:text-left">
             <h4 className="text-lg font-semibold mb-4">Contact & Support</h4>
             <ul className="space-y-2 text-gray-300">

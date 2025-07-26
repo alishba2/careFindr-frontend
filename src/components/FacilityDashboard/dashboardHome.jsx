@@ -28,9 +28,9 @@ export default function DashboardHome() {
   const getNotificationMessage = (action) => {
     switch (action) {
       case "ACCOUNT_CREATED":
-        return "Your account has been successfully created. Let’s complete your onboarding to get started!";
+        return "Your account has been successfully created. Let's complete your onboarding to get started!";
       case "RESET_PASSWORD":
-        return "Your password has been reset. If this wasn’t you, please secure your account immediately.";
+        return "Your password has been reset. If this wasn't you, please secure your account immediately.";
       case "FACILITY_INFO_UPDATED":
         return "Your facility information has been successfully updated.";
       case "SERVICES_UPDATE":
@@ -40,11 +40,30 @@ export default function DashboardHome() {
       case "UPDATED_PROFILE_PROGRESS":
         return "Your profile setup is progressing. Keep going to complete it!";
       case "ONBOARDING_COMPLETED":
-        return "Congratulations! You’ve successfully completed your onboarding process.";
+        return "Congratulations! You've successfully completed your onboarding process.";
       case "PROFILE_IMAGE_UPDATED":
         return "Your profile picture has been updated.";
+      case "PROFILE_VERIFIED":
+        return "Congratulations! Your profile has been successfully verified.";
+      case "PROFILE_DEACTIVATED":
+        return "Your profile has been deactivated. Please contact support if you believe this is an error.";
+      case "PROFILE_ACTIVATED":
+        return "Your profile has been activated and is now live on the platform.";
       default:
         return "You have a new update or activity in your account.";
+    }
+  };
+
+  // Function to get notification styling based on action type
+  const getNotificationStyle = (action) => {
+    switch (action) {
+      case "PROFILE_VERIFIED":
+      case "PROFILE_ACTIVATED":
+        return "bg-green-50 border-green-200 border"; // Light green background with green border
+      case "PROFILE_DEACTIVATED":
+        return "bg-red-50 border-red-200 border"; // Light red background with red border
+      default:
+        return "bg-[#c1e3ff] border-[#AADEE6] border"; // Default blue styling
     }
   };
 
@@ -58,7 +77,6 @@ export default function DashboardHome() {
     };
     fetchProfileStatus();
   }, []);
-
 
   const fetchNotifications = async () => {
     setLoadingNotifications(true);
@@ -133,7 +151,6 @@ export default function DashboardHome() {
   };
 
   return (
-    
     <Content className="h-full">
       <div className="font-inter font-semibold text-3xl leading-[36px] tracking-[0.5%] mb-1">
         Dashboard Overview
@@ -195,7 +212,7 @@ export default function DashboardHome() {
                     {recentActivity.map((notification) => (
                       <li
                         key={notification._id}
-                        className="bg-[#c1e3ff] p-4 rounded-lg shadow-sm border-[#AADEE6"
+                        className={`p-4 rounded-lg shadow-sm ${getNotificationStyle(notification.action)}`}
                       >
                         <p className="text-base text-gray-800 font-medium">
                           {getNotificationMessage(notification.action)}
