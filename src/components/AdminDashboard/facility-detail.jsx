@@ -18,7 +18,6 @@ import {
 } from "../../services/facility";
 import { CoreClinicalSpecialities } from "../enums/medicalSpecialities";
 import { useAuth } from "../hook/auth";
-import { updateFacilityServices } from "../../services/facility";
 import { FacilityInformation } from "../FacilityDashboard/facilityInformation";
 import FacilityServiceComponent from "./services";
 import { HospitalServices } from "../FacilityDashboard/hospitalServices";

@@ -1,4 +1,4 @@
-// contexts/ChatContext.js
+// contexts/ChatContext.js - Updated with file upload support
 import React, {
   createContext,
   useState,
@@ -26,6 +26,10 @@ export const ChatProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // File upload state
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [uploadingFiles, setUploadingFiles] = useState(new Set());
 
   // Chat stats for admin
   const [chatStats, setChatStats] = useState({
@@ -215,6 +219,15 @@ export const ChatProvider = ({ children }) => {
       if (data.success) {
         console.log("Message sent successfully");
         
+        // Remove from uploading files if it was a file
+        if (data.message && data.message.fileUrl) {
+          setUploadingFiles(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(data.message.fileName);
+            return newSet;
+          });
+        }
+        
         // If this was a new chat creation, update the activeChat with real chat ID
         if (activeChat && (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_'))) {
           setActiveChat(prev => ({
@@ -274,7 +287,7 @@ export const ChatProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await chatService.getAllChats(token, params);
+      const response = await chatService.getAllChats(params);
       const chatsData = response.data.chats || [];
       
       // Ensure each chat has messages array
@@ -286,7 +299,8 @@ export const ChatProvider = ({ children }) => {
       setChats(chatsWithMessages);
       setError(null);
     } catch (error) {
-      return;
+      console.error("Error fetching chats:", error);
+      setError("Failed to load chats");
     } finally {
       setLoading(false);
     }
@@ -297,7 +311,7 @@ export const ChatProvider = ({ children }) => {
     if (!isAdmin || !token) return;
 
     try {
-      const response = await chatService.getChatStats(token);
+      const response = await chatService.getChatStats();
       setChatStats(response.data);
     } catch (error) {
       console.error("Error fetching chat stats:", error);
@@ -310,14 +324,15 @@ export const ChatProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await chatService.getFacilityChat(token);
+      const response = await chatService.getFacilityChat();
       const chat = response.data;
       setActiveChat(chat);
       setMessages(chat.messages || []);
       setUnreadCount(chat.unreadCount?.facility || 0);
       setError(null);
     } catch (error) {
-      return;
+      console.error("Error fetching facility chat:", error);
+      setError("Failed to load chat");
     } finally {
       setLoading(false);
     }
@@ -329,7 +344,7 @@ export const ChatProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await chatService.getChatByFacility(token, facilityId);
+      const response = await chatService.getChatByFacility(facilityId);
       const chat = response.data;
       
       // Update the active chat with complete data
@@ -355,93 +370,195 @@ export const ChatProvider = ({ children }) => {
       setError(null);
       return chat;
     } catch (error) {
-      return;
+      console.error("Error fetching chat by facility:", error);
+      setError("Failed to load chat");
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  // Send message
+  // UPDATED: Send message - now supports files with FormData
   const sendMessage = async (messageData) => {
     if (!token || !activeChat) return;
 
     try {
-      const payload = {
-        message: messageData.message,
-        messageType: messageData.messageType || "text",
-        fileUrl: messageData.fileUrl,
-        fileName: messageData.fileName,
-      };
-      
-      // Handle different chat scenarios
-      if (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_')) {
-        // This is a new conversation with a facility
-        payload.facilityId = activeChat.facilityId?._id || activeChat.facilityId;
-        console.log("Starting new conversation with facility:", payload.facilityId);
+      console.log("📤 Sending message:", messageData);
+
+      // Handle file uploads using FormData
+      if (messageData.file) {
+        // Validate file before sending
+        try {
+          chatService.validateFile(messageData.file);
+        } catch (validationError) {
+          setError(validationError.message);
+          throw validationError;
+        }
+
+        const payload = {
+          message: messageData.message || messageData.file.name,
+          messageType: messageData.messageType || 'file',
+          file: messageData.file
+        };
+
+        // Handle different chat scenarios
+        if (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_')) {
+          payload.facilityId = activeChat.facilityId?._id || activeChat.facilityId;
+          console.log("Starting new conversation with facility:", payload.facilityId);
+        } else {
+          payload.chatId = activeChat._id;
+        }
+
+        console.log("📤 Sending file message via FormData:", {
+          messageType: payload.messageType,
+          fileName: payload.file.name,
+          fileSize: payload.file.size,
+          chatId: payload.chatId,
+          facilityId: payload.facilityId
+        });
+
+        // Add to uploading files
+        setUploadingFiles(prev => new Set([...prev, messageData.file.name]));
+
+        // Create optimistic message for file
+        const newMessage = {
+          senderId: authData._id,
+          senderType: isAdmin ? "Admin" : "Facility",
+          senderName: isAdmin ? authData.fullName : authData.name,
+          message: payload.message,
+          messageType: messageData.file.type.startsWith('image/') ? 'image' : 'file',
+          fileName: messageData.file.name,
+          fileSize: messageData.file.size,
+          fileType: messageData.file.type,
+          timestamp: new Date(),
+          // Add temporary URL for immediate preview if it's an image
+          fileUrl: messageData.file.type.startsWith('image/') ? URL.createObjectURL(messageData.file) : null,
+          isUploading: true // Flag to show upload status
+        };
+
+        // Optimistically update the UI immediately
+        setMessages((prev) => [...prev, newMessage]);
+
+        try {
+          // Send file via API using FormData
+          const response = await chatService.sendMessageWithFile(payload);
+          
+          if (response.success) {
+            // Update the message with the real file URL and remove upload status
+            setMessages((prev) => prev.map((msg, index) => {
+              if (index === prev.length - 1 && msg.isUploading) {
+                // Clean up temporary object URL
+                if (msg.fileUrl && msg.fileUrl.startsWith('blob:')) {
+                  URL.revokeObjectURL(msg.fileUrl);
+                }
+                // Return the actual message from server response
+                return {
+                  ...response.data.message,
+                  // Ensure we keep the correct sender info
+                  senderId: authData._id,
+                  senderType: isAdmin ? "Admin" : "Facility",
+                  senderName: isAdmin ? authData.fullName : authData.name,
+                  isUploading: false
+                };
+              }
+              return msg;
+            }));
+
+            console.log("✅ File uploaded successfully:", response.data.message);
+          }
+        } catch (uploadError) {
+          console.error("❌ File upload failed:", uploadError);
+          
+          // Remove the optimistic message on error
+          setMessages((prev) => prev.filter((msg, index) => !(index === prev.length - 1 && msg.isUploading)));
+          
+          // Remove from uploading files
+          setUploadingFiles(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(messageData.file.name);
+            return newSet;
+          });
+          
+          throw uploadError;
+        }
+
       } else {
-        // This is an existing chat
-        payload.chatId = activeChat._id;
+        // Handle text messages (existing logic)
+        const payload = {
+          message: messageData.message,
+          messageType: messageData.messageType || "text",
+        };
+        
+        // Handle different chat scenarios
+        if (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_')) {
+          payload.facilityId = activeChat.facilityId?._id || activeChat.facilityId;
+          console.log("Starting new conversation with facility:", payload.facilityId);
+        } else {
+          payload.chatId = activeChat._id;
+        }
+
+        console.log("📤 Sending text message:", payload);
+
+        // Create the new message object for local state
+        const newMessage = {
+          senderId: authData._id,
+          senderType: isAdmin ? "Admin" : "Facility",
+          senderName: isAdmin ? authData.fullName : authData.name,
+          message: payload.message,
+          messageType: payload.messageType,
+          timestamp: new Date(),
+        };
+
+        // Optimistically update the UI immediately
+        setMessages((prev) => [...prev, newMessage]);
+        
+        // Send via socket for real-time to other users
+        if (chatService.isSocketConnected()) {
+          chatService.sendMessageSocket(payload);
+        } else {
+          // Fallback to API if socket is not connected
+          await chatService.sendMessage(payload);
+        }
       }
 
-      console.log(payload, "payload is here");
-
-      // Create the new message object for local state
-      const newMessage = {
-        senderId: authData._id,
-        senderType: isAdmin ? "Admin" : "Facility",
-        senderName: isAdmin ? authData.fullName : authData.name,
-        message: payload.message,
-        messageType: payload.messageType,
-        timestamp: new Date(),
-      };
-
-      // Optimistically update the UI immediately
-      setMessages((prev) => [...prev, newMessage]);
-      
       // Update the chat in chats list immediately (only if it's an existing chat)
       if (!activeChat.type || activeChat.type === 'chat') {
         setChats(prev => prev.map(chat => 
           chat._id === activeChat._id 
             ? { 
                 ...chat, 
-                messages: [...(chat.messages || []), newMessage],
                 lastMessageAt: new Date()
               }
             : chat
         ));
       }
 
-      // Send via socket for real-time to other users
-      if (chatService.isSocketConnected()) {
-        chatService.sendMessageSocket(payload);
-      } else {
-        // Fallback to API if socket is not connected
-        await chatService.sendMessage(token, payload);
-      }
-
       setError(null);
     } catch (error) {
       console.error("Error sending message:", error);
-      setError("Failed to send message");
+      setError(error.message || "Failed to send message");
       
-      // Remove the optimistically added message on error
-      setMessages((prev) => prev.slice(0, -1));
-      if (!activeChat.type || activeChat.type === 'chat') {
-        setChats(prev => prev.map(chat => 
-          chat._id === activeChat._id 
-            ? { 
-                ...chat, 
-                messages: (chat.messages || []).slice(0, -1)
-              }
-            : chat
-        ));
+      // Remove the optimistically added message on error (only for text messages)
+      if (!messageData.file) {
+        setMessages((prev) => prev.slice(0, -1));
       }
       
       throw error;
     }
   };
 
+  // NEW: Upload file function
+  const uploadFile = async (file, message = '') => {
+    if (!file) throw new Error('No file selected');
+    
+    return await sendMessage({
+      file: file,
+      message: message,
+      messageType: 'file'
+    });
+  };
+
+  // NEW: Download file function
   // Mark messages as read
   const markAsRead = async (chatId = null) => {
     const targetChatId = chatId || activeChat?._id;
@@ -451,7 +568,7 @@ export const ChatProvider = ({ children }) => {
       if (chatService.isSocketConnected()) {
         chatService.markAsReadSocket(targetChatId);
       } else {
-        await chatService.markAsRead(token, targetChatId);
+        await chatService.markAsRead(targetChatId);
         setUnreadCount(0);
       }
     } catch (error) {
@@ -467,7 +584,7 @@ export const ChatProvider = ({ children }) => {
       if (chatService.isSocketConnected()) {
         chatService.updateChatStatusSocket(chatId, statusData);
       } else {
-        await chatService.updateChatStatus(token, chatId, statusData);
+        await chatService.updateChatStatus(chatId, statusData);
 
         // Update local state
         setChats((prev) =>
@@ -543,9 +660,13 @@ export const ChatProvider = ({ children }) => {
     error,
     chatStats,
     isAdmin,
+    uploadProgress,
+    uploadingFiles,
 
     // Actions
     sendMessage,
+    uploadFile,
+
     markAsRead,
     updateChatStatus,
     sendTyping,
@@ -560,6 +681,10 @@ export const ChatProvider = ({ children }) => {
     setError,
     setActiveChat,
     setMessages,
+    // File helpers
+    validateFile: chatService.validateFile,
+    getFileIcon: chatService.getFileIcon,
+    formatFileSize: chatService.formatFileSize,
   };
 
   return (
@@ -574,3 +699,5 @@ export const useChat = () => {
   }
   return context;
 };
+
+        //

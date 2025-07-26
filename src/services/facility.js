@@ -2,21 +2,6 @@ import axios from './axiosConfig';
 
 const backendUrl = import.meta.env.VITE_APP_BASE_URL;
 
-// 1. Update services with FormData
-export const updateFacilityServices = async (services) => {
-    try {
-        console.log("Updating facility services with payload:", services);
-        const response = await axios.put(`${backendUrl}/api/facilities/services`, services, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error updating facility services:", error);
-        throw error;
-    }
-};
 
 // 2. Get logged-in facility's own data
 export const getFacility = async () => {

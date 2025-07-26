@@ -202,7 +202,7 @@ export const DocumentUpload = () => {
     return newFileList;
   };
 
- 
+
 
   const uploadProps = (field) => ({
     name: field,
@@ -216,11 +216,7 @@ export const DocumentUpload = () => {
     onRemove: (file) => handleDelete(file, field),
   });
 
-  // Fix the field name mapping in your React component
- // FRONTEND: Complete Fix for File Deletion
-// FRONTEND: Simple deletion approach - just send deleted files
-
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
   if (!hasChanges) {
     message.info("No changes to save.");
     return;
@@ -233,21 +229,18 @@ const handleSubmit = async () => {
     formData.append("facilityType", facilityType);
     formData.append("additionalInfo", additionalInfo);
 
-    // Simple approach: just send the deleted files as a single field
-    const mappedDeletedFiles = {
-      facilityPhotos: deletedFiles.facilityPhotos || [],
-      facilityDetails: deletedFiles.facilityDetails || [], 
-      priceList: deletedFiles.priceList || [], 
-      licenseRegistration: deletedFiles.licenseRegistration || [], 
-      specialistSchedules: deletedFiles.specialistSchedules || [] 
+    // Send current file state as JSON arrays with original field names
+    const getCurrentFileUrls = (field) => {
+      return fileList[field]
+        .filter(file => file.isExisting) // Only existing files that weren't deleted
+        .map(file => file.uid); // file.uid contains the file path for existing files
     };
 
-    console.log('Sending deleted files:', mappedDeletedFiles);
-
-    // Only send deletedFiles if there are actually deleted files
-    if (hasDeletedFiles) {
-      formData.append("deletedFiles", JSON.stringify(mappedDeletedFiles));
-    }
+    formData.append("facilityPhotos", JSON.stringify(getCurrentFileUrls("facilityPhotos")));
+    formData.append("facilityDetails", JSON.stringify(getCurrentFileUrls("facilityDetails")));
+    formData.append("priceList", JSON.stringify(getCurrentFileUrls("priceList")));
+    formData.append("licenseRegistration", JSON.stringify(getCurrentFileUrls("licenseRegistration")));
+    formData.append("specialistSchedules", JSON.stringify(getCurrentFileUrls("specialistSchedules")));
 
     // Helper function to append files
     const appendFiles = (frontendField, backendFieldName) => {
@@ -349,33 +342,32 @@ const handleSubmit = async () => {
     message.error("Failed to upload documents. Please try again.");
   }
 };
+  // Keep the existing handleDelete function as is
+  const handleDelete = (fileToRemove, field) => {
+    console.log(`Deleting file: ${fileToRemove.name} from ${field}, isExisting: ${fileToRemove.isExisting}`);
 
-// Keep the existing handleDelete function as is
-const handleDelete = (fileToRemove, field) => {
-  console.log(`Deleting file: ${fileToRemove.name} from ${field}, isExisting: ${fileToRemove.isExisting}`);
-  
-  // If it's an existing file, add it to deleted files list
-  if (fileToRemove.isExisting) {
-    setDeletedFiles((prev) => {
-      const updated = {
-        ...prev,
-        [field]: [...prev[field], fileToRemove.uid],
-      };
-      console.log(`Updated deleted files for ${field}:`, updated[field]);
-      return updated;
-    });
-  }
+    // If it's an existing file, add it to deleted files list
+    if (fileToRemove.isExisting) {
+      setDeletedFiles((prev) => {
+        const updated = {
+          ...prev,
+          [field]: [...prev[field], fileToRemove.uid],
+        };
+        console.log(`Updated deleted files for ${field}:`, updated[field]);
+        return updated;
+      });
+    }
 
-  // Remove from current file list
-  setFileList((prev) => ({
-    ...prev,
-    [field]: prev[field].filter((file) => file.uid !== fileToRemove.uid),
-  }));
-  
-  message.success(`${fileToRemove.name} removed`);
-};
+    // Remove from current file list
+    setFileList((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((file) => file.uid !== fileToRemove.uid),
+    }));
 
-// ALSO FIX: Make sure handleDelete properly tracks deleted files
+    message.success(`${fileToRemove.name} removed`);
+  };
+
+  // ALSO FIX: Make sure handleDelete properly tracks deleted files
   return (
     <div className="flex flex-col w-full max-w-full px-4 shadow-md rounded-[15px] bg-white border ">
       <StepProgress currentStep={authData?.onBoardingStep} />
@@ -437,7 +429,7 @@ const handleDelete = (fileToRemove, field) => {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                               <Tag
                                 color={statusDisplay.color}
                                 icon={statusDisplay.icon}
@@ -453,7 +445,7 @@ const handleDelete = (fileToRemove, field) => {
                                   </span>
                                 </Tooltip>
                               )}
-                            </div>
+                            </div> */}
 
                             {verification.status === 'rejected' && verification.notes && (
                               <div className="mt-1 text-red-600 text-xs bg-red-50 p-1 rounded">

@@ -245,15 +245,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:64:12-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:62:12-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 64,
-          "endLine": 64,
+          "line": 62,
+          "endLine": 62,
           "column": 12,
           "endColumn": 30,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -261,15 +261,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:149:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:151:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 149,
-          "endLine": 149,
+          "line": 151,
+          "endLine": 151,
           "column": 51,
           "endColumn": 69,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -277,15 +277,15 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:155:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:157:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 155,
-          "endLine": 155,
+          "line": 157,
+          "endLine": 157,
           "column": 51,
           "endColumn": 72,
           "sourceFile": "src/components/pages/navbar.jsx"
@@ -293,17 +293,33 @@
       }
     },
     {
-      "id": "src/components/pages/navbar.jsx:169:47-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "id": "src/components/pages/navbar.jsx:189:51-to-src/components/common/RedirectIfAuthenticated.jsx",
+      "source": "src/components/AdminDashboard/dasboard.jsx",
+      "target": "src/components/common/RedirectIfAuthenticated.jsx",
+      "data": {
+        "viaRoute": "/login",
+        "trigger": {
+          "element": "navigate(\"/login\")",
+          "line": 189,
+          "endLine": 189,
+          "column": 51,
+          "endColumn": 69,
+          "sourceFile": "src/components/pages/navbar.jsx"
+        }
+      }
+    },
+    {
+      "id": "src/components/pages/navbar.jsx:195:51-to-src/components/common/RedirectIfAuthenticated.jsx",
       "source": "src/components/AdminDashboard/dasboard.jsx",
       "target": "src/components/common/RedirectIfAuthenticated.jsx",
       "data": {
         "viaRoute": "/register",
         "trigger": {
           "element": "navigate(\"/register\")",
-          "line": 169,
-          "endLine": 169,
-          "column": 47,
-          "endColumn": 68,
+          "line": 195,
+          "endLine": 195,
+          "column": 51,
+          "endColumn": 72,
           "sourceFile": "src/components/pages/navbar.jsx"
         }
       }

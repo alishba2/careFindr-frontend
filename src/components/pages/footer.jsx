@@ -33,10 +33,10 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h4 className="text-lg font-semibold mb-4">For Facilities</h4>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">Join Network</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Referral Dashboard</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Brand Visibility</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Training & Support</a></li>
+              <li><a href="/register" className="hover:text-white transition-colors">Join Network</a></li>
+              <li><a href="/register" className="hover:text-white transition-colors">Referral Dashboard</a></li>
+              <li><a href="/register" className="hover:text-white transition-colors">Brand Visibility</a></li>
+              <li><a href="/register" className="hover:text-white transition-colors">Training & Support</a></li>
             </ul>
           </div>
 

@@ -9,19 +9,13 @@ export const createBlog = async (blogData) => {
   try {
     console.log("Creating blog post with data:", blogData);
     
-    // Create FormData for file upload support
     const formData = new FormData();
-    
-    // Append all blog fields to FormData
-    Object.keys(blogData).forEach(key => {
+        Object.keys(blogData).forEach(key => {
       if (key === 'tags' && Array.isArray(blogData[key])) {
-        // Convert tags array to comma-separated string
         formData.append(key, blogData[key].join(','));
       } else if (key === 'seo' && typeof blogData[key] === 'object') {
-        // Stringify SEO object
         formData.append(key, JSON.stringify(blogData[key]));
       } else if (key === 'featuredImage' && blogData[key] instanceof File) {
-        // Handle file upload
         formData.append(key, blogData[key]);
       } else if (blogData[key] !== null && blogData[key] !== undefined) {
         formData.append(key, blogData[key]);

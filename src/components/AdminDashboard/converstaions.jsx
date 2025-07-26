@@ -1,6 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Send, Search, Filter, MoreVertical, Phone, Mail, Clock, User, MessageSquare, AlertCircle, CheckCircle2, Circle, Loader, RefreshCw } from 'lucide-react';
+import { 
+  Send, 
+  Search, 
+  Filter, 
+  MoreVertical, 
+  Phone, 
+  Mail, 
+  Clock, 
+  User, 
+  MessageSquare, 
+  AlertCircle, 
+  CheckCircle2, 
+  Circle, 
+  Loader, 
+  RefreshCw,
+  Paperclip,
+  X,
+  Eye,
+  File,
+  Image as ImageIcon,
+  FileText,
+  Upload
+} from 'lucide-react';
 import { useChat } from '../hook/chatContext';
 import { useAuth } from '../hook/auth';
 import { getAllFacilities } from '../../services/facility';
@@ -31,7 +53,10 @@ const AdminChatPage = () => {
     refreshChats,
     setError,
     setActiveChat,
-    setMessages
+    setMessages,
+    uploadingFiles,
+    validateFile,
+    getFileIcon
   } = useChat();
 
   const { role } = useAuth();
@@ -41,13 +66,26 @@ const AdminChatPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [showFileInput, setShowFileInput] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [facilities, setFacilities] = useState([]);
   const [allItems, setAllItems] = useState([]); // Combined chats and facilities
   const [hasAutoSelected, setHasAutoSelected] = useState(false); // Track if auto-selection happened
 
-  // Helper functions (defined before they're used)
+  // Helper functions
+  const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   const getCurrentTypingForChat = (chatId) => {
     return typingUsers.find(user => user.chatId === chatId);
   };
@@ -56,7 +94,11 @@ const AdminChatPage = () => {
     if (!chat.messages || chat.messages.length === 0) {
       return "No messages yet";
     }
-    return chat.messages[chat.messages.length - 1].message;
+    const lastMsg = chat.messages[chat.messages.length - 1];
+    if (lastMsg.messageType === 'file' || lastMsg.messageType === 'image') {
+      return `📎 ${lastMsg.fileName || 'File'}`;
+    }
+    return lastMsg.message;
   };
 
   const getLastMessageTime = (chat) => {
@@ -104,11 +146,125 @@ const AdminChatPage = () => {
     }
   };
 
+  // File handling functions
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const handleFileUpload = (file) => {
+    try {
+      validateFile(file);
+      setSelectedFile(file);
+      
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      }
+      
+      setShowFileInput(false);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  // Render file message
+  const renderFileMessage = (msg) => {
+    const isImage = msg.messageType === 'image' || (msg.fileType && msg.fileType.startsWith('image/'));
+    const fileName = msg.fileName || 'File';
+    const fileSize = msg.fileSize ? formatFileSize(msg.fileSize) : '';
+    const fileIcon = getFileIcon(msg.fileType || '');
+
+    if (isImage && msg.fileUrl) {
+      return (
+        <div className="max-w-xs">
+          <img 
+            src={msg.fileUrl} 
+            alt={fileName}
+            className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => window.open(msg.fileUrl, '_blank')}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
+          <div className="text-xs mt-1 opacity-75">
+            {fileName} {fileSize && `• ${fileSize}`}
+          </div>
+          {/* Fallback file display if image fails to load */}
+          <div className="hidden flex items-center space-x-3 p-3 bg-gray-50 rounded-lg max-w-xs">
+            <div className="text-2xl">{fileIcon}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-black truncate">{fileName}</div>
+              {fileSize && <div className="text-xs text-gray-500">{fileSize}</div>}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg max-w-xs">
+          <div className="text-2xl">{fileIcon}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-black truncate">{fileName}</div>
+            {fileSize && <div className="text-xs text-gray-500">{fileSize}</div>}
+          </div>
+          <div className="flex space-x-1">
+            {msg.fileUrl && (
+              <button 
+                onClick={() => window.open(msg.fileUrl, '_blank')}
+                className="p-1 hover:bg-gray-200 rounded"
+                title="View file"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+  };
+
   // Fetch facilities
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
-        const res = await getAllFacilities({ page: 1, limit: 100 }); // Get more facilities
+        const res = await getAllFacilities({ page: 1, limit: 100 });
         console.log(res, "response here");
         setFacilities(res.data?.facilities || res.facilities || []);
       } catch (err) {
@@ -123,12 +279,11 @@ const AdminChatPage = () => {
   useEffect(() => {
     const chatFacilityIds = new Set(chats.map(chat => chat.facilityId?._id || chat.facilityId).filter(Boolean));
     
-    // Facilities that don't have chats yet
     const facilitiesWithoutChats = facilities.filter(facility => 
       !chatFacilityIds.has(facility._id)
     ).map(facility => ({
       ...facility,
-      type: 'facility', // Mark as facility for identification
+      type: 'facility',
       facilityName: facility.name,
       facilityId: facility._id,
       messages: [],
@@ -136,13 +291,11 @@ const AdminChatPage = () => {
       priority: 'medium'
     }));
 
-    // Mark existing chats
     const existingChats = chats.map(chat => ({
       ...chat,
       type: 'chat'
     }));
 
-    // Combine and sort by last activity
     const combined = [...existingChats, ...facilitiesWithoutChats].sort((a, b) => {
       const timeA = a.type === 'chat' ? new Date(getLastMessageTime(a)) : new Date(a.createdAt || 0);
       const timeB = b.type === 'chat' ? new Date(getLastMessageTime(b)) : new Date(b.createdAt || 0);
@@ -157,14 +310,12 @@ const AdminChatPage = () => {
     const matchesSearch = item.facilityName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.messages?.some(msg => msg.message.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // For chats, apply status and priority filters
     if (item.type === 'chat') {
       const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter;
       return matchesSearch && matchesStatus && matchesPriority;
     }
     
-    // For facilities without chats, show them (they're "new" status by default)
     const matchesStatus = statusFilter === 'all' || statusFilter === 'new';
     return matchesSearch && matchesStatus;
   });
@@ -172,7 +323,6 @@ const AdminChatPage = () => {
   // Auto-select facility/chat based on URL parameter
   useEffect(() => {
     if (chatId && allItems.length > 0 && !hasAutoSelected) {
-      // First check if this is an existing chat ID
       const existingChat = allItems.find(item => 
         item.type === 'chat' && (item._id === chatId || item.facilityId?._id === chatId || item.facilityId === chatId)
       );
@@ -184,7 +334,6 @@ const AdminChatPage = () => {
         return;
       }
 
-      // If not found in existing chats, check if it's a facility ID
       const facility = allItems.find(item => 
         item.type === 'facility' && item._id === chatId
       );
@@ -196,7 +345,6 @@ const AdminChatPage = () => {
         return;
       }
 
-      // If still not found, try to find by facility ID in existing chats
       const chatByFacility = allItems.find(item => 
         item.type === 'chat' && 
         (item.facilityId?._id === chatId || item.facilityId === chatId)
@@ -218,11 +366,10 @@ const AdminChatPage = () => {
     setHasAutoSelected(false);
   }, [chatId]);
 
-  // Handle URL routing - load chat when chatId changes (legacy support)
+  // Handle URL routing - load chat when chatId changes
   useEffect(() => {
     if (chatId && allItems.length > 0 && !hasAutoSelected) {
       if (chatId.startsWith('new_')) {
-        // This is a new facility chat
         const facilityId = chatId.replace('new_', '');
         const facility = allItems.find(item => item.type === 'facility' && item._id === facilityId);
         if (facility) {
@@ -230,7 +377,6 @@ const AdminChatPage = () => {
           setHasAutoSelected(true);
         }
       } else {
-        // This is an existing chat
         const chat = allItems.find(item => item.type === 'chat' && item._id === chatId);
         if (chat) {
           handleSelectChatInternal(chat);
@@ -250,34 +396,32 @@ const AdminChatPage = () => {
     }
   }, [statusFilter, priorityFilter, role]);
 
-  // Debug effect to monitor socket connection and active chat
-  useEffect(() => {
-    console.log('Socket connected:', isConnected);
-    console.log('Active chat:', activeChat?._id);
-    console.log('Current messages count:', messages.length);
-  }, [isConnected, activeChat, messages.length]);
-
   // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   // Internal function to handle chat selection without URL navigation
   const handleSelectChatInternal = async (item) => {
     if (activeChat && String(activeChat._id) === String(item._id)) return;
 
     try {
-      // Leave previous chat room if exists
       if (activeChat) {
-        // Assuming you have a leaveChat method in chatService
-        // chatService.leaveChat(activeChat._id);
+        // Leave previous chat room if exists
       }
 
       if (item.type === 'facility') {
-        // This is a facility without a chat - create/fetch the chat
         const facilityId = item._id;
         
-        // Create a temporary chat object immediately for better UX
         const tempChat = {
           _id: `temp_${facilityId}`,
           facilityId: facilityId,
@@ -291,30 +435,24 @@ const AdminChatPage = () => {
         setActiveChat(tempChat);
         setMessages([]);
         
-        // Try to fetch existing chat, but don't fail if none exists
         try {
           const existingChat = await fetchChatByFacility(facilityId);
           if (existingChat) {
-            // If chat exists, update the URL to reflect the real chat ID
             navigate(`/admin-dashboard/conversations/${existingChat._id}`, { replace: true });
           }
         } catch (error) {
-          // If no chat exists, that's fine - we'll create one when sending the first message
           console.log("No existing chat found, will create new one when message is sent");
         }
       } else {
-        // This is an existing chat
         setActiveChat(item);
         setMessages(item.messages || []);
 
         if (item.facilityId?._id) {
-          // Fetch additional data if needed
           await fetchChatByFacility(item.facilityId._id);
         } else {
           selectChat(item);
         }
 
-        // Mark messages as read for admin
         markAsRead(item._id);
       }
     } catch (error) {
@@ -324,23 +462,28 @@ const AdminChatPage = () => {
 
   // Public function to handle chat selection with URL navigation
   const handleSelectChat = async (item) => {
-    // Navigate to the chat URL
     const chatId = item.type === 'facility' ? `new_${item._id}` : item._id;
     navigate(`/admin-dashboard/conversations/${chatId}`);
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() || sending) return;
+    if ((!message.trim() && !selectedFile) || sending) return;
 
     try {
       setSending(true);
-      await sendMessage({
+      
+      const messageData = {
         message: message.trim(),
-        messageType: 'text'
-      });
+        messageType: selectedFile ? (selectedFile.type.startsWith('image/') ? 'image' : 'file') : 'text'
+      };
+
+      if (selectedFile) {
+        messageData.file = selectedFile;
+      }
+
+      await sendMessage(messageData);
       setMessage('');
-      // No need to refresh all chats - the message will be updated via socket events
-      // or the sendMessage function will handle local state updates
+      clearSelectedFile();
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -372,7 +515,13 @@ const AdminChatPage = () => {
   };
 
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div 
+      className={`h-screen flex bg-gray-50 ${dragActive ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
+      onDragEnter={handleDrag}
+      onDragLeave={handleDrag}
+      onDragOver={handleDrag}
+      onDrop={handleDrop}
+    >
       {/* Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
@@ -608,33 +757,70 @@ const AdminChatPage = () => {
                   <p>No messages yet. Start the conversation!</p>
                 </div>
               ) : (
-                messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.senderType === 'Admin' ? 'justify-end' : 'justify-start'}`}
-                  >
+                messages.map((msg, index) => {
+                  const isAdmin = msg.senderType === 'Admin';
+                  const isFileMessage = msg.messageType === 'file' || msg.messageType === 'image';
+                  const isUploading = msg.isUploading;
+                  
+                  return (
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        msg.senderType === 'Admin'
-                          ? 'bg-primarysolid text-white'
-                          : 'bg-gray-200 text-gray-900'
-                      }`}
+                      key={index}
+                      className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}
                     >
-                      <p className="text-sm">{msg.message}</p>
-                      <div className={`text-xs mt-1 ${
-                        msg.senderType === 'Admin' ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {formatTime(msg.timestamp)}
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          isAdmin
+                            ? 'bg-primarysolid text-white'
+                            : 'bg-gray-200 text-gray-900'
+                        }`}
+                      >
+                        {/* Upload progress indicator */}
+                        {isUploading && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-xs">Uploading...</span>
+                          </div>
+                        )}
+                        
+                        {/* File content */}
+                        {isFileMessage ? (
+                          <div className="space-y-2">
+                            {renderFileMessage(msg)}
+                            {msg.message && msg.message !== msg.fileName && (
+                              <div className="text-sm">{msg.message}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm">{msg.message}</p>
+                        )}
+                        
+                        <div className={`text-xs mt-1 ${
+                          isAdmin ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {formatTime(msg.timestamp)}
+                          {isUploading && (
+                            <span className="ml-2">
+                              <Upload className="w-3 h-3 inline animate-pulse" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
               
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg">
-                    <div className="text-sm text-gray-600">Facility is typing...</div>
+                    <div className="text-sm text-gray-600 flex items-center space-x-2">
+                      <span>Facility is typing</span>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -644,7 +830,85 @@ const AdminChatPage = () => {
 
             {/* Message Input */}
             <div className="bg-white border-t border-gray-200 p-4">
+              {/* Error Display */}
+              {error && (
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* File preview */}
+              {selectedFile && (
+                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {previewUrl ? (
+                        <img src={previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-gray-500" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-sm font-medium text-black">{selectedFile.name}</div>
+                        <div className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={clearSelectedFile}
+                      className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                    >
+                      <X className="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-3">
+                {/* File Upload Button */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFileInput(!showFileInput)}
+                    className="p-2 text-gray-500 hover:text-primarysolid hover:bg-gray-100 rounded-full transition-all duration-200"
+                    title="Attach file"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+                  
+                  {/* File input dropdown */}
+                  {showFileInput && (
+                    <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg p-2 min-w-[200px] z-50">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx"
+                      />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg text-left"
+                      >
+                        <ImageIcon className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm">Upload Image</span>
+                      </button>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg text-left"
+                      >
+                        <File className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">Upload Document</span>
+                      </button>
+                      <div className="px-2 py-1">
+                        <div className="text-xs text-gray-500">
+                          Max 10MB • Images, PDFs, Documents
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <input
                   type="text"
                   value={message}
@@ -658,13 +922,13 @@ const AdminChatPage = () => {
                       handleSendMessage();
                     }
                   }}
-                  placeholder="Type your message..."
+                  placeholder={selectedFile ? "Add a message (optional)..." : "Type your message..."}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={sending}
                 />
                 <button
                   onClick={handleSendMessage}
-                  disabled={!message.trim() || sending}
+                  disabled={(!message.trim() && !selectedFile) || sending}
                   className="bg-primarysolid text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {sending ? (
@@ -674,6 +938,46 @@ const AdminChatPage = () => {
                   )}
                   Send
                 </button>
+              </div>
+
+              {/* Status indicators */}
+              <div className="flex items-center justify-between mt-3 text-xs">
+                <div className="flex items-center space-x-4 text-gray-500">
+                  <span className="flex items-center space-x-1">
+                    <span>Press</span>
+                    <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd>
+                    <span>to send</span>
+                  </span>
+                  {selectedFile && (
+                    <span className="flex items-center space-x-1 text-blue-600">
+                      <Paperclip className="w-3 h-3" />
+                      <span>File attached</span>
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  {Array.from(uploadingFiles).length > 0 && (
+                    <span className="text-blue-600 font-medium flex items-center space-x-1">
+                      <Upload className="w-3 h-3 animate-pulse" />
+                      <span>Uploading {Array.from(uploadingFiles).length} file{Array.from(uploadingFiles).length > 1 ? 's' : ''}...</span>
+                    </span>
+                  )}
+                  <span className="text-gray-400">
+                    {isConnected ? '🟢 Online' : '🔴 Offline'}
+                  </span>
+                </div>
+              </div>
+
+              {/* File Upload Tips */}
+              <div className="mt-2 text-xs text-gray-400 text-center">
+                <span>Drag & drop files here or click </span>
+                <button 
+                  onClick={() => setShowFileInput(!showFileInput)}
+                  className="text-blue-500 hover:text-blue-600 underline"
+                >
+                  attach
+                </button>
+                <span> • Supported: Images, PDFs, Documents (Max 10MB)</span>
               </div>
             </div>
           </>
@@ -687,6 +991,17 @@ const AdminChatPage = () => {
           </div>
         )}
       </div>
+
+      {/* Drag and drop overlay */}
+      {dragActive && (
+        <div className="fixed inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-xl shadow-lg text-center">
+            <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Drop your file here</h3>
+            <p className="text-gray-500">Release to upload</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

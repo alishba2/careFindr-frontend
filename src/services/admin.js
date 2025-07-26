@@ -62,12 +62,3 @@ export const deleteAdmin = async (id) => {
     }
 };
 
-// export const loginAdmin = async (credentials) => {
-//     try {
-//         const response = await axios.post(`${backendUrl}/api/admin/login`, credentials);
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error logging in:", error);
-//         throw error.response?.data || error;
-//     }
-// };
