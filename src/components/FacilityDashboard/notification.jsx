@@ -7,6 +7,9 @@ import {
   Badge,
   Tooltip,
   message,
+  Pagination,
+  Row,
+  Col,
 } from "antd";
 import { BellOutlined, CheckCircleTwoTone } from "@ant-design/icons";
 import axios from "axios";
@@ -86,38 +89,35 @@ const getBadgeColor = (action) => {
   }
 };
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Displays a list of notifications for a facility.
- *
- * The component fetches the notifications from the server and displays them
- * in a list. It also provides a button to mark all notifications as read.
- *
- * The notifications are fetched from the server and marked as read every time
- * the component is mounted. The component also listens for changes to the
- * notifications and updates the list accordingly.
- *
- * @returns {React.Component} A React component that displays a list of notifications.
- */
-/*******  ad980468-22c9-486f-9644-3c5d55993ab8  *******/
 const Notifications = () => {
   const { authData } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const facilityId = authData?._id;
 
   // 👇 Ref to track if silent read already done
   const hasMarkedSilently = useRef(false);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (page = 1, limit = 10) => {
     try {
+      setLoading(true);
       const res = await axios.get(
-        `${backendUrl}/api/notifications/facility/${facilityId}?page=1&limit=10`
+        `${backendUrl}/api/notifications/facility/${facilityId}?page=${page}&limit=${limit}`
       );
-      setNotifications(res.data.notifications || []);
+      
+      if (res.data) {
+        setNotifications(res.data.notifications || []);
+        setTotalCount(res.data.totalCount || 0);
+        setTotalPages(res.data.totalPages || 1);
+      }
     } catch (err) {
       setError("Failed to load notifications.");
+      console.error("Error fetching notifications:", err);
     } finally {
       setLoading(false);
     }
@@ -128,6 +128,11 @@ const Notifications = () => {
     try {
       await axios.put(`${backendUrl}/api/notifications/mark-all-read/${facilityId}`);
       hasMarkedSilently.current = true; // 👈 Marked so won't repeat
+      
+      // Update local state to reflect the change
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, isRead: true }))
+      );
     } catch (err) {
       console.error("Silent mark as read failed:", err);
     }
@@ -140,83 +145,186 @@ const Notifications = () => {
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, isRead: true }))
       );
+      hasMarkedSilently.current = true; // Update the ref as well
     } catch (err) {
       console.error("Error marking all as read:", err);
       message.error("Failed to mark notifications as read.");
     }
   };
 
+  // Handle page change
+  const handlePageChange = (page, pageSize) => {
+    setCurrentPage(page);
+    if (pageSize !== itemsPerPage) {
+      setItemsPerPage(pageSize);
+      setCurrentPage(1); // Reset to first page when changing page size
+    }
+    fetchNotifications(pageSize !== itemsPerPage ? 1 : page, pageSize);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (current, size) => {
+    setItemsPerPage(size);
+    setCurrentPage(1);
+    fetchNotifications(1, size);
+  };
+
   useEffect(() => {
     if (facilityId) {
-      fetchNotifications().then(() => {
-        markUnreadAsReadSilently(); // 👈 only after fetch
+      fetchNotifications(currentPage, itemsPerPage).then(() => {
+        // Only mark as read silently on first load (page 1)
+        if (currentPage === 1) {
+          markUnreadAsReadSilently();
+        }
       });
     }
   }, [facilityId]);
 
   return (
     <div className="p-6 bg-white rounded shadow-md">
-      <div className="flex justify-between items-center mb-4 ">
+      <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <BellOutlined style={{ fontSize: 24, color: "#0C7792" }} />
           <Title
             level={3}
-            style={{ margin: 0, fontSize: "1.25rem", "@media (max-width: 500px)": { fontSize: "1rem" } }}
+            style={{ 
+              margin: 0, 
+              fontSize: "1.25rem",
+              "@media (max-width: 500px)": { fontSize: "1rem" } 
+            }}
           >
             Notifications
           </Title>
         </div>
-        <Tooltip title="Mark all as read">
-          <Button
-            type="primary"
-            className="bg-primarysolid hover:bg-primarysolid hidden md:flex"
-            onClick={markAllAsRead}
-          >
-            Mark All as Read
-          </Button>
-        </Tooltip>
+        
+        <div className="flex items-center gap-3">
+          {/* Notification count info */}
+          {!loading && totalCount > 0 && (
+            <Text type="secondary" className="hidden sm:block">
+              {totalCount} total • Page {currentPage} of {totalPages}
+            </Text>
+          )}
+          
+          {/* Mark all as read button */}
+          <Tooltip title="Mark all as read">
+            <Button
+              type="primary"
+              className="bg-primarysolid hover:bg-primarysolid"
+              onClick={markAllAsRead}
+              disabled={notifications.every(n => n.isRead)}
+            >
+              <span className="hidden md:inline">Mark All as Read</span>
+              <span className="md:hidden">Mark All</span>
+            </Button>
+          </Tooltip>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center my-10">
-          <Spin size="large" />
+          <Spin size="large" tip="Loading notifications..." />
         </div>
       ) : error ? (
-        <Alert message={error} type="error" showIcon />
-      ) : notifications.length === 0 ? (
-        <Text>No notifications found.</Text>
-      ) : (
-        <List
-          itemLayout="horizontal"
-          dataSource={notifications}
-          renderItem={(item) => (
-            <List.Item
-              style={getNotificationStyle(item.action, item.isRead)}
-            >
-              <List.Item.Meta
-                avatar={
-                  !item.isRead ? (
-                    <Badge
-                      status="processing"
-                      color={getBadgeColor(item.action)}
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                      }}
-                    />
-                  ) : null
-                }
-                title={<Text>{getNotificationMessage(item.action)}</Text>}
-                description={
-                  <Text type="secondary">
-                    {new Date(item.createdAt).toLocaleString()}
-                  </Text>
-                }
-              />
-            </List.Item>
-          )}
+        <Alert 
+          message="Error" 
+          description={error} 
+          type="error" 
+          showIcon 
+          action={
+            <Button size="small" onClick={() => fetchNotifications(currentPage, itemsPerPage)}>
+              Retry
+            </Button>
+          }
         />
+      ) : notifications.length === 0 ? (
+        <div className="text-center py-8">
+          <BellOutlined style={{ fontSize: 48, color: "#d9d9d9", marginBottom: 16 }} />
+          <Text className="block text-gray-500">No notifications found.</Text>
+        </div>
+      ) : (
+        <>
+          <List
+            itemLayout="horizontal"
+            dataSource={notifications}
+            renderItem={(item) => (
+              <List.Item
+                style={getNotificationStyle(item.action, item.isRead)}
+                className="transition-all duration-200 hover:shadow-sm"
+              >
+                <List.Item.Meta
+                  avatar={
+                    !item.isRead ? (
+                      <Badge
+                        status="processing"
+                        color={getBadgeColor(item.action)}
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                        }}
+                      />
+                    ) : (
+                      <CheckCircleTwoTone 
+                        twoToneColor={getBadgeColor(item.action)}
+                        style={{ fontSize: 12, opacity: 0.6 }}
+                      />
+                    )
+                  }
+                  title={
+                    <Text strong={!item.isRead}>
+                      {getNotificationMessage(item.action)}
+                    </Text>
+                  }
+                  description={
+                    <Text type="secondary" className="text-sm">
+                      {new Date(item.createdAt).toLocaleString()}
+                    </Text>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+
+          {/* Pagination */}
+          {totalCount > 0 && (
+            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+              <Row justify="center" align="middle" className="flex-wrap gap-2">
+                {/* Results info - only show on larger screens */}
+                {/* <Col xs={0} sm={0} md={8} lg={6}>
+                  <Text type="secondary" className="text-sm">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}
+                  </Text>
+                </Col> */}
+
+                {/* Pagination controls */}
+                  <div className="flex justify-center md:justify-end">
+
+                       <Pagination
+                                                                align="center"
+                                                                current={currentPage}
+                                                                total={totalCount}
+                                                                pageSize={itemsPerPage}
+                                                                onChange={handlePageChange}
+                                                                onShowSizeChange={handlePageChange}
+                                                                showSizeChanger={false}
+                                                                showTotal={(total, range) =>
+                                                                    window.innerWidth >= 640 
+                                                                        ? `${range[0]}-${range[1]} of ${total}`
+                                                                        : `${range[0]}-${range[1]}` // Shorter text on mobile
+                                                                }
+                                                                pageSizeOptions={['5', '10', '20', '50']}
+                                                                size={window.innerWidth >= 640 ? "default" : "small"} // Smaller on mobile
+                                                                className="text-center"
+                                                                responsive={true}
+                                                                showLessItems={window.innerWidth < 480} // Show fewer page numbers on very small screens
+                                                                simple={window.innerWidth < 380} // Simple pagination on very small screens
+                                                            />
+               
+                  </div>
+              </Row>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
