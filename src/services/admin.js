@@ -31,12 +31,12 @@ export const getAdminById = async (id) => {
         throw error.response?.data || error;
     }
 }
+
 export const getCurrentAdmin = async () => {
     try {
         const response = await axios.get(`${backendUrl}/api/admin/me`);
         return response.data;
-    }
-    catch (error) {
+    } catch (error) {
         console.error("error fetching admin");
         throw error;
     }
@@ -52,6 +52,17 @@ export const updateAdmin = async (id, data) => {
     }
 };
 
+// ADD THIS NEW FUNCTION - Update current logged-in admin
+export const updateCurrentAdmin = async (data) => {
+    try {
+        const response = await axios.put(`${backendUrl}/api/admin/me`, data);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating current admin:", error);
+        throw error.response?.data || error;
+    }
+};
+
 export const deleteAdmin = async (id) => {
     try {
         const response = await axios.delete(`${backendUrl}/api/admin/${id}`);
@@ -61,4 +72,3 @@ export const deleteAdmin = async (id) => {
         throw error.response?.data || error;
     }
 };
-

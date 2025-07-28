@@ -48,7 +48,7 @@ import car from "../../components/asstes/car.png";
 import register from "../../components/asstes/register.png";
 import color from "../../components/asstes/color.png";
 import time from "../../components/asstes/time.png";
-
+import AdminSettings from "./settings";
 const { Sider, Content } = Layout;
 const { SubMenu } = Menu;
 
@@ -96,121 +96,121 @@ const AdminDashboard = () => {
     fetchDashboardStats();
   }, []);
 
- const fetchDashboardStats = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    const adminStatsResponse = await statsService.getAdminStats();
-    
-    console.log('Admin Stats Response:', adminStatsResponse);
-    
-    if (adminStatsResponse?.stats) {
-      const { stats } = adminStatsResponse;
-      
-      const facilityTypeStats = [
-        {
-          label: "Total Facilities",
-          count: stats.overview?.totalFacilities?.toLocaleString() || "0",
-          icon: "total",
-          delta: ` +${Math.floor(Math.random() * 5) + 1} this month`,
-          bg: "bg-[#E5FFD1]",
-        },
-        {
-          label: "Hospitals",
-          count: (stats.facilitiesByType?.Hospital || 0).toLocaleString(),
-          icon: "hospitalIcon",
-          delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
-          bg: "bg-[#FFD1E5]",
-        },
-        {
-          label: "Laboratories",
-          count: (stats.facilitiesByType?.Laboratory || 0).toLocaleString(),
-          icon: "laboratoryIcon",
-          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
-          bg: "bg-[#D1FFFB]",
-        },
-        {
-          label: "Specialist Clinic Center",
-          count: (stats.facilitiesByType?.SpecialistClinic || 0).toLocaleString(),
-          icon: "specialistIcon",
-          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
-          bg: "bg-[#FFE5D1]",
-        },
-        {
-          label: "Pharmacies",
-          count: (stats.facilitiesByType?.Pharmacy || 0).toLocaleString(),
-          icon: "pharmacyIcon",
-          delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
-          bg: "bg-[#D1E5FF]",
-        },
-        {
-          label: "Ambulance Services",
-          count: (stats.facilitiesByType?.Ambulance || 0).toLocaleString(),
-          icon: "ambulanceIcon",
-          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
-          bg: "bg-[#E2D1FF]",
-        },
-        {
-          label: "Insurance Providers",
-          count: (stats.facilitiesByType?.Insurance || 0).toLocaleString(),
-          icon: "insuranceIcon",
-          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
-          bg: "bg-[#FFD1E5]",
-        },
-        {
-          label: "Blood Banks",
-          count: (stats.facilitiesByType?.['Blood Bank'] || 0).toLocaleString(),
-          icon: "bloodBankIcon",
-          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
-          bg: "bg-[#FFE5D1]",
-        },
-        {
-          label: "Active Facilities",
-          count: (stats.overview?.activeFacilities || 0).toLocaleString(),
-          icon: "active",
-          delta: `Currently active`,
-          bg: "bg-[#E5FFD1]",
-        },
-        {
-          label: "Pending Facilities",
-          count: (stats.overview?.pendingFacilities || 0).toLocaleString(),
-          icon: "pending",
-          delta: `Awaiting verification`,
-          bg: "bg-[#FFF3CD]",
-        },
-        {
-          label: "Verified Facilities",
-          count: (stats.overview?.verifiedFacilities || 0).toLocaleString(),
-          icon: "verified",
-          delta: `Fully verified`,
-          bg: "bg-[#D4EDDA]",
-        },
-        {
-          label: "Deactivated Facilities",
-          count: (stats.overview?.deactivatedFacilities || 0).toLocaleString(),
-          icon: "deactivated",
-          delta: `Currently deactivated`,
-          bg: "bg-[#F8D7DA]",
-        }
-      ];
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-      const mappedStats = facilityTypeStats.map(stat => ({
-        ...stat,
-        icon: iconMap[stat.icon] || iconMap.total
-      }));
-      
-      setStatCards(mappedStats);
+      const adminStatsResponse = await statsService.getAdminStats();
+
+      console.log('Admin Stats Response:', adminStatsResponse);
+
+      if (adminStatsResponse?.stats) {
+        const { stats } = adminStatsResponse;
+
+        const facilityTypeStats = [
+          {
+            label: "Total Facilities",
+            count: stats.overview?.totalFacilities?.toLocaleString() || "0",
+            icon: "total",
+            delta: ` +${Math.floor(Math.random() * 5) + 1} this month`,
+            bg: "bg-[#E5FFD1]",
+          },
+          {
+            label: "Hospitals",
+            count: (stats.facilitiesByType?.Hospital || 0).toLocaleString(),
+            icon: "hospitalIcon",
+            delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
+            bg: "bg-[#FFD1E5]",
+          },
+          {
+            label: "Laboratories",
+            count: (stats.facilitiesByType?.Laboratory || 0).toLocaleString(),
+            icon: "laboratoryIcon",
+            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            bg: "bg-[#D1FFFB]",
+          },
+          {
+            label: "Specialist Clinic Center",
+            count: (stats.facilitiesByType?.SpecialistClinic || 0).toLocaleString(),
+            icon: "specialistIcon",
+            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            bg: "bg-[#FFE5D1]",
+          },
+          {
+            label: "Pharmacies",
+            count: (stats.facilitiesByType?.Pharmacy || 0).toLocaleString(),
+            icon: "pharmacyIcon",
+            delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
+            bg: "bg-[#D1E5FF]",
+          },
+          {
+            label: "Ambulance Services",
+            count: (stats.facilitiesByType?.Ambulance || 0).toLocaleString(),
+            icon: "ambulanceIcon",
+            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            bg: "bg-[#E2D1FF]",
+          },
+          {
+            label: "Insurance Providers",
+            count: (stats.facilitiesByType?.Insurance || 0).toLocaleString(),
+            icon: "insuranceIcon",
+            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            bg: "bg-[#FFD1E5]",
+          },
+          {
+            label: "Blood Banks",
+            count: (stats.facilitiesByType?.['Blood Bank'] || 0).toLocaleString(),
+            icon: "bloodBankIcon",
+            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            bg: "bg-[#FFE5D1]",
+          },
+          {
+            label: "Active Facilities",
+            count: (stats.overview?.activeFacilities || 0).toLocaleString(),
+            icon: "active",
+            delta: `Currently active`,
+            bg: "bg-[#E5FFD1]",
+          },
+          {
+            label: "Pending Facilities",
+            count: (stats.overview?.pendingFacilities || 0).toLocaleString(),
+            icon: "pending",
+            delta: `Awaiting verification`,
+            bg: "bg-[#FFF3CD]",
+          },
+          {
+            label: "Verified Facilities",
+            count: (stats.overview?.verifiedFacilities || 0).toLocaleString(),
+            icon: "verified",
+            delta: `Fully verified`,
+            bg: "bg-[#D4EDDA]",
+          },
+          {
+            label: "Deactivated Facilities",
+            count: (stats.overview?.deactivatedFacilities || 0).toLocaleString(),
+            icon: "deactivated",
+            delta: `Currently deactivated`,
+            bg: "bg-[#F8D7DA]",
+          }
+        ];
+
+        const mappedStats = facilityTypeStats.map(stat => ({
+          ...stat,
+          icon: iconMap[stat.icon] || iconMap.total
+        }));
+
+        setStatCards(mappedStats);
+      }
+
+    } catch (err) {
+      console.error('Error fetching dashboard stats:', err);
+      setError(`Failed to load dashboard statistics: ${err.message}`);
+      setStatCards(getDefaultStats());
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    console.error('Error fetching dashboard stats:', err);
-    setError(`Failed to load dashboard statistics: ${err.message}`);
-    setStatCards(getDefaultStats());
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const getDefaultStats = () => [
     {
@@ -324,6 +324,7 @@ const AdminDashboard = () => {
     if (key === "9") navigate("/admin-dashboard/notifications");
     if (key === "10") navigate("/admin-dashboard/blogs");
     if (key === "11") navigate("/admin-dashboard/analytics");
+    if (key === "13") navigate("/admin-dashboard/settings");
   };
 
   const formatDate = (dateString) => {
@@ -502,7 +503,7 @@ const AdminDashboard = () => {
                           <div
                             key={index}
                             className="bg-white rounded-xl shadow px-6 py-8 flex items-center justify-between w-full hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                        
+
                           >
                             <div className="flex-1">
                               <h3 className="font-inter font-medium text-sm lg:text-base leading-tight tracking-[0.5%] mb-2">
@@ -527,7 +528,7 @@ const AdminDashboard = () => {
 
                     <div className="bg-white rounded-xl shadow p-6">
                       <h3 className="text-2xl font-bold mb-4">Recent Activity</h3>
-                      <Notifications loc={"dashboard"}/>
+                      <Notifications loc={"dashboard"} />
                     </div>
                   </div>
                 }
@@ -560,6 +561,7 @@ const AdminDashboard = () => {
               <Route path="/blogs" element={<AddBlogPost />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/analytics" element={<AdminAnalytics />} />
+              <Route path="/settings" element={<AdminSettings />} />
             </Routes>
           </Content>
         </Layout>
