@@ -27,7 +27,7 @@ import Notifications from "./components/FacilityDashboard/notification";
 
 import Users from "./components/AdminDashboard/users";
 import Landing from "./components/pages/home";
-
+import BlogDetailPage from "./components/FacilityDashboard/blog-detail";
 
 import BlogPage from "./components/FacilityDashboard/blogs";
 
@@ -110,6 +110,7 @@ export const App = () => {
                 <AdminDashboard />
               }
             />
+            <Route path="/blog/:id" element={<BlogDetailPage />} />
 
             {/* Facility dashboard routes */}
             <Route

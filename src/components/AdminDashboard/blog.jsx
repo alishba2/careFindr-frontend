@@ -495,7 +495,7 @@ const BlogForm = ({ editingBlog, onSuccess, onCancel }) => {
                 src={
                   imageFile
                     ? formData.featuredImage // This will be the base64 data URL for new uploads
-                    : `${import.meta.env.VITE_APP_BASE_URL}/${formData.featuredImage}` // This for existing images from API
+                    : `${import.meta.env.VITE_APP_BASE_URL}${formData.featuredImage}` // This for existing images from API
                 }
                 alt="Featured"
                 className="w-40 h-24 object-cover rounded-md border shadow-sm"
@@ -503,7 +503,7 @@ const BlogForm = ({ editingBlog, onSuccess, onCancel }) => {
             </div>
           )}
           <p className="text-sm text-gray-500 mt-1">
-            Recommended size: 1200x630 pixels. Maximum file size: 2MB.
+            Recommended size: 1200x630 pixels. Maximum file size: 5MB.
           </p>
           {errors.featuredImage && <p className="text-red-500 text-sm mt-1">{errors.featuredImage}</p>}
         </div>
@@ -631,7 +631,7 @@ const BlogList = ({ blogs, onEdit, onRefresh, loading }) => {
         <div key={blog._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           {blog.featuredImage && (
             <img
-              src={`${import.meta.env.VITE_APP_BASE_URL}/${blog.featuredImage}`}
+              src={`${import.meta.env.VITE_APP_BASE_URL}${blog.featuredImage}`}
               alt={blog.title}
               className="w-full h-48 object-cover"
             />
@@ -806,6 +806,8 @@ const BlogManagement = () => {
     'Chronic Illness Management',
     'Digital Health Literacy',
     'Product Update',
+    "General"
+
   ];
 
   const tabs = [

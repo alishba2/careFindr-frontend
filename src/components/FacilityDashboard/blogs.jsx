@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Calendar, Clock, User, Search, ChevronRight } from "lucide-react";
+import { Calendar, Clock, User, Search, ChevronRight, Filter, X, RotateCcw } from "lucide-react";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 
 import { getPublishedBlogs } from "../../services/blogService";
 import Navbar from "../pages/navbar";
@@ -13,10 +14,27 @@ export default function BlogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalBlogs, setTotalBlogs] = useState(0);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [categories] = useState([
+    "All Categories",
+    "Health & Wellness",
+    "Women's Health", 
+    "Child & Family Health",
+    "Emergency Care Tips",
+    "Chronic Illness Management",
+    "Digital Health Literacy",
+    "Product Update",
+    "General"
+  ]);
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBlogs();
-  }, [currentPage]);
+  }, [currentPage, searchQuery, selectedCategory]);
 
   const fetchBlogs = async () => {
     try {
@@ -25,7 +43,9 @@ export default function BlogPage() {
       
       const params = {
         page: currentPage,
-        limit: 9
+        limit: 9,
+        search: searchQuery,
+        category: selectedCategory !== "All Categories" ? selectedCategory : undefined
       };
 
       const response = await getPublishedBlogs(params);
@@ -42,6 +62,22 @@ export default function BlogPage() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("All Categories");
+    setCurrentPage(1);
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -51,18 +87,24 @@ export default function BlogPage() {
     });
   };
 
+  const handleBlogClick = (blog) => {
+    navigate(`/blog/${blog._id}`);
+  };
+
   const BlogCard = ({ blog }) => (
-    <article className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+    <article 
+      className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+      onClick={() => handleBlogClick(blog)}
+    >
       <div className="relative overflow-hidden">
         <img
-          src={`${import.meta.env.VITE_APP_BASE_URL}/${blog.featuredImage}`}
+          src={`${import.meta.env.VITE_APP_BASE_URL}${blog.featuredImage}`}
           alt={blog.title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
             e.target.src = '/api/placeholder/600/400';
           }}
         />
-   
       </div>
       
       <div className="p-6">
@@ -70,10 +112,6 @@ export default function BlogPage() {
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
             <span>{formatDate(blog.publishedAt)}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {/* <Clock className="w-4 h-4" /> */}
-            {/* <span>{blog.readTime || 'Quick read'}</span> */}
           </div>
         </div>
         
@@ -85,7 +123,19 @@ export default function BlogPage() {
           {blog.excerpt || 'Click to read more...'}
         </p>
         
-       
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="text-primarysolid hover:text-primarysolid/80 p-0 h-auto font-medium"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleBlogClick(blog);
+            }}
+          >
+            Read More
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
         
         {blog.tags && blog.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
@@ -108,23 +158,101 @@ export default function BlogPage() {
       <Navbar />
       
       {/* Hero Section */}
-       <section className="bg-primarysolid text-white py-12">
+      <section className="bg-primarysolid text-white py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-             Your Guide to Smarter, Connected Healthcare
+              Your Guide to Smarter, Connected Healthcare
             </h1>
             <p className="text-base md:text-lg text-blue-100 max-w-2xl mx-auto">
-            From finding the right care to understanding your health—our blog delivers trusted tips, expert insights, and updates that help you make confident healthcare decisions with CareFindr
+              From finding the right care to understanding your health—our blog delivers trusted tips, expert insights, and updates that help you make confident healthcare decisions with CareFindr
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Search and Filter Section */}
+      <section className="py-8 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search blog posts..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primarysolid focus:border-transparent outline-none transition-all"
+              />
+            </div>
+
+            {/* Category Filter and Actions */}
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primarysolid focus:border-transparent outline-none bg-white min-w-[180px]"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+
+              {/* Clear Filters Button */}
+              {(searchQuery || selectedCategory !== "All Categories") && (
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="flex items-center gap-2 px-4 py-3"
+                >
+                  <Filter className="w-4 h-4" />
+                  Clear
+                </Button>
+              )}
+
+              {/* Refresh Button */}
+              <Button
+                variant="outline"
+                onClick={fetchBlogs}
+                className="p-3"
+                disabled={loading}
+              >
+                <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Filter Status */}
+          {(searchQuery || selectedCategory !== "All Categories") && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+              <span>Active filters:</span>
+              {searchQuery && (
+                <span className="bg-blue-100 text-primarysolid px-2 py-1 rounded-full text-xs">
+                  Search: "{searchQuery}"
+                </span>
+              )}
+              {selectedCategory !== "All Categories" && (
+                <span className="bg-blue-100 text-primarysolid px-2 py-1 rounded-full text-xs">
+                  Category: {selectedCategory}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Blog Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-   
+          {/* Results Counter */}
+          <div className="mb-8">
+            <p className="text-gray-600">
+              {loading ? 'Loading...' : `Showing ${blogs.length} of ${totalBlogs} articles`}
+            </p>
+          </div>
 
           {error ? (
             <div className="text-center py-20">
@@ -158,8 +286,27 @@ export default function BlogPage() {
               <div className="text-gray-400 mb-4">
                 <Search className="w-16 h-16 mx-auto" />
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">No articles found</h3>
-              <p className="text-gray-600">Check back later for new content</p>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                {searchQuery || selectedCategory !== "All Categories" 
+                  ? "No articles match your filters" 
+                  : "No articles found"
+                }
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {searchQuery || selectedCategory !== "All Categories"
+                  ? "Try adjusting your search or filter criteria"
+                  : "Check back later for new content"
+                }
+              </p>
+              {(searchQuery || selectedCategory !== "All Categories") && (
+                <Button 
+                  onClick={clearFilters}
+                  variant="outline"
+                  className="mt-4"
+                >
+                  Clear Filters
+                </Button>
+              )}
             </div>
           ) : (
             <>
@@ -212,7 +359,6 @@ export default function BlogPage() {
           )}
         </div>
       </section>
-
 
       <Footer />
     </div>

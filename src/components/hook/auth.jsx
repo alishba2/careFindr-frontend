@@ -7,7 +7,8 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [authData, setAuthData] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token, setToken] = useState(''); // For facilities
+  const [adminToken, setAdminToken] = useState(''); // For admins
   const [facilityType, setFacilityType] = useState(localStorage.getItem('facilityType') || 'Hospital');
   const [role, setRole] = useState(null);
   const [userType, setUserType] = useState(localStorage.getItem('userType') || null);
@@ -15,10 +16,31 @@ export const AuthProvider = ({ children }) => {
   const [hasLab, setHasLab] = useState(false);
   const [isAmbulance, setIsAmbulance] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [adminAccessType, setAdminAccessType] = useState(null); // Default to 'admin'
+  const [adminAccessType, setAdminAccessType] = useState(null);
 
   const updateIsAmbulance = (value) => {
     setIsAmbulance(value);
+  };
+
+  // Get the active token based on user type
+  const getActiveToken = () => {
+    const storedUserType = localStorage.getItem('userType');
+    if (storedUserType === 'admin') {
+      return adminToken || localStorage.getItem('adminToken') || '';
+    } else {
+      return token || localStorage.getItem('token') || '';
+    }
+  };
+
+  // Initialize tokens from localStorage
+  const initializeTokens = () => {
+    const facilityToken = localStorage.getItem('token') || '';
+    const adminTokenStored = localStorage.getItem('adminToken') || '';
+
+    setToken(facilityToken);
+    setAdminToken(adminTokenStored);
+
+    return { facilityToken, adminTokenStored };
   };
 
   // Decode JWT and set role
@@ -28,7 +50,7 @@ export const AuthProvider = ({ children }) => {
         const decoded = jwtDecode(jwtToken);
         console.log(decoded, "decoded role is here");
         setRole(decoded.role || null);
-        
+
         // Set user type based on token data
         if (decoded.role === 'admin' || decoded.role === 'super-admin') {
           setUserType('admin');
@@ -37,16 +59,20 @@ export const AuthProvider = ({ children }) => {
           setUserType('facility');
           localStorage.setItem('userType', 'facility');
         }
+
+        return decoded;
       } catch (err) {
         console.error('Error decoding token:', err);
         setRole(null);
         setUserType(null);
         localStorage.removeItem('userType');
+        return null;
       }
     } else {
       setRole(null);
       setUserType(null);
       localStorage.removeItem('userType');
+      return null;
     }
   };
 
@@ -54,9 +80,9 @@ export const AuthProvider = ({ children }) => {
   const fetchCurrentAdmin = async () => {
     try {
       const res = await getCurrentAdmin();
-      console.log(res, "respons ere");
+      console.log(res, "admin response here");
       if (res && res.admin) {
-        setAdminAccessType(res?.admin?.accessType)
+        setAdminAccessType(res?.admin?.accessType);
         setAuthData(res.admin);
         setRole(res.admin.role);
       }
@@ -77,14 +103,14 @@ export const AuthProvider = ({ children }) => {
         setAuthData(res.facility);
         setFacilityType(res.facility.type);
         localStorage.setItem('facilityType', res.facility.type);
-        
+
         // Set facility-specific states
         setIsPharmacy(res.facility.type === 'Pharmacy');
         setHasLab(res.facility.hasLab || false);
         setIsAmbulance(res.facility.type === 'Ambulance');
       }
     } catch (err) {
-      return;
+      console.error('Failed to fetch facility data:', err);
       // If facility fetch fails, might need to logout
       if (err.status === 401 || err.status === 403) {
         logout();
@@ -94,22 +120,44 @@ export const AuthProvider = ({ children }) => {
 
   // Main function to fetch auth data based on user type
   const fetchAuthData = async () => {
-    const storedToken = localStorage.getItem('token');
+    const { facilityToken, adminTokenStored } = initializeTokens();
     const storedUserType = localStorage.getItem('userType');
-    
-    if (!storedToken) {
+
+    // Determine which token to use
+    let activeToken = '';
+    if (storedUserType === 'admin' && adminTokenStored) {
+      activeToken = adminTokenStored;
+    } else if (storedUserType === 'facility' && facilityToken) {
+      activeToken = facilityToken;
+    } else if (adminTokenStored) {
+      // Fallback: if we have admin token, decode it to check
+      const decoded = decodeAndSetRole(adminTokenStored);
+      if (decoded && (decoded.role === 'admin' || decoded.role === 'super-admin')) {
+        activeToken = adminTokenStored;
+      }
+    } else if (facilityToken) {
+      // Fallback: if we have facility token
+      activeToken = facilityToken;
+    }
+
+    if (!activeToken) {
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      
+
       // Decode token first to determine user type
-      decodeAndSetRole(storedToken);
-      
+      const decoded = decodeAndSetRole(activeToken);
+
+      if (!decoded) {
+        setLoading(false);
+        return;
+      }
+
       // Fetch data based on user type
-      if (storedUserType === 'admin' || role === 'admin' || role === 'super-admin') {
+      if (decoded.role === 'admin' || decoded.role === 'super-admin') {
         await fetchCurrentAdmin();
       } else {
         await fetchFacilityData();
@@ -119,6 +167,7 @@ export const AuthProvider = ({ children }) => {
       // Clear invalid data
       setAuthData(null);
       setToken('');
+      setAdminToken('');
       setRole(null);
       setUserType(null);
     } finally {
@@ -128,44 +177,53 @@ export const AuthProvider = ({ children }) => {
 
   // Watch for userType changes to fetch appropriate data
   useEffect(() => {
-    if (userType === 'admin' && token) {
+    if (userType === 'admin' && adminToken) {
       fetchCurrentAdmin();
     } else if (userType === 'facility' && token) {
       fetchFacilityData();
     }
-  }, [userType, token]);
+  }, [userType, token, adminToken]);
 
   // Initial data fetch on mount
   useEffect(() => {
     fetchAuthData();
   }, []);
 
-  // Watch token changes to decode role
-  useEffect(() => {
-    if (token) {
-      decodeAndSetRole(token);
-    }
-  }, [token]);
-
-  // Login function
+  // Login function with support for both token types
   const login = (data, loginToken, loginUserType) => {
-    // Set token and user type
-    const finalToken = loginToken || localStorage.getItem('token') || '';
-    const finalUserType = loginUserType || localStorage.getItem('userType') || 'facility';
-    
-    setToken(finalToken);
+    // Determine user type
+    let finalUserType = loginUserType;
+    if (!finalUserType) {
+      // Try to determine from data or token
+      if (data && (data.role === 'admin' || data.role === 'super-admin')) {
+        finalUserType = 'admin';
+      } else {
+        finalUserType = 'facility';
+      }
+    }
+
+    // Set appropriate token based on user type
+    if (finalUserType === 'admin') {
+      setAdminToken(loginToken);
+      setToken(''); // Clear facility token
+      localStorage.setItem('adminToken', loginToken);
+      localStorage.removeItem('token'); // Clear facility token from storage
+    } else {
+      setToken(loginToken);
+      setAdminToken(''); // Clear admin token
+      localStorage.setItem('token', loginToken);
+      localStorage.removeItem('adminToken'); // Clear admin token from storage
+    }
+
     setUserType(finalUserType);
     setAuthData(data);
-    
-    // Store in localStorage
-    if (finalToken) {
-      localStorage.setItem('token', finalToken);
-    }
+
+    // Store user type
     localStorage.setItem('userType', finalUserType);
-    
+
     // Decode and set role
-    decodeAndSetRole(finalToken);
-    
+    decodeAndSetRole(loginToken);
+
     // Set facility-specific data if it's a facility login
     if (finalUserType === 'facility' && data) {
       setFacilityType(data.type || 'Hospital');
@@ -176,10 +234,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin-specific login function
+  const loginAdmin = (adminData, adminTokenValue) => {
+    login(adminData, adminTokenValue, 'admin');
+  };
+
+  // Facility-specific login function
+  const loginFacility = (facilityData, facilityTokenValue) => {
+    login(facilityData, facilityTokenValue, 'facility');
+  };
+
   // Logout function
   const logout = () => {
     setAuthData(null);
     setToken('');
+    setAdminToken('');
     setFacilityType('Hospital');
     setRole(null);
     setUserType(null);
@@ -187,9 +256,11 @@ export const AuthProvider = ({ children }) => {
     setHasLab(false);
     setIsAmbulance(false);
     setLoading(false);
-    
+    setAdminAccessType(null);
+
     // Clear localStorage
     localStorage.removeItem('token');
+    localStorage.removeItem('adminToken');
     localStorage.removeItem('facilityType');
     localStorage.removeItem('userType');
   };
@@ -204,7 +275,8 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is authenticated
   const isAuthenticated = () => {
-    return !!(token && authData);
+    const activeToken = getActiveToken();
+    return !!(activeToken && authData);
   };
 
   // Check if user is admin
@@ -217,38 +289,48 @@ export const AuthProvider = ({ children }) => {
     return userType === 'facility' && !isAdmin();
   };
 
+  // Get current auth token (useful for API calls)
+  const getCurrentToken = () => {
+    return getActiveToken();
+  };
+
   const contextValue = {
     // Auth state
     authData,
-    token,
+    token, // Facility token
+    adminToken, // Admin token
     role,
     userType,
     loading,
-    
+
     // Facility-specific state
     facilityType,
     isPharmacy,
     hasLab,
     isAmbulance,
     adminAccessType,
-    
+
     // Actions
     login,
+    loginAdmin, // Specific admin login
+    loginFacility, // Specific facility login
     logout,
     fetchAuthData,
     updateAuthData,
     updateIsAmbulance,
-    
+
     // Setters (if needed)
     setAuthData,
     setFacilityType,
     setIsPharmacy,
     setHasLab,
-    
+
     // Utility functions
     isAuthenticated,
     isAdmin,
     isFacility,
+    getCurrentToken,
+    getActiveToken,
   };
 
   return (

@@ -1,4 +1,5 @@
 import { Button } from "../ui/button";
+import { useState } from "react";
 import { Card, CardContent } from "../ui/card";
 import Navbar from "./navbar";
 import Footer from "./footer";
@@ -19,9 +20,11 @@ import {
     Pill,
     Droplets,
     Sparkles,
-    User, 
-    Building2, 
+    User,
+    Building2,
 } from "lucide-react";
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
 import { useNavigate } from "react-router-dom";
 import HealthBg from "../../assets/Health.jpg"
 export default function Landing() {
@@ -31,7 +34,39 @@ export default function Landing() {
     const scrollToSection = (sectionId) => {
         const element = document.getElementById(sectionId);
         element?.scrollIntoView({ behavior: "smooth" });
+       
+
+    }; 
+     const [openIndex, setOpenIndex] = useState(null);
+    const toggleFAQ = (index) => {
+        setOpenIndex(openIndex === index ? null : index);
     };
+    const faqs = [
+        {
+            question: "How do I verify my healthcare facility on the platform?",
+            answer: "Healthcare facility verification involves submitting required documentation including licenses, certifications, and facility information. Our verification team reviews all submissions within 48 hours."
+        },
+        {
+            question: "Is patient data secure on CareFindr?",
+            answer: "Yes, we use enterprise-grade encryption and comply with international healthcare data protection standards. All patient information is encrypted and access is strictly controlled."
+        },
+        {
+            question: "What are the costs for healthcare facilities to join?",
+            answer: "Basic registration is free for all healthcare facilities. We offer premium features through affordable subscription plans with no hidden fees."
+        },
+        {
+            question: "How quickly can I receive referrals after joining?",
+            answer: "Once verified, healthcare facilities typically receive their first referrals within 24-48 hours. Our platform actively matches patients with appropriate healthcare providers."
+        },
+        {
+            question: "Can patients choose from different types of facilities?",
+            answer: "Absolutely. Patients can browse verified healthcare facilities, view specializations, and choose healthcare providers that best meet their needs and preferences."
+        },
+        {
+            question: "How does the AI-powered matching work?",
+            answer: "Our AI-powered matching system analyzes patient needs, medical conditions, location preferences, and healthcare facility capabilities to provide the most suitable matches. The system considers factors like specialty expertise, availability, distance, and patient preferences to ensure optimal care coordination."
+        }
+    ];
 
     return (
         <div className="min-h-screen bg-white">
@@ -77,7 +112,7 @@ export default function Landing() {
                             <div className="mt-8 flex items-center space-x-6 text-sm text-gray-500">
                                 <div className="flex items-center">
                                     <CheckCircle className="w-4 h-4 text-success mr-2 text-[#10B77F]" />
-                                    Verified Hospitals
+                                   verified Healthcare Facilities
                                 </div>
                                 <div className="flex items-center">
                                     <Shield className="w-4 h-4 text-success mr-2 text-[#10B77F]" />
@@ -113,7 +148,7 @@ export default function Landing() {
                 </div>
             </section>
 
-            <section id="features"  className="py-20 bg-white">
+            <section id="features" className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -412,7 +447,7 @@ export default function Landing() {
 
                                     </div>
                                 </div>
-                                 <div className="flex items-start space-x-4">
+                                <div className="flex items-start space-x-4">
                                     <div className="flex-shrink-0">
                                         <CheckCircle className="w-6 h-6  text-gray-900 mt-1" />
                                     </div>
@@ -431,111 +466,111 @@ export default function Landing() {
                 </div>
             </section>
             {/* Benefits Section */}
-         <section id="benefits" className="py-20 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                        Built for Everyone in Healthcare
-                    </h2>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Tailored solutions for patients, facilities, and healthcare organizations
-                    </p>
-                </div>
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* For Patients */}
-                    <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
-                        <CardContent className="p-8">
-                            <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
-                                <User className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                                For Patients
-                            </h3>
-                            <ul className="space-y-4 text-gray-600">
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Safe, verified healthcare providers</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Transparent pricing and treatment options</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Choose facilities by specialization</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Real-time referral tracking</span>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+            <section id="benefits" className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                            Built for Everyone in Healthcare
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Tailored solutions for patients, facilities, and healthcare organizations
+                        </p>
+                    </div>
+                    <div className="grid lg:grid-cols-3 gap-8">
+                        {/* For Patients */}
+                        <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
+                            <CardContent className="p-8">
+                                <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <User className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                                    For Patients
+                                </h3>
+                                <ul className="space-y-4 text-gray-600">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Safe, verified healthcare providers</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Transparent pricing and treatment options</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Choose facilities by specialization</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Real-time referral tracking</span>
+                                    </li>
+                                </ul>
+                            </CardContent>
+                        </Card>
 
-                    {/* For Healthcare Facilities */}
-                    <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
-                        <CardContent className="p-8">
-                            <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-6">
-                                <Building2 className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                                For Healthcare Facilities
-                            </h3>
-                            <div className="text-sm text-gray-500 mb-4">
-                                Hospitals, Labs, Pharmacies
-                            </div>
-                            <ul className="space-y-4 text-gray-600">
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Increased patient visibility and traffic</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Accurate, pre-screened referrals</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Seamless case management tools</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Access to professional care network</span>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+                        {/* For Healthcare Facilities */}
+                        <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
+                            <CardContent className="p-8">
+                                <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <Building2 className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                                    For Healthcare Facilities
+                                </h3>
+                                <div className="text-sm text-gray-500 mb-4">
+                                    Hospitals, Labs, Pharmacies
+                                </div>
+                                <ul className="space-y-4 text-gray-600">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Increased patient visibility and traffic</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Accurate, pre-screened referrals</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Seamless case management tools</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Access to professional care network</span>
+                                    </li>
+                                </ul>
+                            </CardContent>
+                        </Card>
 
-                    {/* For Organizations */}
-                    <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
-                        <CardContent className="p-8">
-                            <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-6">
-                                <Users className="w-8 h-8 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                                For Organizations
-                            </h3>
-                            <div className="text-sm text-gray-500 mb-4">
-                                HMOs, NGOs, & Employers
-                            </div>
-                            <ul className="space-y-4 text-gray-600">
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Centralized data tracking</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Fraud detection and claim integrity</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                    <span>Outcome monitoring and cost controls</span>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+                        {/* For Organizations */}
+                        <Card className="bg-white hover:shadow-lg transition-shadow border-2 ">
+                            <CardContent className="p-8">
+                                <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <Users className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                                    For Organizations
+                                </h3>
+                                <div className="text-sm text-gray-500 mb-4">
+                                    HMOs, NGOs, & Employers
+                                </div>
+                                <ul className="space-y-4 text-gray-600">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Centralized data tracking</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Fraud detection and claim integrity</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
+                                        <span>Outcome monitoring and cost controls</span>
+                                    </li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
             {/* Trusted Hospitals Section */}
             <section id="hospitals" className="py-20 bg-white">
@@ -595,7 +630,7 @@ export default function Landing() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="text-center">
                                     <div className="text-3xl font-bold text-primarysolid">500+</div>
-                                    <div className="text-sm text-gray-600">Verified Hospitals</div>
+                                    <div className="text-sm text-gray-600">Verified Healthcare Facilities</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="text-3xl font-bold text-[#10B77F]">10K+</div>
@@ -619,44 +654,33 @@ export default function Landing() {
                         </p>
                     </div>
 
-                    <div className="space-y-6">
-                        {[
-                            {
-                                question: "How do I verify my hospital on the platform?",
-                                answer:
-                                    "Hospital verification involves submitting required documentation including licenses, certifications, and facility information. Our verification team reviews all submissions within 48 hours.",
-                            },
-                            {
-                                question: "Is patient data secure on CareFindr?",
-                                answer:
-                                    "Yes, we use enterprise-grade encryption and comply with international healthcare data protection standards. All patient information is encrypted and access is strictly controlled.",
-                            },
-                            {
-                                question: "What are the costs for hospitals to join?",
-                                answer:
-                                    "Basic registration is free for all hospitals. We offer premium features through affordable subscription plans with no hidden fees.",
-                            },
-                            {
-                                question:
-                                    "How quickly can I receive referrals after joining?",
-                                answer:
-                                    "Once verified, hospitals typically receive their first referrals within 24-48 hours. Our platform actively matches patients with appropriate healthcare providers.",
-                            },
-                            {
-                                question:
-                                    "Can patients choose specific hospitals for their care?",
-                                answer:
-                                    "Absolutely. Patients can browse verified hospitals, view specializations, and choose healthcare providers that best meet their needs and preferences.",
-                            },
-                        ].map((faq, index) => (
-                            <Card key={index} className="bg-white">
-                                <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    <div className="space-y-4">
+                        {faqs.map((faq, index) => (
+                            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <button
+                                    className="w-full px-6 py-5 text-left flex justify-between items-center hover:bg-gray-50 transition-colors duration-200"
+                                    onClick={() => toggleFAQ(index)}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-900 pr-4">
                                         {faq.question}
                                     </h3>
-                                    <p className="text-gray-600">{faq.answer}</p>
-                                </CardContent>
-                            </Card>
+                                    {openIndex === index ? (
+                                        <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                    ) : (
+                                        <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                    )}
+                                </button>
+
+                                {openIndex === index && (
+                                    <div className="px-6 pb-6">
+                                        <div className="pt-2 border-t border-gray-100">
+                                            <p className="text-gray-600 leading-relaxed">
+                                                {faq.answer}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
