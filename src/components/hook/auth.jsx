@@ -88,9 +88,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
-      // If admin fetch fails, might need to logout
+      // If admin fetch fails, might need to logout admin only
       if (error.status === 401 || error.status === 403) {
-        logout();
+        logoutAdmin();
       }
     }
   };
@@ -111,9 +111,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Failed to fetch facility data:', err);
-      // If facility fetch fails, might need to logout
+      // If facility fetch fails, might need to logout facility only
       if (err.status === 401 || err.status === 403) {
-        logout();
+        logoutFacility();
       }
     }
   };
@@ -164,14 +164,35 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error fetching auth data:', error);
-      // Clear invalid data
-      setAuthData(null);
-      setToken('');
-      setAdminToken('');
-      setRole(null);
-      setUserType(null);
+      // Clear invalid data for current user type only
+      if (userType === 'admin') {
+        logoutAdmin();
+      } else {
+        logoutFacility();
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Switch between user types without logging out
+  const switchUserType = (targetUserType) => {
+    if (targetUserType === 'admin') {
+      const adminTokenStored = localStorage.getItem('adminToken');
+      if (adminTokenStored) {
+        setUserType('admin');
+        localStorage.setItem('userType', 'admin');
+        decodeAndSetRole(adminTokenStored);
+        fetchCurrentAdmin();
+      }
+    } else if (targetUserType === 'facility') {
+      const facilityTokenStored = localStorage.getItem('token');
+      if (facilityTokenStored) {
+        setUserType('facility');
+        localStorage.setItem('userType', 'facility');
+        decodeAndSetRole(facilityTokenStored);
+        fetchFacilityData();
+      }
     }
   };
 
@@ -202,17 +223,15 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Set appropriate token based on user type
+    // Set appropriate token based on user type (keep both tokens)
     if (finalUserType === 'admin') {
       setAdminToken(loginToken);
-      setToken(''); // Clear facility token
       localStorage.setItem('adminToken', loginToken);
-      localStorage.removeItem('token'); // Clear facility token from storage
+      // Don't clear facility token - keep it for independent sessions
     } else {
       setToken(loginToken);
-      setAdminToken(''); // Clear admin token
       localStorage.setItem('token', loginToken);
-      localStorage.removeItem('adminToken'); // Clear admin token from storage
+      // Don't clear admin token - keep it for independent sessions
     }
 
     setUserType(finalUserType);
@@ -244,7 +263,65 @@ export const AuthProvider = ({ children }) => {
     login(facilityData, facilityTokenValue, 'facility');
   };
 
-  // Logout function
+  // Logout admin only
+  const logoutAdmin = () => {
+    // Clear admin-specific data
+    setAdminToken('');
+    setAdminAccessType(null);
+    localStorage.removeItem('adminToken');
+
+    // If currently viewing admin, try to switch to facility if available
+    if (userType === 'admin') {
+      const facilityTokenStored = localStorage.getItem('token');
+      if (facilityTokenStored) {
+        // Switch to facility view
+        setUserType('facility');
+        localStorage.setItem('userType', 'facility');
+        decodeAndSetRole(facilityTokenStored);
+        fetchFacilityData();
+      } else {
+        // No facility token available, clear everything
+        setAuthData(null);
+        setRole(null);
+        setUserType(null);
+        localStorage.removeItem('userType');
+      }
+    }
+    // If currently viewing facility, don't change anything
+  };
+
+  // Logout facility only
+  const logoutFacility = () => {
+    // Clear facility-specific data
+    setToken('');
+    setFacilityType('Hospital');
+    setIsPharmacy(false);
+    setHasLab(false);
+    setIsAmbulance(false);
+    localStorage.removeItem('token');
+    localStorage.removeItem('facilityType');
+
+    // If currently viewing facility, try to switch to admin if available
+    if (userType === 'facility') {
+      const adminTokenStored = localStorage.getItem('adminToken');
+      if (adminTokenStored) {
+        // Switch to admin view
+        setUserType('admin');
+        localStorage.setItem('userType', 'admin');
+        decodeAndSetRole(adminTokenStored);
+        fetchCurrentAdmin();
+      } else {
+        // No admin token available, clear everything
+        setAuthData(null);
+        setRole(null);
+        setUserType(null);
+        localStorage.removeItem('userType');
+      }
+    }
+    // If currently viewing admin, don't change anything
+  };
+
+  // Full logout (clears everything)
   const logout = () => {
     setAuthData(null);
     setToken('');
@@ -277,6 +354,16 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = () => {
     const activeToken = getActiveToken();
     return !!(activeToken && authData);
+  };
+
+  // Check if admin is logged in
+  const isAdminLoggedIn = () => {
+    return !!(adminToken || localStorage.getItem('adminToken'));
+  };
+
+  // Check if facility is logged in
+  const isFacilityLoggedIn = () => {
+    return !!(token || localStorage.getItem('token'));
   };
 
   // Check if user is admin
@@ -314,7 +401,10 @@ export const AuthProvider = ({ children }) => {
     login,
     loginAdmin, // Specific admin login
     loginFacility, // Specific facility login
-    logout,
+    logout, // Full logout
+    logoutAdmin, // Admin-only logout
+    logoutFacility, // Facility-only logout
+    switchUserType, // Switch between user types
     fetchAuthData,
     updateAuthData,
     updateIsAmbulance,
@@ -329,6 +419,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isFacility,
+    isAdminLoggedIn,
+    isFacilityLoggedIn,
     getCurrentToken,
     getActiveToken,
   };
