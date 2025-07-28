@@ -104,16 +104,16 @@ const Notifications = () => {
     fetchNotifications(1, size);
   };
 
-  // useEffect(() => {
-  //   if (facilityId) {
-  //     fetchNotifications(currentPage, itemsPerPage).then(() => {
-  //       // Only mark as read silently on first load (page 1)
-  //       if (currentPage === 1) {
-  //         markUnreadAsReadSilently();
-  //       }
-  //     });
-  //   }
-  // }, [facilityId]);
+  useEffect(() => {
+    if (facilityId) {
+      fetchNotifications(currentPage, itemsPerPage).then(() => {
+        // Only mark as read silently on first load (page 1)
+        // if (currentPage === 1) {
+        //   markUnreadAsReadSilently();
+        // }
+      });
+    }
+  }, [facilityId]);
 
   return (
     <div className="p-6 bg-white rounded shadow-md">
