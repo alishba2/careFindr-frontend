@@ -113,56 +113,56 @@ const AdminDashboard = () => {
           label: "Total Facilities",
           count: stats.overview?.totalFacilities?.toLocaleString() || "0",
           icon: "total",
-          delta: `📈 +${Math.floor(Math.random() * 5) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 5) + 1} this month`,
           bg: "bg-[#E5FFD1]",
         },
         {
           label: "Hospitals",
           count: (stats.facilitiesByType?.Hospital || 0).toLocaleString(),
           icon: "hospitalIcon",
-          delta: `📈 +${Math.floor(Math.random() * 3) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
           bg: "bg-[#FFD1E5]",
         },
         {
           label: "Laboratories",
           count: (stats.facilitiesByType?.Laboratory || 0).toLocaleString(),
           icon: "laboratoryIcon",
-          delta: `📈 +${Math.floor(Math.random() * 2) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
           bg: "bg-[#D1FFFB]",
         },
         {
           label: "Specialist Clinic Center",
           count: (stats.facilitiesByType?.SpecialistClinic || 0).toLocaleString(),
           icon: "specialistIcon",
-          delta: `📈 +${Math.floor(Math.random() * 2) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
           bg: "bg-[#FFE5D1]",
         },
         {
           label: "Pharmacies",
           count: (stats.facilitiesByType?.Pharmacy || 0).toLocaleString(),
           icon: "pharmacyIcon",
-          delta: `📈 +${Math.floor(Math.random() * 3) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
           bg: "bg-[#D1E5FF]",
         },
         {
           label: "Ambulance Services",
           count: (stats.facilitiesByType?.Ambulance || 0).toLocaleString(),
           icon: "ambulanceIcon",
-          delta: `📈 +${Math.floor(Math.random() * 2) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
           bg: "bg-[#E2D1FF]",
         },
         {
           label: "Insurance Providers",
           count: (stats.facilitiesByType?.Insurance || 0).toLocaleString(),
           icon: "insuranceIcon",
-          delta: `📈 +${Math.floor(Math.random() * 2) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
           bg: "bg-[#FFD1E5]",
         },
         {
           label: "Blood Banks",
           count: (stats.facilitiesByType?.['Blood Bank'] || 0).toLocaleString(),
           icon: "bloodBankIcon",
-          delta: `📈 +${Math.floor(Math.random() * 2) + 1} this month`,
+          delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
           bg: "bg-[#FFE5D1]",
         },
         {
@@ -502,33 +502,7 @@ const AdminDashboard = () => {
                           <div
                             key={index}
                             className="bg-white rounded-xl shadow px-6 py-8 flex items-center justify-between w-full hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                            onClick={() => {
-                              if (card.label.includes('Pending')) {
-                                navigate('/admin-dashboard/facilities?type=all&status=Pending');
-                              } else if (card.label.includes('Active')) {
-                                navigate('/admin-dashboard/facilities?type=all&status=Active');
-                              } else if (card.label.includes('Verified')) {
-                                navigate('/admin-dashboard/facilities?type=all&status=Verified');
-                              } else if (card.label.includes('Deactivated')) {
-                                navigate('/admin-dashboard/facilities?type=all&status=Deactivated');
-                              } else if (card.label === 'Hospitals') {
-                                navigate('/admin-dashboard/facilities?type=Hospital');
-                              } else if (card.label === 'Laboratories') {
-                                navigate('/admin-dashboard/facilities?type=Laboratory');
-                              } else if (card.label === 'Specialist Clinics') {
-                                navigate('/admin-dashboard/facilities?type=SpecialistClinic');
-                              } else if (card.label === 'Pharmacies') {
-                                navigate('/admin-dashboard/facilities?type=Pharmacy');
-                              } else if (card.label === 'Ambulance Services') {
-                                navigate('/admin-dashboard/facilities?type=Ambulance');
-                              } else if (card.label === 'Insurance Providers') {
-                                navigate('/admin-dashboard/facilities?type=Insurance');
-                              } else if (card.label === 'Blood Banks') {
-                                navigate('/admin-dashboard/facilities?type=Blood Bank');
-                              } else {
-                                navigate('/admin-dashboard/facilities');
-                              }
-                            }}
+                        
                           >
                             <div className="flex-1">
                               <h3 className="font-inter font-medium text-sm lg:text-base leading-tight tracking-[0.5%] mb-2">

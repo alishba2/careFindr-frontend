@@ -63,7 +63,7 @@ export const AdminLogin = () => {
 
             console.log(response.token, "admin token is here");
             // Store token in localStorage (or use context/auth provider)
-            localStorage.setItem("adminToken", response.token);
+            localStorage.setItem("token", response.token);
             localStorage.setItem("adminData", response.admin)
             localStorage.setItem("userType", "admin")
 
