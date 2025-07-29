@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Input, Table, Tag, Button, message, Select, Dropdown, Menu } from "antd";
-import { SearchOutlined, MoreOutlined, FilterOutlined } from "@ant-design/icons";
+import { Input, Table, Tag, Button, message, Select, DatePicker } from "antd";
+import { SearchOutlined, CalendarOutlined } from "@ant-design/icons";
 import { states } from "../enums/state";
 import { lgas } from "../enums/lgas";
 import {
@@ -10,8 +10,9 @@ import {
 import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import filter from "../../assets/FunnelSimple.png";
-const { Option } = Select;
 
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const columns = (onVerify, onRevise) => [
   {
@@ -59,22 +60,35 @@ const columns = (onVerify, onRevise) => [
     ),
   },
   {
-    title: "Document Status",
+    title: "Status",
     dataIndex: "status",
     key: "status",
-    render: (_, record) => {
+    render: (status) => {
+      const getStatusConfig = (status) => {
+        const statusLower = status?.toLowerCase();
+        switch (statusLower) {
+          case "verified":
+            return { color: "green", text: "Verified" };
+          case "active":
+            return { color: "blue", text: "Active" };
+          case "pending":
+            return { color: "orange", text: "Pending" };
+          case "deactivated":
+            return { color: "red", text: "Deactivated" };
+          case "deleted":
+            return { color: "default", text: "Deleted" };
+          case "rejected":
+            return { color: "red", text: "Rejected" };
+          default:
+            return { color: "default", text: status || "Unknown" };
+        }
+      };
+
+      const { color, text } = getStatusConfig(status);
+
       return (
-        <Tag
-          color={
-            record.status === "verified"
-              ? "green"
-              : record.status === "rejected"
-              ? "red"
-              : "blue"
-          }
-          className="text-gray-700"
-        >
-          {record.status}
+        <Tag color={color} className="text-gray-700">
+          {text}
         </Tag>
       );
     },
@@ -96,6 +110,7 @@ const AllFacilities = () => {
   const [filterState, setFilterState] = useState("");
   const [filterLga, setFilterLga] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [dateRange, setDateRange] = useState([]);
   const [showClear, setShowClear] = useState(false);
 
   const fetchFacilities = async (currentPage = page) => {
@@ -106,7 +121,6 @@ const AllFacilities = () => {
         ? await getFacilitiesByType({ type, page: currentPage, limit })
         : await getAllFacilities({ page: currentPage, limit });
 
-      console.log(response, "response is here");
 
       const formattedData = response.facilities.map((facility, index) => ({
         key: index + (currentPage - 1) * limit,
@@ -127,20 +141,19 @@ const AllFacilities = () => {
       setTotalPages(response.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch facilities", err);
-    
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset filters when type changes
   useEffect(() => {
     setFilterType(type || "all");
     setSearchText("");
     setFilterState("");
     setFilterLga("");
     setFilterStatus("");
-    setPage(1); // Reset to first page when type changes
+    setDateRange([]);
+    setPage(1); 
   }, [type]);
 
   // Fetch data when type or page changes
@@ -155,7 +168,8 @@ const AllFacilities = () => {
       (filterType && filterType !== "all") || 
       filterState || 
       filterLga || 
-      filterStatus;
+      filterStatus ||
+      (dateRange && dateRange.length === 2);
     
     setShowClear(hasActiveFilters);
 
@@ -189,11 +203,23 @@ const AllFacilities = () => {
 
     // Filter by status
     if (filterStatus) {
-      filtered = filtered.filter((item) => item.status === filterStatus);
+      filtered = filtered.filter((item) => 
+        item.status?.toLowerCase() === filterStatus.toLowerCase()
+      );
+    }
+
+    // Filter by date range
+    if (dateRange && dateRange.length === 2) {
+      const [startDate, endDate] = dateRange;
+      filtered = filtered.filter((item) => {
+        const itemDate = dayjs(item.createdAt);
+        return itemDate.isAfter(startDate.startOf('day')) && 
+               itemDate.isBefore(endDate.endOf('day'));
+      });
     }
 
     setFilteredData(filtered);
-  }, [data, searchText, filterType, filterState, filterLga, filterStatus, type]);
+  }, [data, searchText, filterType, filterState, filterLga, filterStatus, dateRange, type]);
 
   const handleVerify = async (id) => {
     try {
@@ -225,13 +251,44 @@ const AllFacilities = () => {
     setFilterState("");
     setFilterLga("");
     setFilterStatus("");
+    setDateRange([]);
   };
 
   // Options for filters
-  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance","SpecialistClinic", "Laboratory","Blood Bank"];
-  const statusOptions = ["Verified", "Pending", "Need Revision"];
+  const typeOptions = ["Hospital", "Pharmacy", "Ambulance", "Insurance", "SpecialistClinic", "Laboratory", "Blood Bank"];
+  const statusOptions = [
+    "Verified", 
+    "Pending", 
+    "Deactivated", 
+    "Deleted", 
+    "Rejected"
+  ];
   const stateOptions = states || [];
   const lgaOptions = Object.values(lgas).flat() || [];
+
+  // Date picker presets
+  const datePresets = [
+    {
+      label: 'Last 7 Days',
+      value: [dayjs().subtract(7, 'day'), dayjs()],
+    },
+    {
+      label: 'Last 30 Days',
+      value: [dayjs().subtract(30, 'day'), dayjs()],
+    },
+    {
+      label: 'Last 3 Months',
+      value: [dayjs().subtract(3, 'month'), dayjs()],
+    },
+    {
+      label: 'Last 6 Months',
+      value: [dayjs().subtract(6, 'month'), dayjs()],
+    },
+    {
+      label: 'This Year',
+      value: [dayjs().startOf('year'), dayjs()],
+    },
+  ];
 
   return (
     <div>
@@ -247,17 +304,29 @@ const AllFacilities = () => {
 
         {/* Filters */}
         <div className="mb-3">
-          <div className="flex flex-row lg:flex-row gap-4 items-start lg:items-center">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
-                placeholder="Search"
+                placeholder="Search facilities..."
                 className="h-11 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
             </div>
+
+              {/* Date Range Filter */}
+              <RangePicker
+                placeholder={['Start Date', 'End Date']}
+                value={dateRange}
+                onChange={(dates) => setDateRange(dates || [])}
+                presets={datePresets}
+                suffixIcon={<CalendarOutlined className="text-gray-400" />}
+                style={{ height: 44 }}
+                format="DD MMM YYYY"
+              />
+
 
             {/* Filter Controls */}
             <div className="flex flex-wrap gap-3">
@@ -269,7 +338,7 @@ const AllFacilities = () => {
                   value={filterType === "all" ? undefined : filterType}
                   onChange={(value) => setFilterType(value || "all")}
                   suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
-                  style={{ height: 40, backgroundColor: "transparent" }}
+                  style={{ height: 44, backgroundColor: "transparent" }}
                   dropdownClassName="ant-select-dropdown"
                 >
                   <Option value="">All Types</Option>
@@ -280,6 +349,7 @@ const AllFacilities = () => {
                   ))}
                 </Select>
               )}
+
 
               {/* State Filter */}
               <Select
@@ -332,6 +402,24 @@ const AllFacilities = () => {
             </div>
           </div>
         </div>
+
+        {/* Results Summary */}
+        {(searchText || filterType !== "all" || filterState || filterStatus || (dateRange && dateRange.length === 2)) && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">
+                {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} found
+              </span>
+              {searchText && <span> for "{searchText}"</span>}
+              {filterType && filterType !== "all" && <span> • Type: {filterType}</span>}
+              {filterState && <span> • State: {filterState}</span>}
+              {filterStatus && <span> • Status: {filterStatus}</span>}
+              {dateRange && dateRange.length === 2 && (
+                <span> • Date: {dateRange[0].format('DD MMM YYYY')} - {dateRange[1].format('DD MMM YYYY')}</span>
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">

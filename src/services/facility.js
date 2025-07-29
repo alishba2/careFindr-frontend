@@ -211,3 +211,14 @@ export const getProfileStatus = async () => {
         throw error;
     }
 };
+
+export const recoverFacility = async (facilityId) => {
+  try {
+
+    const response = await axios.patch(`${backendUrl}/api/facilities/recover/${facilityId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error recovering facility:', error);
+    throw error.response?.data || error;
+  }
+};

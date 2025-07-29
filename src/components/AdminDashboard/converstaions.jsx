@@ -21,7 +21,9 @@ import {
   File,
   Image as ImageIcon,
   FileText,
-  Upload
+  Upload,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { useChat } from '../hook/chatContext';
 import { useAuth } from '../hook/auth';
@@ -56,7 +58,8 @@ const AdminChatPage = () => {
     setMessages,
     uploadingFiles,
     validateFile,
-    getFileIcon
+    getFileIcon,
+    reconnect 
   } = useChat();
 
   const { role } = useAuth();
@@ -70,12 +73,75 @@ const AdminChatPage = () => {
   const [dragActive, setDragActive] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showFileInput, setShowFileInput] = useState(false);
+  const [connectionRetrying, setConnectionRetrying] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
   const [facilities, setFacilities] = useState([]);
-  const [allItems, setAllItems] = useState([]); // Combined chats and facilities
-  const [hasAutoSelected, setHasAutoSelected] = useState(false); // Track if auto-selection happened
+  const [allItems, setAllItems] = useState([]);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
+
+  // Connection retry logic
+  const handleConnectionRetry = async () => {
+    if (connectionRetrying) return;
+    
+    setConnectionRetrying(true);
+    try {
+      // Clear any existing timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      // Try to reconnect
+      if (reconnect && typeof reconnect === 'function') {
+        await reconnect();
+      } else {
+        // Fallback: refresh chats which might trigger reconnection
+        await refreshChats();
+      }
+      
+      // If still not connected after 3 seconds, stop showing loading
+      reconnectTimeoutRef.current = setTimeout(() => {
+        setConnectionRetrying(false);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Reconnection failed:', error);
+      setConnectionRetrying(false);
+    }
+  };
+
+  // Auto-retry connection when disconnected
+  useEffect(() => {
+    if (!isConnected && !connectionRetrying) {
+      // Automatically try to reconnect after 2 seconds
+      const autoRetryTimeout = setTimeout(() => {
+        handleConnectionRetry();
+      }, 2000);
+
+      return () => clearTimeout(autoRetryTimeout);
+    }
+  }, [isConnected, connectionRetrying]);
+
+  // Stop retrying when connected
+  useEffect(() => {
+    if (isConnected && connectionRetrying) {
+      setConnectionRetrying(false);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    }
+  }, [isConnected]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Helper functions
   const formatFileSize = (bytes) => {
@@ -529,7 +595,16 @@ const AdminChatPage = () => {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-semibold text-gray-900">Chat Support</h1>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              {/* Connection status - only show when connected or retrying */}
+              {isConnected ? (
+                <div className="w-2 h-2 rounded-full bg-green-400" title="Connected"></div>
+              ) : connectionRetrying ? (
+                <div className="flex items-center gap-1">
+                  <Loader className="w-3 h-3 text-blue-500 animate-spin" />
+                  <span className="text-xs text-blue-600">Connecting...</span>
+                </div>
+              ) : null}
+              
               <button
                 onClick={refreshChats}
                 disabled={loading}
@@ -613,6 +688,22 @@ const AdminChatPage = () => {
               </div>
             </div>
           )}
+
+          {/* Connection retry notification - only show when not connected and not retrying */}
+          {/* {!isConnected && !connectionRetrying && (
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <WifiOff className="w-4 h-4 text-orange-500" />
+                <span className="text-sm text-orange-700">Connection lost</span>
+                <button 
+                  onClick={handleConnectionRetry}
+                  className="ml-auto text-orange-600 hover:text-orange-800 text-sm font-medium"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )} */}
         </div>
 
         {/* Chat List */}
@@ -724,28 +815,30 @@ const AdminChatPage = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <select
-                    value={activeChat.status || 'open'}
-                    onChange={(e) => handleUpdateStatus(e.target.value, activeChat.priority)}
-                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="open">Open</option>
-                    <option value="closed">Closed</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
-                  
-                  <select
-                    value={activeChat.priority || 'medium'}
-                    onChange={(e) => handleUpdateStatus(activeChat.status, e.target.value)}
-                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
+                {activeChat.type !== 'new_chat' && (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={activeChat.status || 'open'}
+                      onChange={(e) => handleUpdateStatus(e.target.value, activeChat.priority)}
+                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="open">Open</option>
+                      <option value="closed">Closed</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                    
+                    <select
+                      value={activeChat.priority || 'medium'}
+                      onChange={(e) => handleUpdateStatus(activeChat.status, e.target.value)}
+                      className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -962,9 +1055,12 @@ const AdminChatPage = () => {
                       <span>Uploading {Array.from(uploadingFiles).length} file{Array.from(uploadingFiles).length > 1 ? 's' : ''}...</span>
                     </span>
                   )}
-                  <span className="text-gray-400">
-                    {isConnected ? '🟢 Online' : '🔴 Offline'}
-                  </span>
+                  {isConnected && (
+                    <span className="text-green-500 flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Online</span>
+                    </span>
+                  )}
                 </div>
               </div>
 

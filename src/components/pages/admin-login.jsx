@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { adminLogin } from "../../services/auth.js";
 import logo from "../../assets/logo.png";
-
+import { useAuth } from "../hook/auth.jsx";
 import {
     UserOutlined,
     LockOutlined,
@@ -45,6 +45,8 @@ export const AdminLogin = () => {
         password: "",
     };
 
+    const {setAuthData, setToken} = useAuth();
+
     // For navigation after successful login
     const navigate = useNavigate();
 
@@ -63,7 +65,11 @@ export const AdminLogin = () => {
 
             console.log(response.token, "admin token is here");
             // Store token in localStorage (or use context/auth provider)
+            setAuthData(response?.admin);
+           
+
             localStorage.setItem("token", response.token);
+            setToken(response.token);
             localStorage.setItem("adminData", response.admin)
             localStorage.setItem("userType", "admin")
 

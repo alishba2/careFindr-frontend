@@ -137,6 +137,7 @@ const Notifications = ({ loc }) => {
             
             // For dashboard mode, always get first 5
             const response = await getAllNotifications(isDashboard ? 1 : page, isDashboard ? 5 : limit);
+            console.log('Fetched Notifications:', response);
 
             if (response && response.notifications) {
                 setNotifications(response.notifications);
@@ -327,7 +328,7 @@ const Notifications = ({ loc }) => {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className={`font-medium ${notification.adminRead ? 'text-gray-800' : 'text-gray-800'} ${isDashboard ? 'text-sm' : ''}`}>
-                                                    {notification.facilityId?.name || 'Unknown Facility'}
+                                                    {notification?.facilityId?.name || 'Unknown Facility'}
                                                 </span>
                                                 <span className={`${notification.adminRead ? 'text-gray-800' : 'text-gray-700'} ${isDashboard ? 'text-sm' : ''}`}>
                                                     {formatAction(notification.action)}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Info, Upload, Check, Trash2, AlertTriangle, Edit, X, CheckCircle, Power, PowerOff, MessageCircle } from "lucide-react";
+import { Info, Upload, Check, Trash2, AlertTriangle, Edit, X, CheckCircle, Power, PowerOff, MessageCircle, RotateCcw } from "lucide-react";
 import Select from "react-select";
 import { Button } from "../../components/button";
 import { Card, CardContent } from "../../components/card";
@@ -9,13 +9,16 @@ import { Checkbox } from "../../components/checkbox";
 import { Label } from "../../components/label";
 import { Select as ShadSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/select";
 import { Textarea } from "../../components/textArea";
-import { 
-  getFacilityById, 
-  verifyFacility, 
-  deactivateFacility, 
-  reactivateFacility, 
-  deleteFacility 
+import {
+  getFacilityById,
+  verifyFacility,
+  deactivateFacility,
+  reactivateFacility,
+  deleteFacility,
+  recoverFacility // Add this import
 } from "../../services/facility";
+
+
 import { CoreClinicalSpecialities } from "../enums/medicalSpecialities";
 import { useAuth } from "../hook/auth";
 import { FacilityInformation } from "../FacilityDashboard/facilityInformation";
@@ -28,17 +31,17 @@ import {
 } from "antd";
 
 // Confirmation Modal Component
-const ConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title, 
-  message, 
-  confirmText = "Confirm", 
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = "Confirm",
   cancelText = "Cancel",
   type = "default", // default, danger, warning, success
   loading = false,
-  children 
+  children
 }) => {
   if (!isOpen) return null;
 
@@ -68,12 +71,12 @@ const ConfirmationModal = ({
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <div className="mb-6">
           <p className="text-gray-700 mb-4">{message}</p>
           {children}
         </div>
-        
+
         <div className="flex space-x-3 justify-end">
           <Button
             variant="outline"
@@ -102,13 +105,15 @@ const FacilityDetail = () => {
   const [facility, setFacility] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Modal states
   const [modals, setModals] = useState({
     verify: { open: false, notes: '' },
     deactivate: { open: false, reason: '' },
     reactivate: { open: false, notes: '' },
     delete: { open: false, hardDelete: false },
+    recover: { open: false },
+    permanentDelete: { open: false },
     chat: { open: false }
   });
 
@@ -132,6 +137,8 @@ const FacilityDetail = () => {
       deactivate: { open: false, reason: '' },
       reactivate: { open: false, notes: '' },
       delete: { open: false, hardDelete: false },
+      recover: { open: false },
+      permanentDelete: { open: false },
       chat: { open: false }
     });
   };
@@ -165,7 +172,7 @@ const FacilityDetail = () => {
       message.success('Facility verified successfully!');
     } catch (error) {
       console.error('Error verifying facility:', error);
-      // alert('Failed to verify facility. Please try again.');
+      message.error('Failed to verify facility. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -182,10 +189,10 @@ const FacilityDetail = () => {
       await deactivateFacility(id, modals.deactivate.reason || null);
       await refreshFacility();
       closeAllModals();
-       message.success('Facility deactivated successfully!');
+      message.success('Facility deactivated successfully!');
     } catch (error) {
       console.error('Error deactivating facility:', error);
-      // alert('Failed to deactivate facility. Please try again.');
+      message.error('Failed to deactivate facility. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -202,10 +209,10 @@ const FacilityDetail = () => {
       await reactivateFacility(id, modals.reactivate.notes || null);
       await refreshFacility();
       closeAllModals();
-       message.success('Facility reactivated successfully!');
+      message.success('Facility reactivated successfully!');
     } catch (error) {
       console.error('Error reactivating facility:', error);
-      // alert('Failed to reactivate facility. Please try again.');
+      message.error('Failed to reactivate facility. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -221,17 +228,57 @@ const FacilityDetail = () => {
     try {
       await deleteFacility(id, modals.delete.hardDelete);
       closeAllModals();
-      
+
       if (modals.delete.hardDelete) {
-         message.success('Facility permanently deleted!');
+        message.success('Facility permanently deleted!');
         navigate('/facilities'); // Navigate back to facilities list
       } else {
-         message.success('Facility soft deleted successfully!');
+        message.success('Facility soft deleted successfully!');
         await refreshFacility();
       }
     } catch (error) {
       console.error('Error deleting facility:', error);
-      // alert('Failed to delete facility. Please try again.');
+      message.error('Failed to delete facility. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Recover
+  const handleRecover = () => {
+    setModals(prev => ({ ...prev, recover: { open: true } }));
+  };
+
+  const confirmRecover = async () => {
+    setLoading(true);
+    try {
+      await recoverFacility(id);
+      await refreshFacility();
+      closeAllModals();
+      message.success('Facility recovered successfully!');
+    } catch (error) {
+      console.error('Error recovering facility:', error);
+      message.error('Failed to recover facility. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Permanent Delete
+  const handlePermanentDelete = () => {
+    setModals(prev => ({ ...prev, permanentDelete: { open: true } }));
+  };
+
+  const confirmPermanentDelete = async () => {
+    setLoading(true);
+    try {
+      await deleteFacility(id, true); // true for hard delete
+      closeAllModals();
+      message.success('Facility permanently deleted!');
+      navigate('/admin-dashboard/facilities'); // Navigate back to facilities list
+    } catch (error) {
+      console.error('Error permanently deleting facility:', error);
+      message.error('Failed to permanently delete facility. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -249,7 +296,41 @@ const FacilityDetail = () => {
     const status = facility.status?.toLowerCase();
     const buttons = [];
 
-    // Chat button - always show
+    // If facility is deleted, only show recover and permanent delete buttons
+    if (status === 'deleted') {
+      buttons.push(
+        <Button
+          key="recover"
+          variant="outline"
+          size="sm"
+          onClick={handleRecover}
+          className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+        >
+          <RotateCcw className="w-4 h-4" />
+          <span>Recover Facility</span>
+        </Button>
+      );
+
+      // Add permanent delete button for soft-deleted facilities
+      if (adminAccessType !== 'editor') {
+        buttons.push(
+          <Button
+            key="permanentDelete"
+            variant="outline"
+            size="sm"
+            onClick={handlePermanentDelete}
+            className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Delete Permanently</span>
+          </Button>
+        );
+      }
+
+      return buttons;
+    }
+
+    // Chat button - always show for non-deleted facilities
     buttons.push(
       <Button
         key="chat"
@@ -280,7 +361,7 @@ const FacilityDetail = () => {
     }
 
     // Deactivate/Reactivate button
-    if (status === 'deactivated'  && adminAccessType !== 'editor') {
+    if (status === 'deactivated' && adminAccessType !== 'editor') {
       buttons.push(
         <Button
           key="reactivate"
@@ -293,7 +374,7 @@ const FacilityDetail = () => {
           <span>Reactivate</span>
         </Button>
       );
-    } else if (status !== 'deleted') {
+    } else if (status !== 'deleted' && adminAccessType !== 'editor') {
       buttons.push(
         <Button
           key="deactivate"
@@ -309,7 +390,7 @@ const FacilityDetail = () => {
     }
 
     // Delete button - show for all except already deleted
-    if (status !== 'deleted') {
+    if (status !== 'deleted' && adminAccessType !== 'editor') {
       buttons.push(
         <Button
           key="delete"
@@ -348,15 +429,14 @@ const FacilityDetail = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                facility.status === 'Active' || facility.status === 'Verified'
-                  ? 'bg-green-100 text-green-800' 
-                  : facility.status === 'Deactivated'
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${facility.status === 'Active' || facility.status === 'Verified'
+                ? 'bg-green-100 text-green-800'
+                : facility.status === 'Deactivated'
                   ? 'bg-red-100 text-red-800'
                   : facility.status === 'Deleted'
-                  ? 'bg-gray-100 text-gray-800'
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+                    ? 'bg-gray-100 text-gray-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
                 {facility.status?.charAt(0).toUpperCase() + facility.status?.slice(1) || 'Pending'}
               </span>
             </div>
@@ -366,38 +446,67 @@ const FacilityDetail = () => {
 
       {/* Main Content */}
       <div className="mx-auto space-y-8">
-        {/* Facility Information Section */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Facility Information</h3>
-              <div className="w-12 h-0.5 bg-blue-500"></div>
-            </div>
-            <FacilityInfo facilityId={id} />
-          </CardContent>
-        </Card>
+        {/* Show different content based on facility status */}
+        {facility.status?.toLowerCase() === 'deleted' ? (
+          // Show deleted facility info
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-8 h-8 text-gray-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Facility Deleted</h3>
+                <p className="text-gray-600 mb-4">
+                  This facility has been soft deleted. You can recover it or permanently delete it using the buttons below.
+                </p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <p><strong>Facility Name:</strong> {facility.name}</p>
+                  <p><strong>Type:</strong> {facility.type}</p>
+                  <p><strong>Email:</strong> {facility.email}</p>
+                  {facility.deletedAt && (
+                    <p><strong>Deleted At:</strong> {new Date(facility.deletedAt).toLocaleString()}</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          // Show normal facility content
+          <>
+            {/* Facility Information Section */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Facility Information</h3>
+                  <div className="w-12 h-0.5 bg-blue-500"></div>
+                </div>
+                <FacilityInfo facilityId={id} />
+              </CardContent>
+            </Card>
 
-        {/* Services Section */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Services</h3>
-              <div className="w-12 h-0.5 bg-green-500"></div>
-            </div>
-            <FacilityServiceComponent facilityId={id} />
-          </CardContent>
-        </Card>
+            {/* Services Section */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Services</h3>
+                  <div className="w-12 h-0.5 bg-green-500"></div>
+                </div>
+                <FacilityServiceComponent facilityId={id} />
+              </CardContent>
+            </Card>
 
-        {/* Documents Section */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Documents</h3>
-              <div className="w-12 h-0.5 bg-orange-500"></div>
-            </div>
-            <FacilityDoc facilityId={id} />
-          </CardContent>
-        </Card>
+            {/* Documents Section */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Documents</h3>
+                  <div className="w-12 h-0.5 bg-orange-500"></div>
+                </div>
+                <FacilityDoc facilityId={id} />
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Sticky Footer */}
@@ -412,7 +521,7 @@ const FacilityDetail = () => {
       </div>
 
       {/* Confirmation Modals */}
-      
+
       {/* Verify Modal */}
       <ConfirmationModal
         isOpen={modals.verify.open}
@@ -423,9 +532,7 @@ const FacilityDetail = () => {
         confirmText="Verify Facility"
         type="success"
         loading={loading}
-      >
-       
-      </ConfirmationModal>
+      />
 
       {/* Deactivate Modal */}
       <ConfirmationModal
@@ -496,7 +603,7 @@ const FacilityDetail = () => {
               <strong>Warning:</strong> This action cannot be undone easily. Please choose carefully.
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Checkbox
               id="hardDelete"
@@ -510,12 +617,55 @@ const FacilityDetail = () => {
               Permanently delete (cannot be recovered)
             </Label>
           </div>
-          
+
           <p className="text-xs text-gray-600">
-            {modals.delete.hardDelete 
+            {modals.delete.hardDelete
               ? "The facility will be permanently removed from the database."
               : "The facility will be marked as deleted but can be recovered by an administrator."
             }
+          </p>
+        </div>
+      </ConfirmationModal>
+
+      {/* Recover Modal */}
+      <ConfirmationModal
+        isOpen={modals.recover.open}
+        onClose={closeAllModals}
+        onConfirm={confirmRecover}
+        title="Recover Facility"
+        message={`Are you sure you want to recover "${facility.name}"? This will restore the facility to active status.`}
+        confirmText="Recover Facility"
+        type="success"
+        loading={loading}
+      >
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-blue-800">
+            <strong>Note:</strong> The facility will be restored to "Active" status and will be accessible again.
+          </p>
+        </div>
+      </ConfirmationModal>
+
+      {/* Permanent Delete Modal */}
+      <ConfirmationModal
+        isOpen={modals.permanentDelete.open}
+        onClose={closeAllModals}
+        onConfirm={confirmPermanentDelete}
+        title="Permanently Delete Facility"
+        message={`Are you sure you want to permanently delete "${facility.name}"?`}
+        confirmText="Delete Permanently"
+        type="danger"
+        loading={loading}
+      >
+        <div className="space-y-4">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-800">
+              <strong>⚠️ CRITICAL WARNING:</strong> This action is irreversible and will permanently remove all facility data from the database.
+            </p>
+          </div>
+
+
+          <p className="text-xs text-red-600 font-medium">
+            Once deleted, this facility cannot be recovered by any means.
           </p>
         </div>
       </ConfirmationModal>

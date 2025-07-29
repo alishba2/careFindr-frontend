@@ -108,61 +108,68 @@ const AdminDashboard = () => {
       if (adminStatsResponse?.stats) {
         const { stats } = adminStatsResponse;
 
+        // Helper function to format monthly growth
+        const formatMonthlyGrowth = (count) => {
+          if (count === 0) return '0 this month';
+          if (count === 1) return '+1 this month';
+          return `+${count} this month`;
+        };
+
         const facilityTypeStats = [
           {
             label: "Total Facilities",
             count: stats.overview?.totalFacilities?.toLocaleString() || "0",
             icon: "total",
-            delta: ` +${Math.floor(Math.random() * 5) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.totalFacilities || 0),
             bg: "bg-[#E5FFD1]",
           },
           {
             label: "Hospitals",
             count: (stats.facilitiesByType?.Hospital || 0).toLocaleString(),
             icon: "hospitalIcon",
-            delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.Hospital || 0),
             bg: "bg-[#FFD1E5]",
           },
           {
             label: "Laboratories",
             count: (stats.facilitiesByType?.Laboratory || 0).toLocaleString(),
             icon: "laboratoryIcon",
-            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.Laboratory || 0),
             bg: "bg-[#D1FFFB]",
           },
           {
             label: "Specialist Clinic Center",
             count: (stats.facilitiesByType?.SpecialistClinic || 0).toLocaleString(),
             icon: "specialistIcon",
-            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.SpecialistClinic || 0),
             bg: "bg-[#FFE5D1]",
           },
           {
             label: "Pharmacies",
             count: (stats.facilitiesByType?.Pharmacy || 0).toLocaleString(),
             icon: "pharmacyIcon",
-            delta: ` +${Math.floor(Math.random() * 3) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.Pharmacy || 0),
             bg: "bg-[#D1E5FF]",
           },
           {
             label: "Ambulance Services",
             count: (stats.facilitiesByType?.Ambulance || 0).toLocaleString(),
             icon: "ambulanceIcon",
-            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.Ambulance || 0),
             bg: "bg-[#E2D1FF]",
           },
           {
             label: "Insurance Providers",
             count: (stats.facilitiesByType?.Insurance || 0).toLocaleString(),
             icon: "insuranceIcon",
-            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.Insurance || 0),
             bg: "bg-[#FFD1E5]",
           },
           {
             label: "Blood Banks",
             count: (stats.facilitiesByType?.['Blood Bank'] || 0).toLocaleString(),
             icon: "bloodBankIcon",
-            delta: ` +${Math.floor(Math.random() * 2) + 1} this month`,
+            delta: formatMonthlyGrowth(stats.monthlyGrowth?.byType?.['Blood Bank'] || 0),
             bg: "bg-[#FFE5D1]",
           },
           {
@@ -201,6 +208,9 @@ const AdminDashboard = () => {
         }));
 
         setStatCards(mappedStats);
+
+        // Log monthly growth data for debugging
+        console.log('Monthly Growth Data:', stats.monthlyGrowth);
       }
 
     } catch (err) {
@@ -212,6 +222,7 @@ const AdminDashboard = () => {
     }
   };
 
+ 
   const getDefaultStats = () => [
     {
       label: "Total Facilities",
@@ -477,17 +488,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    {error && (
-                      <Alert
-                        message="Error Loading Data"
-                        description={error}
-                        type="error"
-                        closable
-                        className="mb-6"
-                        onClose={() => setError(null)}
-                      />
-                    )}
-
+                 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-5 mb-6">
                       {loading ? (
                         Array.from({ length: 12 }).map((_, index) => (

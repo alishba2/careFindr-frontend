@@ -9,7 +9,7 @@ export const lgas = {
     'Madagali', 'Maiha', 'Mayo Belwa', 'Michika', 'Mubi North', 'Mubi South', 'Numan',
     'Shelleng', 'Song', 'Toungo', 'Yola North', 'Yola South'
   ],
-  AkwaIbom: [
+  'Akwa Ibom': [
     'Abak', 'Eastern Obolo', 'Eket', 'Esit Eket', 'Essien Udim', 'Etim Ekpo', 'Etinan',
     'Ibeno', 'Ibesikpo Asutan', 'Ibiono-Ibom', 'Ika', 'Ikono', 'Ikot Abasi', 'Ikot Ekpene',
     'Ini', 'Itu', 'Mbo', 'Mkpat-Enin', 'Nsit-Atai', 'Nsit-Ibom', 'Nsit-Ubium', 'Obot Akara',
@@ -40,7 +40,7 @@ export const lgas = {
     'Kukawa', 'Kwaya Kusar', 'Mafa', 'Magumeri', 'Maiduguri', 'Marte', 'Mobbar',
     'Monguno', 'Ngala', 'Nganzai', 'Shani'
   ],
-  CrossRiver: [
+  'Cross River': [
     'Abi', 'Akamkpa', 'Akpabuyo', 'Bakassi', 'Bekwarra', 'Biase', 'Boki',
     'Calabar Municipal', 'Calabar South', 'Etung', 'Ikom', 'Obanliku', 'Obubra',
     'Obudu', 'Odukpani', 'Ogoja', 'Yakurr', 'Yala'
@@ -123,8 +123,8 @@ export const lgas = {
   ],
   Lagos: [
     'Agege', 'Ajeromi-Ifelodun', 'Alimosho', 'Amuwo-Odofin', 'Apapa', 'Badagry', 'Epe',
-    'Eti-Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye', 'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island',
-    'Lagos Mainland', 'Mbatchushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'
+    'Eti Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye', 'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island',
+    'Lagos Mainland', 'Mushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'
   ],
   Nasarawa: [
     'Akwanga', 'Awe', 'Doma', 'Karu', 'Lafia', 'Keana', 'Obi', 'Kokona', 'Keffi',
@@ -174,7 +174,7 @@ export const lgas = {
   ],
   Sokoto: [
     'Binji', 'Bodinga', 'Dange Shuni', 'Gada', 'Sokoto South', 'Sokoto North',
-    'Gwadabawa', 'Wamakko', 'Tangaza', 'Bodinga', 'Sabon Birni', 'Isah', 'Rabah',
+    'Gwadabawa', 'Wamakko', 'Tangaza', 'Sabon Birni', 'Isah', 'Rabah',
     'Silame', 'Wurno', 'Goronyo', 'Illela', 'Gudu', 'Tureta', 'Tambuwal', 'Kware'
   ],
   Taraba: [
@@ -190,7 +190,8 @@ export const lgas = {
     'Anka', 'Bakuka', 'Birnin Magaji/Kiyaw', 'Bukkuyum', 'Bungudu', 'Tsafe', 'Gummi',
     'Gusau', 'Kaura-Namoda', 'Maradun', 'Maru', 'Shinkafi', 'Talata-Mafara', 'Zurmi'
   ],
-  FederalCapitalTerritory: [
+  'Federal Capital Territory': [
     'Abaji', 'Abuja Municipal Area Council', 'Kwali', 'Kuje', 'Bwari', 'Gwagwalada'
   ]
 };
+

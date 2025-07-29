@@ -1,4 +1,3 @@
-// contexts/ChatContext.js - Updated with file upload support
 import React, {
   createContext,
   useState,
@@ -12,14 +11,19 @@ import chatService from "../../services/chatService";
 const ChatContext = createContext(null);
 
 export const ChatProvider = ({ children }) => {
-  const { token, authData, role } = useAuth();
+  const {token, authData, role } = useAuth();
+
+  
 
   console.log(authData, "auth data is here");
 
-  // Chat state
   const [chats, setChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]
+
+
+
+  );
   const [unreadCount, setUnreadCount] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
@@ -27,11 +31,9 @@ export const ChatProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // File upload state
   const [uploadProgress, setUploadProgress] = useState({});
   const [uploadingFiles, setUploadingFiles] = useState(new Set());
 
-  // Chat stats for admin
   const [chatStats, setChatStats] = useState({
     totalChats: 0,
     openChats: 0,
@@ -40,23 +42,24 @@ export const ChatProvider = ({ children }) => {
     unreadMessages: 0,
   });
 
-  // Refs for cleanup
   const typingTimeoutRef = useRef(null);
 
-  // Determine user type - FIXED: properly check if role is admin
-  const isAdmin = role === "admin" || role === "super-admin";
+  const isAdmin = localStorage.getItem("userType") === "admin";
 
-  // Initialize socket connection when token is available
   useEffect(() => {
+    console.log(token, authData, "testing here");
+    
+    
     if (token && authData) {
       console.log("Connecting to chat socket...");
       chatService.connect(token);
 
-      // Setup socket event listeners
       setupSocketListeners();
 
-      // Fetch initial data
+      console.log(isAdmin, "isAdmin is here");
+
       if (isAdmin) {
+
         fetchAllChats();
         fetchChatStats();
       } else {
@@ -69,9 +72,7 @@ export const ChatProvider = ({ children }) => {
     }
   }, [token, authData, isAdmin]);
 
-  // Setup socket event listeners
   const setupSocketListeners = () => {
-    // Connection status
     const socket = chatService.getSocket();
     if (socket) {
       socket.on("connect", () => {
@@ -92,25 +93,20 @@ export const ChatProvider = ({ children }) => {
       });
     }
 
-    // Listen for new messages
     chatService.onNewMessage((data) => {
       console.log("New message received:", data);
 
-      // Don't add the message if it's from the current user (already added optimistically)
       const isOwnMessage = data.message.senderId === authData._id;
 
-      // Update active chat messages if it's the current chat
       if (activeChat && data.chatId === activeChat._id) {
         if (!isOwnMessage) {
           setMessages((prev) => [...prev, data.message]);
         }
       }
 
-      // Update chats list
       setChats((prev) =>
         prev.map((chat) => {
           if (chat._id === data.chatId) {
-            // If it's own message, don't duplicate - it's already added optimistically
             if (isOwnMessage) {
               return {
                 ...chat,
@@ -130,21 +126,17 @@ export const ChatProvider = ({ children }) => {
         })
       );
 
-      // Update unread count only for messages from others
       if (!isOwnMessage) {
-        // For admin: only increment unread if the message is not from the currently active chat
         if (isAdmin) {
           if (!activeChat || data.chatId !== activeChat._id) {
             setUnreadCount((prev) => prev + 1);
           }
         } else {
-          // For facility: increment unread count
           setUnreadCount((prev) => prev + 1);
         }
       }
     });
 
-    // Listen for typing indicators
     if (isAdmin) {
       chatService.onFacilityTyping((data) => {
         setTypingUsers((prev) => {
@@ -169,7 +161,6 @@ export const ChatProvider = ({ children }) => {
         if (activeChat && data.chatId === activeChat._id) {
           setIsTyping(data.isTyping);
           if (data.isTyping) {
-            // Clear typing after 3 seconds
             if (typingTimeoutRef.current) {
               clearTimeout(typingTimeoutRef.current);
             }
@@ -181,15 +172,12 @@ export const ChatProvider = ({ children }) => {
       });
     }
 
-    // Listen for read status
     chatService.onMessagesRead((data) => {
       if (activeChat && data.chatId === activeChat._id) {
-        // Update read status in UI
         console.log("Messages marked as read by:", data.readBy);
       }
     });
 
-    // Listen for chat status updates
     chatService.onChatStatusUpdated((data) => {
       setChats((prev) =>
         prev.map((chat) =>
@@ -214,12 +202,10 @@ export const ChatProvider = ({ children }) => {
       }
     });
 
-    // Listen for confirmations
     chatService.onMessageSent((data) => {
       if (data.success) {
         console.log("Message sent successfully");
         
-        // Remove from uploading files if it was a file
         if (data.message && data.message.fileUrl) {
           setUploadingFiles(prev => {
             const newSet = new Set(prev);
@@ -228,7 +214,6 @@ export const ChatProvider = ({ children }) => {
           });
         }
         
-        // If this was a new chat creation, update the activeChat with real chat ID
         if (activeChat && (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_'))) {
           setActiveChat(prev => ({
             ...prev,
@@ -236,7 +221,6 @@ export const ChatProvider = ({ children }) => {
             type: 'chat'
           }));
           
-          // Add the new chat to the chats list
           setChats(prev => {
             const existingChat = prev.find(c => c._id === data.chatId);
             if (!existingChat) {
@@ -264,14 +248,12 @@ export const ChatProvider = ({ children }) => {
       }
     });
 
-    // Listen for errors
     chatService.onError((error) => {
       console.error("Chat error:", error);
       setError(error.message);
     });
   };
 
-  // Cleanup socket listeners
   const cleanupSocketListeners = () => {
     chatService.removeAllListeners();
     if (typingTimeoutRef.current) {
@@ -279,9 +261,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // API Functions
-
-  // Fetch all chats (admin only)
   const fetchAllChats = async (params = {}) => {
     if (!isAdmin || !token) return;
 
@@ -290,7 +269,6 @@ export const ChatProvider = ({ children }) => {
       const response = await chatService.getAllChats(params);
       const chatsData = response.data.chats || [];
       
-      // Ensure each chat has messages array
       const chatsWithMessages = chatsData.map(chat => ({
         ...chat,
         messages: chat.messages || []
@@ -306,7 +284,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Fetch chat stats (admin only)
   const fetchChatStats = async () => {
     if (!isAdmin || !token) return;
 
@@ -318,7 +295,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Fetch facility chat
   const fetchFacilityChat = async () => {
     if (isAdmin || !token) return;
 
@@ -338,7 +314,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Get specific facility chat (admin only)
   const fetchChatByFacility = async (facilityId) => {
     if (!isAdmin || !token) return;
 
@@ -347,24 +322,19 @@ export const ChatProvider = ({ children }) => {
       const response = await chatService.getChatByFacility(facilityId);
       const chat = response.data;
       
-      // Update the active chat with complete data
       setActiveChat(chat);
       setMessages(chat.messages || []);
 
-      // Update the chat in the chats list
       setChats(prev => prev.map(c => 
         c._id === chat._id ? { ...c, ...chat } : c
       ));
 
-      // Leave previous chat room if exists
       if (activeChat && activeChat._id !== chat._id && !activeChat._id?.startsWith('temp_')) {
         chatService.leaveChat(activeChat._id);
       }
 
-      // Join the new chat room - this is crucial for real-time updates
       chatService.joinChat(chat._id);
       
-      // Mark as read
       markAsRead(chat._id);
 
       setError(null);
@@ -378,16 +348,13 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // UPDATED: Send message - now supports files with FormData
   const sendMessage = async (messageData) => {
     if (!token || !activeChat) return;
 
     try {
       console.log("📤 Sending message:", messageData);
 
-      // Handle file uploads using FormData
       if (messageData.file) {
-        // Validate file before sending
         try {
           chatService.validateFile(messageData.file);
         } catch (validationError) {
@@ -401,7 +368,6 @@ export const ChatProvider = ({ children }) => {
           file: messageData.file
         };
 
-        // Handle different chat scenarios
         if (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_')) {
           payload.facilityId = activeChat.facilityId?._id || activeChat.facilityId;
           console.log("Starting new conversation with facility:", payload.facilityId);
@@ -417,10 +383,8 @@ export const ChatProvider = ({ children }) => {
           facilityId: payload.facilityId
         });
 
-        // Add to uploading files
         setUploadingFiles(prev => new Set([...prev, messageData.file.name]));
 
-        // Create optimistic message for file
         const newMessage = {
           senderId: authData._id,
           senderType: isAdmin ? "Admin" : "Facility",
@@ -431,30 +395,23 @@ export const ChatProvider = ({ children }) => {
           fileSize: messageData.file.size,
           fileType: messageData.file.type,
           timestamp: new Date(),
-          // Add temporary URL for immediate preview if it's an image
           fileUrl: messageData.file.type.startsWith('image/') ? URL.createObjectURL(messageData.file) : null,
-          isUploading: true // Flag to show upload status
+          isUploading: true
         };
 
-        // Optimistically update the UI immediately
         setMessages((prev) => [...prev, newMessage]);
 
         try {
-          // Send file via API using FormData
           const response = await chatService.sendMessageWithFile(payload);
           
           if (response.success) {
-            // Update the message with the real file URL and remove upload status
             setMessages((prev) => prev.map((msg, index) => {
               if (index === prev.length - 1 && msg.isUploading) {
-                // Clean up temporary object URL
                 if (msg.fileUrl && msg.fileUrl.startsWith('blob:')) {
                   URL.revokeObjectURL(msg.fileUrl);
                 }
-                // Return the actual message from server response
                 return {
                   ...response.data.message,
-                  // Ensure we keep the correct sender info
                   senderId: authData._id,
                   senderType: isAdmin ? "Admin" : "Facility",
                   senderName: isAdmin ? authData.fullName : authData.name,
@@ -469,10 +426,8 @@ export const ChatProvider = ({ children }) => {
         } catch (uploadError) {
           console.error("❌ File upload failed:", uploadError);
           
-          // Remove the optimistic message on error
           setMessages((prev) => prev.filter((msg, index) => !(index === prev.length - 1 && msg.isUploading)));
           
-          // Remove from uploading files
           setUploadingFiles(prev => {
             const newSet = new Set(prev);
             newSet.delete(messageData.file.name);
@@ -483,13 +438,11 @@ export const ChatProvider = ({ children }) => {
         }
 
       } else {
-        // Handle text messages (existing logic)
         const payload = {
           message: messageData.message,
           messageType: messageData.messageType || "text",
         };
         
-        // Handle different chat scenarios
         if (activeChat.type === 'new_chat' || activeChat._id?.startsWith('temp_')) {
           payload.facilityId = activeChat.facilityId?._id || activeChat.facilityId;
           console.log("Starting new conversation with facility:", payload.facilityId);
@@ -499,7 +452,6 @@ export const ChatProvider = ({ children }) => {
 
         console.log("📤 Sending text message:", payload);
 
-        // Create the new message object for local state
         const newMessage = {
           senderId: authData._id,
           senderType: isAdmin ? "Admin" : "Facility",
@@ -509,19 +461,15 @@ export const ChatProvider = ({ children }) => {
           timestamp: new Date(),
         };
 
-        // Optimistically update the UI immediately
         setMessages((prev) => [...prev, newMessage]);
         
-        // Send via socket for real-time to other users
         if (chatService.isSocketConnected()) {
           chatService.sendMessageSocket(payload);
         } else {
-          // Fallback to API if socket is not connected
           await chatService.sendMessage(payload);
         }
       }
 
-      // Update the chat in chats list immediately (only if it's an existing chat)
       if (!activeChat.type || activeChat.type === 'chat') {
         setChats(prev => prev.map(chat => 
           chat._id === activeChat._id 
@@ -538,7 +486,6 @@ export const ChatProvider = ({ children }) => {
       console.error("Error sending message:", error);
       setError(error.message || "Failed to send message");
       
-      // Remove the optimistically added message on error (only for text messages)
       if (!messageData.file) {
         setMessages((prev) => prev.slice(0, -1));
       }
@@ -547,7 +494,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // NEW: Upload file function
   const uploadFile = async (file, message = '') => {
     if (!file) throw new Error('No file selected');
     
@@ -558,8 +504,6 @@ export const ChatProvider = ({ children }) => {
     });
   };
 
-  // NEW: Download file function
-  // Mark messages as read
   const markAsRead = async (chatId = null) => {
     const targetChatId = chatId || activeChat?._id;
     if (!token || !targetChatId) return;
@@ -576,7 +520,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Update chat status (admin only)
   const updateChatStatus = async (chatId, statusData) => {
     if (!isAdmin || !token) return;
 
@@ -586,7 +529,6 @@ export const ChatProvider = ({ children }) => {
       } else {
         await chatService.updateChatStatus(chatId, statusData);
 
-        // Update local state
         setChats((prev) =>
           prev.map((chat) =>
             chat._id === chatId ? { ...chat, ...statusData } : chat
@@ -603,7 +545,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Send typing indicator
   const sendTyping = (isTypingNow) => {
     if (!activeChat || !chatService.isSocketConnected()) return;
 
@@ -611,10 +552,8 @@ export const ChatProvider = ({ children }) => {
     chatService.sendTyping(activeChat._id, isTypingNow, facilityId);
   };
 
-  // Select active chat
   const selectChat = async (chat) => {
     try {
-      // Leave previous chat room
       if (activeChat && activeChat._id !== chat._id && !activeChat._id?.startsWith('temp_')) {
         chatService.leaveChat(activeChat._id);
       }
@@ -622,13 +561,11 @@ export const ChatProvider = ({ children }) => {
       setActiveChat(chat);
       setMessages(chat.messages || []);
 
-      // Join new chat room - essential for receiving real-time messages
       if (chat._id && !chat._id.startsWith('temp_')) {
         chatService.joinChat(chat._id);
         console.log(`Joined chat room: ${chat._id}`);
       }
 
-      // Mark as read
       markAsRead(chat._id);
       
     } catch (error) {
@@ -636,7 +573,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Refresh data
   const refreshChats = () => {
     if (isAdmin) {
       fetchAllChats();
@@ -646,9 +582,7 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Context value
   const contextValue = {
-    // State
     chats,
     activeChat,
     messages,
@@ -663,10 +597,8 @@ export const ChatProvider = ({ children }) => {
     uploadProgress,
     uploadingFiles,
 
-    // Actions
     sendMessage,
     uploadFile,
-
     markAsRead,
     updateChatStatus,
     sendTyping,
@@ -677,11 +609,9 @@ export const ChatProvider = ({ children }) => {
     fetchChatByFacility,
     refreshChats,
 
-    // Utilities
     setError,
     setActiveChat,
     setMessages,
-    // File helpers
     validateFile: chatService.validateFile,
     getFileIcon: chatService.getFileIcon,
     formatFileSize: chatService.formatFileSize,
@@ -699,5 +629,3 @@ export const useChat = () => {
   }
   return context;
 };
-
-        //
