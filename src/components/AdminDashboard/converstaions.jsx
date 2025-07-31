@@ -276,6 +276,8 @@ const AdminChatPage = () => {
     const fileSize = msg.fileSize ? formatFileSize(msg.fileSize) : '';
     const fileIcon = getFileIcon(msg.fileType || '');
 
+    console.log(msg.fileUrl, "file url is ere");
+
     if (isImage && msg.fileUrl) {
       return (
         <div className="max-w-xs">

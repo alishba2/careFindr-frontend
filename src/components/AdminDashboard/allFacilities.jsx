@@ -121,7 +121,6 @@ const AllFacilities = () => {
         ? await getFacilitiesByType({ type, page: currentPage, limit })
         : await getAllFacilities({ page: currentPage, limit });
 
-
       const formattedData = response.facilities.map((facility, index) => ({
         key: index + (currentPage - 1) * limit,
         _id: facility._id,
@@ -302,103 +301,115 @@ const AllFacilities = () => {
           </h1>
         </div>
 
-        {/* Filters */}
-        <div className="mb-3">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+        {/* Responsive Filters Section */}
+        <div className="mb-6 space-y-4">
+          {/* First Row: Search Input and Date Range (laptop+) */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:max-w-4xl">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="w-full lg:w-auto lg:min-w-[300px] lg:max-w-md">
               <Input
                 prefix={<SearchOutlined className="text-gray-400" />}
                 placeholder="Search facilities..."
-                className="h-11 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="h-11 w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
             </div>
 
-              {/* Date Range Filter */}
+            {/* Date Range - Same line on laptop+ */}
+            <div className="w-full lg:w-auto lg:min-w-[300px] lg:max-w-sm">
               <RangePicker
                 placeholder={['Start Date', 'End Date']}
                 value={dateRange}
                 onChange={(dates) => setDateRange(dates || [])}
                 presets={datePresets}
                 suffixIcon={<CalendarOutlined className="text-gray-400" />}
-                style={{ height: 44 }}
+                className="w-full h-11 rounded-xl border-gray-300 focus:border-blue-500"
                 format="DD MMM YYYY"
               />
+            </div>
+          </div>
 
+          {/* Second Row: Filter Controls */}
+          <div className="w-full">
 
-            {/* Filter Controls */}
-            <div className="flex flex-wrap gap-3">
-              {/* Type Filter - Only show when type is "all" or not specified */}
-              {(!type || type === "all") && (
-                <Select
-                  placeholder="Filter by Type"
-                  className="min-w-[160px] ant-select-selector"
-                  value={filterType === "all" ? undefined : filterType}
-                  onChange={(value) => setFilterType(value || "all")}
-                  suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
-                  style={{ height: 44, backgroundColor: "transparent" }}
-                  dropdownClassName="ant-select-dropdown"
-                >
-                  <Option value="">All Types</Option>
-                  {typeOptions.map((option) => (
-                    <Option key={option} value={option}>
-                      {option}
-                    </Option>
-                  ))}
-                </Select>
-              )}
+            {/* Filter Controls Container */}
+            <div className="w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+                {/* Type Filter - Only show when type is "all" or not specified */}
+                {(!type || type === "all") && (
+                  <div className="min-w-0">
+                    <Select
+                      placeholder="Filter by Type"
+                      className="w-full h-11"
+                      value={filterType === "all" ? undefined : filterType}
+                      onChange={(value) => setFilterType(value || "all")}
+                      suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                      dropdownClassName="ant-select-dropdown"
+                    >
+                      <Option value="">All Types</Option>
+                      {typeOptions.map((option) => (
+                        <Option key={option} value={option}>
+                          {option}
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                )}
 
+                {/* State Filter */}
+                <div className="min-w-0">
+                  <Select
+                    placeholder="Filter by State"
+                    className="w-full h-11"
+                    value={filterState || undefined}
+                    onChange={(value) => {
+                      setFilterState(value || "");
+                      setFilterLga("");
+                    }}
+                    showSearch
+                    suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                  >
+                    <Option value="">All States</Option>
+                    {stateOptions.map((state) => (
+                      <Option key={state} value={state}>
+                        {state}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
 
-              {/* State Filter */}
-              <Select
-                placeholder="Filter by State"
-                className="min-w-[180px]"
-                value={filterState || undefined}
-                onChange={(value) => {
-                  setFilterState(value || "");
-                  setFilterLga("");
-                }}
-                showSearch
-                suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
-                style={{ height: 44 }}
-              >
-                <Option value="">All States</Option>
-                {stateOptions.map((state) => (
-                  <Option key={state} value={state}>
-                    {state}
-                  </Option>
-                ))}
-              </Select>
+                {/* Status Filter */}
+                <div className="min-w-0">
+                  <Select
+                    placeholder="Filter by Status"
+                    className="w-full h-11"
+                    value={filterStatus || undefined}
+                    onChange={(value) => setFilterStatus(value || "")}
+                    suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
+                  >
+                    <Option value="">All Statuses</Option>
+                    {statusOptions.map((option) => (
+                      <Option key={option} value={option}>
+                        {option}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
 
-              {/* Status Filter */}
-              <Select
-                placeholder="Filter by Status"
-                className="min-w-[160px]"
-                value={filterStatus || undefined}
-                onChange={(value) => setFilterStatus(value || "")}
-                suffixIcon={<img src={filter} alt="Filter" className="h-6 mb-1 w-6 text-gray-400" />}
-                style={{ height: 44 }}
-              >
-                <Option value="">All Statuses</Option>
-                {statusOptions.map((option) => (
-                  <Option key={option} value={option}>
-                    {option}
-                  </Option>
-                ))}
-              </Select>
-
-              {/* Clear Filters Button */}
-              {showClear && (
-                <Button
-                  type="default"
-                  className="h-11 px-6 rounded-lg border-gray-300 hover:bg-gray-50"
-                  onClick={handleClearFilters}
-                >
-                  Clear Filters
-                </Button>
-              )}
+                {/* Clear Filters Button */}
+                {showClear && (
+                  <div className="sm:col-span-2 lg:col-span-1 min-w-0">
+                    <Button
+                      type="default"
+                      className="w-full h-11 px-6 rounded-xl border-gray-300 hover:bg-gray-50 transition-colors"
+                      onClick={handleClearFilters}
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -406,7 +417,7 @@ const AllFacilities = () => {
         {/* Results Summary */}
         {(searchText || filterType !== "all" || filterState || filterStatus || (dateRange && dateRange.length === 2)) && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-800 break-words">
               <span className="font-medium">
                 {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} found
               </span>
@@ -415,7 +426,7 @@ const AllFacilities = () => {
               {filterState && <span> • State: {filterState}</span>}
               {filterStatus && <span> • Status: {filterStatus}</span>}
               {dateRange && dateRange.length === 2 && (
-                <span> • Date: {dateRange[0].format('DD MMM YYYY')} - {dateRange[1].format('DD MMM YYYY')}</span>
+                <span className="block sm:inline"> • Date: {dateRange[0].format('DD MMM YYYY')} - {dateRange[1].format('DD MMM YYYY')}</span>
               )}
             </p>
           </div>

@@ -75,12 +75,14 @@ export const Subspecialties = ({ subSpecialities, setSubspecialities }) => {
       "Pain Medicine",
     ],
     "Pediatric": [
+      "Pediatric Cardiology",
+      "Pediatric Neurology",
+      "Pediatric Surgery",
       "Pediatric Respiratory",
       "Pediatric Oncology",
       "Pediatric Hematology",
       "Pediatric Nephrology",
-      "Pediatric Gastroenterology",
-      "Neonatology"
+      "Pediatric Gastroenterology"
     ],
     "Public Health and Administrative": [
       "Public Health",

@@ -1,15 +1,23 @@
 import React from 'react';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd';
 import { OperatingHours } from '../operatingHours';
 import { BranchAddresses } from '../BranchAddresses';
 import { AdditionalInfo } from '../AdditionalInfo';
 
 const { Option } = Select;
 
-const LaboratoryForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours }) => {
+const LaboratoryForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours, loading }) => {
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-10">
+                <Spin tip="Loading..." size="large" />
+            </div>
+        );
+    }
+
     return (
         <>
-            <div className="flex flex-col sm:flex-row gap-4">
+        <div className="space-y-4 sm:space-y-6 p-2 sm:p-0 mt-14 md:mt-0">
                 <div className="flex-1 min-w-0">
                     <div className="space-y-2">
                         <label className="block text-sm font-bold text-gray-800">Accreditation Status</label>
@@ -89,4 +97,3 @@ const LaboratoryForm = ({ capabilities, setCapabilities, timeError, validateOper
 };
 
 export default LaboratoryForm;
-

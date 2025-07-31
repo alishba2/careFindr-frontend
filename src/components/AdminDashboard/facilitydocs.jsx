@@ -99,12 +99,12 @@ export const FacilityDoc = ({ facilityId }) => {
 
   const getDocumentIcon = (docType) => {
     switch (docType) {
-      case 'facilityPhotos': return <Image className="w-5 h-5" />;
-      case 'facilityDetailsFiles': return <FileText className="w-5 h-5" />;
-      case 'priceListFiles': return <DollarSign className="w-5 h-5" />;
-      case 'licenseRegistrationFiles': return <FileText className="w-5 h-5" />;
-      case 'specialistScheduleFiles': return <Calendar className="w-5 h-5" />;
-      default: return <FileText className="w-5 h-5" />;
+      case 'facilityPhotos': return <Image className="w-4 h-4 sm:w-5 sm:h-5" />;
+      case 'facilityDetailsFiles': return <FileText className="w-4 h-4 sm:w-5 sm:h-5" />;
+      case 'priceListFiles': return <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />;
+      case 'licenseRegistrationFiles': return <FileText className="w-4 h-4 sm:w-5 sm:h-5" />;
+      case 'specialistScheduleFiles': return <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />;
+      default: return <FileText className="w-4 h-4 sm:w-5 sm:h-5" />;
     }
   };
 
@@ -121,11 +121,11 @@ export const FacilityDoc = ({ facilityId }) => {
 
   const getExtractionIcon = (status) => {
     switch (status) {
-      case 'extracted': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'failed': return <XCircle className="w-4 h-4 text-red-600" />;
-      case 'processing': return <Loader className="w-4 h-4 text-blue-600 animate-spin" />;
-      case 'queued': return <Clock className="w-4 h-4 text-yellow-600" />;
-      default: return <Clock className="w-4 h-4 text-gray-600" />;
+      case 'extracted': return <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />;
+      case 'failed': return <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />;
+      case 'processing': return <Loader className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 animate-spin" />;
+      case 'queued': return <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600" />;
+      default: return <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />;
     }
   };
 
@@ -302,10 +302,10 @@ export const FacilityDoc = ({ facilityId }) => {
         {extractedContent && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium text-gray-900">Extracted Content</h4>
+              <h4 className="font-medium text-gray-900 text-sm sm:text-base">Extracted Content</h4>
               <button
                 onClick={() => toggleSection('content')}
-                className="text-gray-600 hover:text-gray-800"
+                className="text-gray-600 hover:text-gray-800 p-1"
                 aria-label={expandedSections.content ? 'Collapse content' : 'Expand content'}
               >
                 {expandedSections.content ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -313,8 +313,8 @@ export const FacilityDoc = ({ facilityId }) => {
             </div>
 
             {expandedSections.content && (
-              <div className="bg-gray-50 p-3 rounded border max-h-64 overflow-y-auto">
-                <pre className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+              <div className="bg-gray-50 p-2 sm:p-3 rounded border max-h-48 sm:max-h-64 overflow-y-auto">
+                <pre className="text-xs sm:text-sm text-gray-800 whitespace-pre-wrap break-words">
                   {displayContent}
                 </pre>
                 <button
@@ -335,7 +335,7 @@ export const FacilityDoc = ({ facilityId }) => {
 
   const renderFileDisplay = (files, docType) => {
     if (!files || (Array.isArray(files) && files.length === 0)) {
-      return <span className="text-gray-500 text-sm">No files uploaded</span>;
+      return <span className="text-gray-500 text-xs sm:text-sm">No files uploaded</span>;
     }
 
     const fileArray = Array.isArray(files) ? files : [files];
@@ -343,7 +343,7 @@ export const FacilityDoc = ({ facilityId }) => {
     
     return (
       <div className="space-y-3">
-        <span className="text-sm text-gray-700">{fileArray.length} file(s) uploaded</span>
+        <span className="text-xs sm:text-sm text-gray-700">{fileArray.length} file(s) uploaded</span>
         <div className="space-y-2">
           {fileArray.map((file, index) => {
             const fileName = getFileName(file);
@@ -355,44 +355,48 @@ export const FacilityDoc = ({ facilityId }) => {
             const extractionStatus = hasExtractedData ? 'extracted' : (fileExtraction?.status || 'pending');
             
             return (
-              <div key={index} className="border rounded-lg p-3 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Files className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">{fileName}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(fileStatus)}`}>
+              <div key={index} className="border rounded-lg p-2 sm:p-3 bg-gray-50">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+                  <div className="flex items-center space-x-2 min-w-0 flex-1">
+                    <Files className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-gray-700 truncate">
+                      {fileName}
+                    </span>
+                    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getStatusColor(fileStatus)} flex-shrink-0`}>
                       {getStatusText(fileStatus)}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  
+                  {/* Action buttons - responsive layout */}
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => handleFileView(file)}
-                      className="inline-flex items-center px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
+                      className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
                       aria-label={`View file ${fileName}`}
                     >
                       <Eye className="w-3 h-3 mr-1" />
-                      View
+                      <span className="hidden sm:inline">View</span>
                     </button>
                     {fileStatus !== 'verified' && (
                       <button
                         onClick={() => handleVerifyFile(docType, file)}
                         disabled={actionLoading}
-                        className="inline-flex items-center px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
                         aria-label={`Verify file ${fileName}`}
                       >
                         <Check className="w-3 h-3 mr-1" />
-                        Verify
+                        <span className="hidden sm:inline">Verify</span>
                       </button>
                     )}
                     {fileStatus !== 'rejected' && (
                       <button
                         onClick={() => handleRejectDocument(docType, file)}
                         disabled={actionLoading}
-                        className="inline-flex items-center px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
                         aria-label={`Reject file ${fileName}`}
                       >
                         <X className="w-3 h-3 mr-1" />
-                        Reject
+                        <span className="hidden sm:inline">Reject</span>
                       </button>
                     )}
                   </div>
@@ -400,18 +404,20 @@ export const FacilityDoc = ({ facilityId }) => {
                 
                 {isExtractableDocument(docType) && fileStatus === 'verified' && (
                   <div className="mt-2 pt-2 border-t">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center space-x-2">
                         {getExtractionIcon(extractionStatus)}
                         <span className={`text-xs ${getExtractionStatusColor(extractionStatus)}`}>
                           {getExtractionStatusText(extractionStatus)}
                         </span>
                       </div>
-                      <div className="flex gap-2">
+                      
+                      {/* Extraction action buttons - responsive */}
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
                         <button
                           onClick={() => handleExtract(docType, file)}
                           disabled={hasExtractedData || extractionLoading[`${docType}-${file}`]}
-                          className="inline-flex items-center px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                          className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                           aria-label={`Extract data from ${fileName}`}
                         >
                           {extractionLoading[`${docType}-${file}`] ? (
@@ -419,22 +425,22 @@ export const FacilityDoc = ({ facilityId }) => {
                           ) : (
                             <Download className="w-3 h-3 mr-1" />
                           )}
-                          Extract
+                          <span className="hidden sm:inline">Extract</span>
                         </button>
                         {hasExtractedData && (
                           <>
                             <button
                               onClick={() => handleViewExtractedData(docType, file)}
-                              className="inline-flex items-center px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                              className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
                               aria-label={`View extracted data for ${fileName}`}
                             >
                               <Database className="w-3 h-3 mr-1" />
-                              View Data
+                              <span className="hidden sm:inline">View Data</span>
                             </button>
                             <button
                               onClick={() => handleExtract(docType, file, true)}
                               disabled={extractionLoading[`${docType}-${file}`]}
-                              className="inline-flex items-center px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
+                              className="inline-flex items-center px-1.5 sm:px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50"
                               aria-label={`Re-extract data for ${fileName}`}
                             >
                               {extractionLoading[`${docType}-${file}`] ? (
@@ -442,14 +448,15 @@ export const FacilityDoc = ({ facilityId }) => {
                               ) : (
                                 <RotateCcw className="w-3 h-3 mr-1" />
                               )}
-                              Re-extract
+                              <span className="hidden sm:inline">Re-extract</span>
                             </button>
                           </>
                         )}
                       </div>
                     </div>
+                    
                     {fileExtraction?.error && (
-                      <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                      <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded break-words">
                         Error: {fileExtraction.error}
                       </div>
                     )}
@@ -465,10 +472,11 @@ export const FacilityDoc = ({ facilityId }) => {
                     )}
                   </div>
                 )}
+                
                 {fileVerification?.notes && fileStatus === 'rejected' && (
                   <div className="mt-2 pt-2 border-t">
                     <span className="text-xs text-gray-600">Rejection reason:</span>
-                    <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                    <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 break-words">
                       {fileVerification.notes}
                     </div>
                   </div>
@@ -484,7 +492,7 @@ export const FacilityDoc = ({ facilityId }) => {
   const renderExtractionStatus = (docType) => {
     if (!isExtractableDocument(docType)) {
       return (
-        <div className="border-t pt-3 text-sm text-gray-500 italic">
+        <div className="border-t pt-3 text-xs sm:text-sm text-gray-500 italic">
           This document type is not eligible for data extraction.
         </div>
       );
@@ -496,7 +504,7 @@ export const FacilityDoc = ({ facilityId }) => {
     if (!hasVerifiedFiles) {
       return (
         <div className="border-t pt-3 space-y-2">
-          <div className="text-sm text-gray-500 italic">
+          <div className="text-xs sm:text-sm text-gray-500 italic">
             Data extraction available after verification
           </div>
         </div>
@@ -518,28 +526,33 @@ export const FacilityDoc = ({ facilityId }) => {
     const canExtract = isExtractableDocument(docType);
 
     return (
-      <div key={docType} className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+      <div key={docType} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
             {getDocumentIcon(docType)}
-            <h3 className="font-medium text-gray-900">{getDocumentTitle(docType)}</h3>
+            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
+              {getDocumentTitle(docType)}
+            </h3>
             {canExtract && (
-              <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+              <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex-shrink-0">
                 Extractable
               </span>
             )}
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(verification?.status)}`}>
+          <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${getStatusColor(verification?.status)} flex-shrink-0`}>
             {getStatusText(verification?.status)}
           </span>
         </div>
+        
         <div className="border-t pt-3">
           {renderFileDisplay(files, docType)}
         </div>
+        
         {canExtract && hasFiles && renderExtractionStatus(docType)}
+        
         {verification?.verifiedAt && (
           <div className="border-t pt-3 space-y-1">
-            <div className="text-sm">
+            <div className="text-xs sm:text-sm">
               <span className="text-gray-600">Last verified by: </span>
               <span className="text-gray-900">{verification.verifiedBy?.name || 'Admin'}</span>
             </div>
@@ -548,10 +561,11 @@ export const FacilityDoc = ({ facilityId }) => {
             </div>
           </div>
         )}
+        
         {verification?.notes && verification?.status === 'rejected' && (
           <div className="border-t pt-3">
-            <span className="text-sm text-gray-600">Rejection reason:</span>
-            <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <span className="text-xs sm:text-sm text-gray-600">Rejection reason:</span>
+            <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs sm:text-sm text-red-700 break-words">
               {verification.notes}
             </div>
           </div>
@@ -562,17 +576,17 @@ export const FacilityDoc = ({ facilityId }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+      <div className="flex justify-center items-center h-32 sm:h-64">
+        <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-gray-600"></div>
       </div>
     );
   }
 
   if (!docs) {
     return (
-      <div className="text-center py-8">
-        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">No facility documents found</p>
+      <div className="text-center py-6 sm:py-8">
+        <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500 text-sm sm:text-base">No facility documents found</p>
       </div>
     );
   }
@@ -588,51 +602,59 @@ export const FacilityDoc = ({ facilityId }) => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+      {/* Header - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Document Management</h2>
-          <p className="text-sm text-gray-600">Facility Type: {docs.facilityType}</p>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Document Management</h2>
+          <p className="text-xs sm:text-sm text-gray-600">Facility Type: {docs.facilityType}</p>
         </div>
-        <div className="flex gap-2">
+        
+        {/* Action buttons - responsive layout */}
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={getFacilityDocs}
-            className="inline-flex items-center px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="inline-flex items-center justify-center px-3 py-2 text-xs sm:text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             aria-label="Refresh documents"
           >
-            <RefreshCw className="w-4 h-4 mr-1" />
+            <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Refresh
           </button>
           {hasAnyDocs && docs.verificationStatus !== 'verified' && (
             <button
               onClick={handleVerifyAll}
               disabled={actionLoading}
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-xs sm:text-sm"
               aria-label="Verify all documents"
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Verify All Documents
             </button>
           )}
         </div>
       </div>
    
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Document Grid - Responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {documentTypes.map(docType => renderDocumentCard(docType))}
       </div>
+      
+      {/* Additional Info - Responsive */}
       {docs.additionalInfo && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="font-medium text-gray-900 mb-2">Additional Information</h3>
-          <p className="text-gray-700">{docs.additionalInfo}</p>
+        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Additional Information</h3>
+          <p className="text-gray-700 text-xs sm:text-sm break-words">{docs.additionalInfo}</p>
         </div>
       )}
+      
+      {/* Rejection Modal - Responsive */}
       {modalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-2 sm:mx-4">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
               Reject Document
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 break-words">
               You are about to reject "{getDocumentTitle(selectedDocument)}" file: {getFileName(selectedFilePath)}. Please provide a reason.
             </p>
             <textarea
@@ -641,16 +663,16 @@ export const FacilityDoc = ({ facilityId }) => {
               onChange={(e) => setRejectNotes(e.target.value)}
               rows={4}
               maxLength={500}
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-xs sm:text-sm"
               aria-label="Rejection reason"
             />
-            <div className="text-xs text-gray-500 mb-4">
+            <div className="text-xs text-gray-500 mb-3 sm:mb-4">
               {rejectNotes.length}/500 characters
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={() => setModalVisible(false)}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 aria-label="Cancel rejection"
               >
                 Cancel
@@ -658,7 +680,7 @@ export const FacilityDoc = ({ facilityId }) => {
               <button
                 onClick={handleRejectSubmit}
                 disabled={!rejectNotes.trim() || actionLoading}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="flex-1 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
                 aria-label="Confirm rejection"
               >
                 {actionLoading ? 'Rejecting...' : 'Reject'}
@@ -667,65 +689,73 @@ export const FacilityDoc = ({ facilityId }) => {
           </div>
         </div>
       )}
+      
+      {/* View Data Modal - Responsive */}
       {viewDataModal && selectedExtractedData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b">
-              <div className="flex items-center space-x-3">
-                <Database className="w-6 h-6 text-blue-600" />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col mx-2 sm:mx-4">
+            {/* Modal Header - Responsive */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-6 border-b gap-3 sm:gap-0">
+              <div className="flex items-start sm:items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">
                     Extracted Data - {getDocumentTitle(selectedDataType)}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
                     File: {getFileName(selectedFilePath || selectedExtractedData.filePath)}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Extracted on {formatDate(selectedExtractedData.extractedAt)}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              
+              {/* Modal Action Buttons - Responsive */}
+              <div className="flex items-center space-x-2 flex-shrink-0">
                 {(selectedFilePath || selectedExtractedData.filePath) && (
                   <button
                     onClick={() => handleFileView(selectedFilePath || selectedExtractedData.filePath)}
-                    className="p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+                    className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
                     aria-label="View original file"
                     title="View original file"
                   >
-                    <ExternalLink className="w-5 h-5" />
+                    <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 )}
                 <button
                   onClick={() => setViewDataModal(false)}
-                  className="p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+                  className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
                   aria-label="Close modal"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-4">
-                <div className="flex gap-2">
+            
+            {/* Modal Content - Responsive */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
+                {/* Action Buttons - Responsive */}
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => copyToClipboard(JSON.stringify(selectedExtractedData.data || selectedExtractedData, null, 2))}
-                    className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
                     aria-label="Copy all extracted data"
                   >
-                    <Copy className="w-4 h-4 mr-1" />
+                    <Copy className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     Copy All
                   </button>
                   <button
                     onClick={() => handleExtract(selectedDataType, selectedFilePath, true)}
                     disabled={extractionLoading[selectedFilePath ? `${selectedDataType}-${selectedFilePath}` : selectedDataType]}
-                    className="px-3 py-1.5 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center"
                     aria-label="Re-extract data"
                   >
                     {extractionLoading[selectedFilePath ? `${selectedDataType}-${selectedFilePath}` : selectedDataType] ? (
-                      <Loader className="w-4 h-4 mr-1 animate-spin" />
+                      <Loader className="w-3 h-3 sm:w-4 sm:h-4 mr-1 animate-spin" />
                     ) : (
-                      <RotateCcw className="w-4 h-4 mr-1" />
+                      <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     )}
                     Re-extract
                   </button>
@@ -733,9 +763,11 @@ export const FacilityDoc = ({ facilityId }) => {
                 {renderExtractedDataContent(selectedExtractedData)}
               </div>
             </div>
-            <div className="border-t p-4 bg-gray-50">
-              <div className="flex justify-between items-center text-sm text-gray-600">
-                <div>
+            
+            {/* Modal Footer - Responsive */}
+            <div className="border-t p-3 sm:p-4 bg-gray-50">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 text-xs sm:text-sm text-gray-600">
+                <div className="break-words">
                   Document: {selectedDataType} •
                   Facility: {docs.facilityType} •
                   Size: {selectedExtractedData.data?.content?.length ?
@@ -743,7 +775,7 @@ export const FacilityDoc = ({ facilityId }) => {
                 </div>
                 <button
                   onClick={() => setViewDataModal(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-xs sm:text-sm flex-shrink-0"
                   aria-label="Close extracted data modal"
                 >
                   Close

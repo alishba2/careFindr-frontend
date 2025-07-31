@@ -6,41 +6,94 @@ import * as Yup from "yup";
 import bgimg from "../../assets/medical.jpg";
 import { Heart } from "lucide-react";
 import { toast } from "react-toastify";
-import { sendOtp } from "../../services/auth.js";
+import { forgotPassword } from "../../services/auth.js";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 
-// Validation schema using Yup
 const validationSchema = Yup.object({
   identifier: Yup.string()
+    .required("Phone number or email is required")
     .test(
-      "is-phone-or-email",
-      "Please enter a valid phone number or email address",
+      "is-valid-phone-or-email",
+      "Enter a valid email or phone number (phone must include country code like +2343001234567)",
       (value) => {
         if (!value) return false;
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^\+?[\d\s-]{10,}$/;
-        return emailRegex.test(value) || phoneRegex.test(value);
+        const internationalPhoneRegex = /^\+\d{10,15}$/;
+
+        return emailRegex.test(value) || internationalPhoneRegex.test(value);
       }
-    )
-    .required("Phone number or email is required"),
+    ),
 });
 
-export const ForgotPassword = () => {
 
+export const ForgotPassword = () => {
   const navigate = useNavigate();
+
   // Initial form values
   const initialValues = {
     identifier: "",
   };
 
-  // Handle form submission
-  const handleSubmit = (values, { setSubmitting }) => {
-    console.log("Forgot Password submitted:", values);
-    setSubmitting(false);
+  // Helper function to detect if identifier is email or phone
+  const isEmail = (identifier) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(identifier);
+  };
 
-    toast.success("OTP sent to your phone number or email!");
+  // Handle form submission
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const { identifier } = values;
+
+      console.log("Sending OTP for password reset to:", identifier);
+
+      // Use the forgotPassword API function
+      const response = await forgotPassword(identifier);
+
+      // Navigate to OTP verification with the identifier and context
+      navigate("/verify-otp", {
+        state: {
+          identifier: identifier,
+          type: response.type || (isEmail(identifier) ? 'email' : 'phone'),
+          context: 'forgot-password' // This helps the OTP page know the context
+        }
+      });
+
+      // Show success message based on type
+      if (isEmail(identifier)) {
+        toast.success("OTP sent to your email address!");
+      } else {
+        toast.success("OTP sent to your phone number!");
+      }
+
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+
+      // Handle different error types
+      if (error.response) {
+        const statusCode = error.response.status;
+        const errorMessage = error.response.data?.error;
+
+        if (statusCode === 404) {
+          toast.error("No account found with this email or phone number.");
+        } else if (statusCode === 400) {
+          toast.error(errorMessage || "Please enter a valid email or phone number.");
+        } else if (statusCode === 500) {
+          toast.error("Server error. Please try again later.");
+        } else {
+          toast.error(errorMessage || "Failed to send OTP. Please try again.");
+        }
+      } else if (error.request) {
+        toast.error("Network error. Please check your connection and try again.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -75,14 +128,13 @@ export const ForgotPassword = () => {
           {/* Logo */}
           <div className="flex items-center justify-center cursor-pointer" onClick={() => navigate("/")}>
             <img src={logo} className="h-12 mr-2" alt="CareFindr Logo" />
-
           </div>
 
           {/* Title */}
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Forgot Password</h2>
             <p className="mt-2 text-sm sm:text-base text-gray-600">
-              Enter your email to reset your password
+              Enter your email or phone number to reset your password
             </p>
           </div>
 
@@ -130,9 +182,9 @@ export const ForgotPassword = () => {
                 </p>
 
                 <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-12 text-[16px] bg-white text-primarysolid border-[2px] border-primarysolid font-semibold rounded-md hover:bg-primarysolid/90"
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="w-full h-12 text-[16px] bg-white text-primarysolid border-[2px] border-primarysolid font-semibold rounded-md hover:bg-primarysolid/10"
                 >
                   Back to Sign In
                 </Button>

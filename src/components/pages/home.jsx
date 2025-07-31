@@ -27,6 +27,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 import { useNavigate } from "react-router-dom";
 import HealthBg from "../../assets/Health.jpg"
+import HeroImg from "../../assets/hero.jpeg"
 export default function Landing() {
     // const [location, setLocation] = useLocation();
 
@@ -126,7 +127,7 @@ export default function Landing() {
                         </div>
                         <div className="relative">
                             <img
-                                src={doc}
+                                src={HeroImg}
                                 alt="African medical professionals collaborating"
                                 className="rounded-2xl shadow-2xl w-full h-auto"
                             />
@@ -137,7 +138,7 @@ export default function Landing() {
                                             <Hospital className="w-6 h-6 text-white" />
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-gray-900">500+ Hospitals</div>
+                                            <div className="font-semibold text-gray-900">1000+ Healthcare Facilities</div>
                                             <div className="text-sm text-gray-500">Verified Partners</div>
                                         </div>
                                     </div>
@@ -559,7 +560,7 @@ export default function Landing() {
                                     </li>
                                     <li className="flex items-start">
                                         <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
-                                        <span>Fraud detection and claim integrity</span>
+                                        <span>Claim integrity</span>
                                     </li>
                                     <li className="flex items-start">
                                         <CheckCircle className="w-5 h-5 text-[#10B77F] mr-3 mt-0.5 flex-shrink-0" />
@@ -629,7 +630,7 @@ export default function Landing() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="text-center">
-                                    <div className="text-3xl font-bold text-primarysolid">500+</div>
+                                    <div className="text-3xl font-bold text-primarysolid">1000+</div>
                                     <div className="text-sm text-gray-600">Verified Healthcare Facilities</div>
                                 </div>
                                 <div className="text-center">

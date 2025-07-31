@@ -8,6 +8,7 @@ export const initialCapabilitiesState = {
     agreedToTerms: false,
     admissionFee: "",
     consultationFee: "",
+    registrationFee:"",
     totalBedSpace: "",
     hasPharmacy: null,
     hasLaboratory: null,

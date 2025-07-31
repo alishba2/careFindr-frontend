@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Input } from '../../input';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd';
 import { CoreClinicalSpecialities } from '../../enums/medicalSpecialities';
 import Subspecialties from '../subspecialities ';
 import { OperatingHours } from '../operatingHours';
@@ -22,7 +22,8 @@ const HospitalForm = ({
     timeError,
     validateOperatingHours,
     type,
-    typeFacility
+    typeFacility,
+    loading
 }) => {
 
 
@@ -35,11 +36,17 @@ const HospitalForm = ({
             return { ...prev, coreClinicalSpecialities: updated };
         });
     };
-
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-10">
+                <Spin tip="Loading..." size="large" />
+            </div>
+        );
+    }
 
     return (
         <>
-            <div className="space-y-2">
+                        <div className="space-y-4 sm:space-y-6 p-2 sm:p-0 mt-14 md:mt-0">
                 <h1 className="text-sm font-bold text-gray-900 mb-2">Core Clinical Specialities</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {CoreClinicalSpecialities.map((item) => (
@@ -110,6 +117,8 @@ const HospitalForm = ({
                         <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
                     </div>
                 </div>
+
+
                 <div className="flex-1">
                     <label className="text-sm font-bold text-gray-800">Consultation Fee (₦)</label>
                     <div className="relative">
@@ -129,8 +138,28 @@ const HospitalForm = ({
                         <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
                     </div>
                 </div>
-            </div>
 
+                
+            </div>
+            <div className="flex-1">
+                <label className="text-sm font-bold text-gray-800">Register Fee (₦)</label>
+                <div className="relative">
+                    <NumericInput
+                        className="h-12 border-gray-300 rounded-md pr-12"
+                        value={capabilities.registrationFee}
+                        onChange={(value) =>
+                            setCapabilities((prev) => ({
+                                ...prev,
+                                registrationFee: value,
+                            }))
+                        }
+                        placeholder="Enter amount in ₦"
+                        allowDecimals={true}
+                        min="0"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
+                </div>
+            </div>
             <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-800">Total Bed Space</label>
                 <NumericInput
@@ -150,7 +179,7 @@ const HospitalForm = ({
             <div className="space-y-4">
                 <div>
                     <label className="text-sm font-bold text-gray-800 mb-1 block">
-                        Do you have Laboratory?
+                        Do you have a Laboratory?
                     </label>
                     <Select
                         className="h-12 w-full"
@@ -171,7 +200,7 @@ const HospitalForm = ({
 
                 <div>
                     <label className="text-sm font-bold text-gray-800 mb-1 block">
-                        Do you have Pharmacy?
+                        Do you have a Pharmacy?
                     </label>
                     <Select
                         className="h-12 w-full"

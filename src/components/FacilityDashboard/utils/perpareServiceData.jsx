@@ -15,6 +15,8 @@ export const prepareServiceData = (facilityId, facilityType, facility, capabilit
             openingTime: capabilities.openingTime,
             closingTime: capabilities.closingTime,
             admissionFee: Number(capabilities.admissionFee) || 0,
+            registrationFee: Number(capabilities.registrationFee)|| 0,
+
             consultationFee: Number(capabilities.consultationFee) || 0,
             totalBedSpace: Number(capabilities.totalBedSpace) || 0,
             hasPharmacy: capabilities.hasPharmacy === "Yes",

@@ -1,14 +1,14 @@
 // ===== 1. hospitalServices/forms/AmbulanceForm.jsx (Complete) =====
 import React from 'react';
 import { Input } from '../../input';
-import { Select } from 'antd';
+import { Select, Spin } from 'antd';
 import { OperatingHours } from '../operatingHours';
 import { BranchAddresses } from '../BranchAddresses';
 import { AdditionalInfo } from '../AdditionalInfo';
 
 const { Option } = Select;
 
-const AmbulanceForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours, typeFacility }) => {
+const AmbulanceForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours, typeFacility, loading }) => {
     const handleToggleAmbulanceType = (value) => {
         setCapabilities((prev) => {
             const updated = prev.ambulanceTypes.includes(value)
@@ -35,10 +35,16 @@ const AmbulanceForm = ({ capabilities, setCapabilities, timeError, validateOpera
             return { ...prev, typicalCrew: updated };
         });
     };
-
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-10">
+                <Spin tip="Loading..." size="large" />
+            </div>
+        );
+    }
     return (
         <>
-            <div className="space-y-2">
+                        <div className="space-y-4 sm:space-y-6 p-2 sm:p-0 mt-14 md:mt-0">
                 <h1 className="text-sm font-bold text-gray-900 mb-2">Ambulance Types</h1>
                 <div className="flex flex-wrap gap-4">
                     {["Basic Life Support (BLS)", "Advanced Support ALS", "Neonatal/ICU Transport"].map((type) => (

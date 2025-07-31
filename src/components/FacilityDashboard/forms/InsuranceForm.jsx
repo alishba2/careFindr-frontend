@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Input } from '../../input';
 import { Button } from '../../button';
-import { Select, Checkbox } from 'antd';
+import { Select, Checkbox, Spin } from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import { BranchAddresses } from '../BranchAddresses';
 import { AdditionalInfo } from '../AdditionalInfo';
@@ -9,7 +9,7 @@ import { OperatingHours } from '../operatingHours';
 
 const { Option } = Select;
 
-const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours }) => {
+const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOperatingHours, loading }) => {
     const addAccreditedHospital = () => {
         setCapabilities((prev) => ({
             ...prev,
@@ -58,8 +58,15 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
         console.log(capabilities, "capabilities are here");
     }, [capabilities]);
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-10">
+                <Spin tip="Loading..." size="large" />
+            </div>
+        );
+    }
     return (
-        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6 p-2 sm:p-0 mt-14 md:mt-0">
             {/* Coverage Details */}
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Coverage Details</label>
@@ -122,7 +129,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 {/* Emergency Coverage */}
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-800">
-                       What is the coverage for emergency services and ambulance transport?
+                        What is the coverage for emergency services and ambulance transport?
                     </label>
                     <Select
                         className="h-12 w-full"
@@ -201,268 +208,23 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                 </div>
 
                 {/* Co-payments or Deductibles - UPDATED TO BOOLEAN */}
-                <div className="space-y-2 flex flex-col">
-                    <label className="text-sm font-bold text-gray-800">Are there co-payments or deductibles involved?</label>
-                    <Checkbox
-                        checked={capabilities.conPayments}
-                        onChange={(e) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                conPayments: e.target.checked,
-                            }))
-                        }
-                    >
-                        Yes, co-payments or deductibles are required
-                    </Checkbox>
-                </div>
-
-                {/* Rejected Claims Handling - UPDATED FIELD NAME */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">How do you handle rejected or disputed claims?</label>
-                    <TextArea
-                        rows={3}
-                        className="border-gray-300 rounded-md"
-                        value={capabilities.handleRejectedClaims}
-                        onChange={(e) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                handleRejectedClaims: e.target.value,
-                            }))
-                        }
-                        placeholder="Describe your process for handling rejected or disputed claims"
-                    />
-                </div>
-
-                {/* Payment System Type - UPDATED FIELD NAME */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">Is your payment system automated or manual?</label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.paymentSystem}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                paymentSystem: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Automated">Automated</Option>
-                        <Option value="Manual">Manual</Option>
-                        <Option value="Hybrid">Hybrid (Both)</Option>
-                    </Select>
-                </div>
-            </div>
-
-            {/* Hospital Network */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Hospital Network</label>
-
-                {/* Accredited Hospitals - UPDATED TO HANDLE OBJECTS */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">List of Accredited Hospitals</label>
-                    {capabilities.accreditedHospitals.map((hospital, index) => (
-                        <div key={index} className="flex gap-4 items-center">
-                            <Input
-                                type="text"
-                                className="h-12 border-gray-300 rounded-md flex-1"
-                                value={hospital.address || ""}
-                                onChange={(e) => updateAccreditedHospital(index, e.target.value)}
-                                placeholder={`Hospital ${index + 1} Name/Address`}
-                            />
-                            <Button
-                                className="h-12 px-4 bg-red-500 text-white rounded-md"
-                                onClick={() => deleteAccreditedHospital(index)}
-                                disabled={capabilities.accreditedHospitals.length === 1}
-                            >
-                                Delete
-                            </Button>
-                        </div>
-                    ))}
-                    <Button
-                        className="h-10 px-4 bg-primarysolid text-white rounded-md"
-                        onClick={addAccreditedHospital}
-                    >
-                        + Add another hospital
-                    </Button>
-                </div>
-
-                {/* Out-of-Network Reimbursement */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Are Out-of-Network Treatments Reimbursable?
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.outOfNetworkReimbursement}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                outOfNetworkReimbursement: value,
-                            }))
-                        }
-                    >
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
-                </div>
-            </div>
-
-            {/* Integration & Technology - UPDATED FIELD NAMES */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Integration & Technology</label>
-
-                {/* API/Tech Integration - UPDATED FIELD NAME */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Do you support API or tech integration with platforms like ours?
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.supportTechIntegration}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                supportTechIntegration: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                        <Option value="In Development">In Development</Option>
-                    </Select>
-                </div>
-
-                {/* Real-time Coverage Verification - UPDATED FIELD NAME */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">
-                        Can we verify patient coverage in real time?
-                    </label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.canVerifyCoverage}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                canVerifyCoverage: value,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                        <Option value="In Development">In Development</Option>
-                    </Select>
-                </div>
-            </div>
-
-            {/* Pre-authorization Requirements */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Pre-authorization Requirements</label>
-
-                {/* Pre-authorization Required */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">Is Pre-authorization Required?</label>
-                    <Select
-                        className="h-12 w-full"
-                        style={{ height: "48px" }}
-                        value={capabilities.preAuthRequired}
-                        onChange={(value) =>
-                            setCapabilities((prev) => ({
-                                ...prev,
-                                preAuthRequired: value,
-                                preAuthorization: value === "No" ? "" : prev.preAuthorization,
-                            }))
-                        }
-                    >
-                        <Option value="">Select</Option>
-                        <Option value="Yes">Yes</Option>
-                        <Option value="No">No</Option>
-                    </Select>
-                </div>
-
-                {capabilities.preAuthRequired === "Yes" && (
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-800">
-                                Which Treatments Require Pre-authorization?
-                            </label>
-                            <Input
-                                type="text"
-                                className="h-12 border-gray-300 rounded-md"
-                                value={capabilities.preAuthorization}
-                                onChange={(e) =>
-                                    setCapabilities((prev) => ({
-                                        ...prev,
-                                        preAuthorization: e.target.value,
-                                    }))
-                                }
-                                placeholder="e.g., Surgery, Chemotherapy"
-                            />
-                        </div>
-
-                        {/* Waiting Periods */}
-                        <div className="space-y-4">
-                            <label className="text-lg font-semibold text-gray-900">Waiting Periods</label>
-                            {capabilities.waitingPeriods.map((item, index) => (
-                                <div key={index} className="flex gap-4 items-center">
-                                    <Input
-                                        type="text"
-                                        className="h-12 border-gray-300 rounded-md flex-1"
-                                        value={item.service}
-                                        onChange={(e) => updateWaitingPeriod(index, "service", e.target.value)}
-                                        placeholder="Service (e.g., Surgery)"
-                                    />
-                                    <Input
-                                        type="number"
-                                        className="h-12 border-gray-300 rounded-md w-20"
-                                        value={item.duration}
-                                        onChange={(e) => updateWaitingPeriod(index, "duration", e.target.value)}
-                                        placeholder="Duration"
-                                    />
-                                    <Select
-                                        className="h-12 w-32"
-                                        style={{ height: "48px" }}
-                                        value={item.unit || "days"}
-                                        onChange={(value) => updateWaitingPeriod(index, "unit", value)}
-                                    >
-                                        <Option value="days">Days</Option>
-                                        <Option value="weeks">Weeks</Option>
-                                        <Option value="months">Months</Option>
-                                    </Select>
-                                    <Button
-                                        className="h-12 px-4 bg-red-500 text-white rounded-md"
-                                        onClick={() => deleteWaitingPeriod(index)}
-                                        disabled={capabilities.waitingPeriods.length === 0}
-                                    >
-                                        Delete
-                                    </Button>
-                                </div>
-                            ))}
-                            <Button
-                                className="h-10 px-4 bg-primarysolid text-white rounded-md"
-                                onClick={addWaitingPeriod}
-                            >
-                                + Add Service
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Premiums & Co-payments */}
-            <div className="space-y-4">
-                <label className="text-lg font-semibold text-gray-900">Premiums & Co-payments</label>
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-800">Premiums and Co-payments Structure</label>
+             <div className="space-y-2 flex flex-col">
+                <label className="text-sm font-bold text-gray-800">Are there co-payments or deductibles involved?</label>
+                <Checkbox
+                    checked={capabilities.conPayments}
+                    onChange={(e) =>
+                        setCapabilities((prev) => ({
+                            ...prev,
+                            conPayments: e.target.checked,
+                        }))
+                    }
+                >
+                    Yes, co-payments or deductibles are required
+                </Checkbox>
+                {capabilities.conPayments && (
                     <Input
                         type="text"
-                        className="h-12 border-gray-300 rounded-md"
+                        className="h-24 border-gray-300 rounded-md w-full"
                         value={capabilities.premiumsCopayments}
                         onChange={(e) =>
                             setCapabilities((prev) => ({
@@ -470,12 +232,270 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
                                 premiumsCopayments: e.target.value,
                             }))
                         }
-                        placeholder="e.g., Monthly premium of ₦5000, 20% co-pay on medicines"
+                        placeholder="e.g., Monthly premium of ₦5000, 20% co-pay on medicines; Annual premium of ₦50,000, 10% co-pay on all services; Quarterly premium of ₦15,000, 15% co-pay on diagnostics; No premium, 30% co-pay on all services"
                     />
-                </div>
+                )}
+            </div>
+            {/* Rejected Claims Handling - UPDATED FIELD NAME */}
+            <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-800">How do you handle rejected or disputed claims?</label>
+                <TextArea
+                    rows={3}
+                    className="border-gray-300 rounded-md"
+                    value={capabilities.handleRejectedClaims}
+                    onChange={(e) =>
+                        setCapabilities((prev) => ({
+                            ...prev,
+                            handleRejectedClaims: e.target.value,
+                        }))
+                    }
+                    placeholder="Describe your process for handling rejected or disputed claims"
+                />
             </div>
 
-            {/* Regulatory Compliance - UPDATED FIELD NAMES */}
+            {/* Payment System Type - UPDATED FIELD NAME */}
+            <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-800">Is your payment system automated or manual?</label>
+                <Select
+                    className="h-12 w-full"
+                    style={{ height: "48px" }}
+                    value={capabilities.paymentSystem}
+                    onChange={(value) =>
+                        setCapabilities((prev) => ({
+                            ...prev,
+                            paymentSystem: value,
+                        }))
+                    }
+                >
+                    <Option value="">Select</Option>
+                    <Option value="Automated">Automated</Option>
+                    <Option value="Manual">Manual</Option>
+                    <Option value="Hybrid">Hybrid (Both)</Option>
+                </Select>
+            </div>
+        </div>
+
+            {/* Hospital Network */ }
+    <div className="space-y-4">
+        <label className="text-lg font-semibold text-gray-900">Hospital Network</label>
+
+        {/* Accredited Hospitals - UPDATED TO HANDLE OBJECTS */}
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">List of Accredited Hospitals</label>
+            {capabilities.accreditedHospitals.map((hospital, index) => (
+                <div key={index} className="flex gap-4 items-center">
+                    <Input
+                        type="text"
+                        className="h-12 border-gray-300 rounded-md flex-1"
+                        value={hospital.address || ""}
+                        onChange={(e) => updateAccreditedHospital(index, e.target.value)}
+                        placeholder={`Hospital ${index + 1} Name/Address`}
+                    />
+                    <Button
+                        className="h-12 px-4 bg-red-500 text-white rounded-md"
+                        onClick={() => deleteAccreditedHospital(index)}
+                        disabled={capabilities.accreditedHospitals.length === 1}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            ))}
+            <Button
+                className="h-10 px-4 bg-primarysolid text-white rounded-md"
+                onClick={addAccreditedHospital}
+            >
+                + Add another hospital
+            </Button>
+        </div>
+
+        {/* Out-of-Network Reimbursement */}
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">
+                Are Out-of-Network Treatments Reimbursable?
+            </label>
+            <Select
+                className="h-12 w-full"
+                style={{ height: "48px" }}
+                value={capabilities.outOfNetworkReimbursement}
+                onChange={(value) =>
+                    setCapabilities((prev) => ({
+                        ...prev,
+                        outOfNetworkReimbursement: value,
+                    }))
+                }
+            >
+                <Option value="Yes">Yes</Option>
+                <Option value="No">No</Option>
+            </Select>
+        </div>
+    </div>
+
+    {/* Integration & Technology - UPDATED FIELD NAMES */ }
+    <div className="space-y-4">
+        <label className="text-lg font-semibold text-gray-900">Integration & Technology</label>
+
+        {/* API/Tech Integration - UPDATED FIELD NAME */}
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">
+                Do you support API or tech integration with platforms like ours?
+            </label>
+            <Select
+                className="h-12 w-full"
+                style={{ height: "48px" }}
+                value={capabilities.supportTechIntegration}
+                onChange={(value) =>
+                    setCapabilities((prev) => ({
+                        ...prev,
+                        supportTechIntegration: value,
+                    }))
+                }
+            >
+                <Option value="">Select</Option>
+                <Option value="Yes">Yes</Option>
+                <Option value="No">No</Option>
+                <Option value="In Development">In Development</Option>
+            </Select>
+        </div>
+
+        {/* Real-time Coverage Verification - UPDATED FIELD NAME */}
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">
+                Can we verify patient coverage in real time?
+            </label>
+            <Select
+                className="h-12 w-full"
+                style={{ height: "48px" }}
+                value={capabilities.canVerifyCoverage}
+                onChange={(value) =>
+                    setCapabilities((prev) => ({
+                        ...prev,
+                        canVerifyCoverage: value,
+                    }))
+                }
+            >
+                <Option value="">Select</Option>
+                <Option value="Yes">Yes</Option>
+                <Option value="No">No</Option>
+                <Option value="In Development">In Development</Option>
+            </Select>
+        </div>
+    </div>
+
+    {/* Pre-authorization Requirements */ }
+    <div className="space-y-4">
+        <label className="text-lg font-semibold text-gray-900">Pre-authorization Requirements</label>
+
+        {/* Pre-authorization Required */}
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">Is Pre-authorization Required?</label>
+            <Select
+                className="h-12 w-full"
+                style={{ height: "48px" }}
+                value={capabilities.preAuthRequired}
+                onChange={(value) =>
+                    setCapabilities((prev) => ({
+                        ...prev,
+                        preAuthRequired: value,
+                        preAuthorization: value === "No" ? "" : prev.preAuthorization,
+                    }))
+                }
+            >
+                <Option value="">Select</Option>
+                <Option value="Yes">Yes</Option>
+                <Option value="No">No</Option>
+            </Select>
+        </div>
+
+        {capabilities.preAuthRequired === "Yes" && (
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-gray-800">
+                        Which Treatments Require Pre-authorization?
+                    </label>
+                    <Input
+                        type="text"
+                        className="h-12 border-gray-300 rounded-md"
+                        value={capabilities.preAuthorization}
+                        onChange={(e) =>
+                            setCapabilities((prev) => ({
+                                ...prev,
+                                preAuthorization: e.target.value,
+                            }))
+                        }
+                        placeholder="e.g., Surgery, Chemotherapy"
+                    />
+                </div>
+
+                {/* Waiting Periods */}
+                <div className="space-y-4">
+                    <label className="text-lg font-semibold text-gray-900">Waiting Periods</label>
+                    {capabilities.waitingPeriods.map((item, index) => (
+                        <div key={index} className="flex gap-4 items-center">
+                            <Input
+                                type="text"
+                                className="h-12 border-gray-300 rounded-md flex-1"
+                                value={item.service}
+                                onChange={(e) => updateWaitingPeriod(index, "service", e.target.value)}
+                                placeholder="Service (e.g., Surgery)"
+                            />
+                            <Input
+                                type="number"
+                                className="h-12 border-gray-300 rounded-md w-20"
+                                value={item.duration}
+                                onChange={(e) => updateWaitingPeriod(index, "duration", e.target.value)}
+                                placeholder="Duration"
+                            />
+                            <Select
+                                className="h-12 w-32"
+                                style={{ height: "48px" }}
+                                value={item.unit || "days"}
+                                onChange={(value) => updateWaitingPeriod(index, "unit", value)}
+                            >
+                                <Option value="days">Days</Option>
+                                <Option value="weeks">Weeks</Option>
+                                <Option value="months">Months</Option>
+                            </Select>
+                            <Button
+                                className="h-12 px-4 bg-red-500 text-white rounded-md"
+                                onClick={() => deleteWaitingPeriod(index)}
+                                disabled={capabilities.waitingPeriods.length === 0}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    ))}
+                    <Button
+                        className="h-10 px-4 bg-primarysolid text-white rounded-md"
+                        onClick={addWaitingPeriod}
+                    >
+                        + Add Service
+                    </Button>
+                </div>
+            </div>
+        )}
+    </div>
+
+    {/* Premiums & Co-payments */ }
+    <div className="space-y-4">
+        <label className="text-lg font-semibold text-gray-900">Premiums & Co-payments</label>
+        <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">Premiums and Co-payments Structure</label>
+            <Input
+                type="text"
+                className="h-12 border-gray-300 rounded-md"
+                value={capabilities.premiumsCopayments}
+                onChange={(e) =>
+                    setCapabilities((prev) => ({
+                        ...prev,
+                        premiumsCopayments: e.target.value,
+                    }))
+                }
+                placeholder="e.g., Monthly premium of ₦5000, 20% co-pay on medicines"
+            />
+        </div>
+    </div>
+
+    {/* Regulatory Compliance - UPDATED FIELD NAMES */ }
             <div className="space-y-4">
                 <label className="text-lg font-semibold text-gray-900">Regulatory Compliance</label>
 
@@ -552,7 +572,7 @@ const InsuranceForm = ({ capabilities, setCapabilities, timeError, validateOpera
 
             <BranchAddresses capabilities={capabilities} setCapabilities={setCapabilities} />
             <AdditionalInfo capabilities={capabilities} setCapabilities={setCapabilities} />
-        </div>
+        </div >
     );
 };
 

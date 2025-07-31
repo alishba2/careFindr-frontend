@@ -87,6 +87,8 @@ export const HospitalServices = () => {
     const [capabilities, setCapabilities] = useState(initialCapabilitiesState);
     const userType = localStorage.getItem("userType");
 
+
+    const [loading, setLoading] = useState(false);
     useEffect(() => {
         setFacility(null);
         if (type === "ambulance") {
@@ -97,14 +99,7 @@ export const HospitalServices = () => {
         }
     }, [facilityType, type]);
 
-    // Separate useEffect for handling ambulance setting when capabilities change
-    useEffect(() => {
-        console.log(capabilities, "capabilities");
-        
-        if (capabilities.hasLaboratory) {
-            setIsAmbulance(true);
-        }
-    }, [capabilities, setIsAmbulance]);
+   
 
     const areStatesEqual = (state1, state2) => {
         return JSON.stringify(state1) === JSON.stringify(state2);
@@ -148,7 +143,8 @@ export const HospitalServices = () => {
     useEffect(() => {
         const getFacilityServices = async () => {
             try {
-                console.log(authData,"auth data is here" );
+                setLoading(true);
+                console.log(authData, "auth data is here");
                 const response = await GetFacilityService(authData?._id);
                 if (response?.service) {
                     const serviceData = response.service;
@@ -171,16 +167,21 @@ export const HospitalServices = () => {
                         setSubspecialities(loadedSubSpecialities);
                         setInitialSubSpecialities(loadedSubSpecialities);
                     }
+                    setLoading(false);
                 } else {
                     setIsServiceSaved(false);
                     setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
                     setInitialSubSpecialities([]);
+                    setLoading(false);
+
                 }
             } catch (error) {
                 console.error("Error fetching service:", error);
                 setIsServiceSaved(false);
                 setInitialCapabilities(JSON.parse(JSON.stringify(capabilities)));
                 setInitialSubSpecialities([]);
+                setLoading(false);
+
             }
         }
 
@@ -239,7 +240,7 @@ export const HospitalServices = () => {
         setSubspecialities([...initialSubSpecialities]);
         setTimeError("");
         setShowConfirmModal(false);
-        
+
         if (userType !== "admin") {
             navigate("/facility-dashboard/document-upload");
         } else {
@@ -276,20 +277,27 @@ export const HospitalServices = () => {
                         setSubspecialities={setSubspecialities}
                         type={type}
                         typeFacility={typeFacility}
+                        loading={loading}
                     />
                 );
             case "Laboratory":
-                return <LaboratoryForm {...commonProps} />;
+                return <LaboratoryForm {...commonProps} loading={loading}
+                />;
             case "Pharmacy":
-                return <PharmacyForm {...commonProps} />;
+                return <PharmacyForm {...commonProps} loading={loading}
+                />;
             case "Ambulance":
-                return <AmbulanceForm {...commonProps} typeFacility={typeFacility} />;
+                return <AmbulanceForm {...commonProps} typeFacility={typeFacility} loading={loading}
+                />;
             case "Insurance":
-                return <InsuranceForm {...commonProps} />;
+                return <InsuranceForm {...commonProps} loading={loading}
+                />;
             case "SpecialistClinic":
-                return <SpecialistClinicForm {...commonProps} />;
+                return <SpecialistClinicForm {...commonProps} loading={loading}
+                />;
             case "Blood Bank":
-                return <BloodBankForm {...commonProps} />;
+                return <BloodBankForm {...commonProps} loading={loading}
+                />;
             default:
                 return null;
         }

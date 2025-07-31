@@ -15,6 +15,7 @@ export const loadServiceData = (serviceData, capabilities) => {
                 facilityFeatures: serviceData.hospitalDetails.facilityFeatures || [],
                 admissionFee: serviceData.hospitalDetails.admissionFee?.toString() || "",
                 consultationFee: serviceData.hospitalDetails.consultationFee?.toString() || "",
+                registrationFee:serviceData.hospitalDetails.registrationFee?.toString()||"",
                 totalBedSpace: serviceData.hospitalDetails.totalBedSpace?.toString() || "",
                 hasPharmacy: serviceData.hospitalDetails.hasPharmacy,
                 hasLaboratory: serviceData.hospitalDetails.hasLaboratory,

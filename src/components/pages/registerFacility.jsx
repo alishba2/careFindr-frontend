@@ -100,12 +100,12 @@ const OtpInput = ({ otp, setOtp, onVerify }) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-    
+
     // Handle arrow keys for navigation
     if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
-    
+
     if (e.key === 'ArrowRight' && index < otp.length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -115,18 +115,18 @@ const OtpInput = ({ otp, setOtp, onVerify }) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text/plain');
     const digits = pastedData.replace(/\D/g, '').slice(0, otp.length);
-    
+
     if (digits.length > 0) {
       const newOtp = [...otp];
       for (let i = 0; i < digits.length && i < otp.length; i++) {
         newOtp[i] = digits[i];
       }
       setOtp(newOtp);
-      
+
       // Focus on the next empty input or the last input
       const nextIndex = Math.min(digits.length, otp.length - 1);
       inputRefs.current[nextIndex]?.focus();
-      
+
       // Auto-verify if all digits are filled
       if (newOtp.every((digit) => digit !== "")) {
         onVerify(newOtp.join(""));
@@ -194,8 +194,8 @@ export const RegistrationStep = () => {
 
   const handleSendOtp = async (phone, type) => {
     try {
-      await sendOtp({ phone, type });
-      toast.success(`OTP sent to ${phone}`, {
+      await sendOtp({ phone: `+${phone}`, type });
+      toast.success(`OTP sent to +${phone}`, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -205,7 +205,9 @@ export const RegistrationStep = () => {
         setShowWhatsappOtp(true);
       }
     } catch (error) {
-      toast.error("Failed to send OTP. Please try again.", {
+
+      console.log(error.response.data.message, "error is here");
+      toast.error(error.response.data.message, {
         position: "top-right",
         autoClose: 3000,
       });
@@ -214,7 +216,9 @@ export const RegistrationStep = () => {
 
   const handleVerifyOtp = async (otp, phone, type) => {
     try {
-      await verifyOtp({ otp, phone, type });
+      let identifier = phone;
+
+      await verifyOtp({ otp, phone: `+${phone}`, type });
       if (type === "phone") {
         setPhoneVerified(true);
         setShowPhoneOtp(false);
@@ -249,10 +253,7 @@ export const RegistrationStep = () => {
 
     setError(null);
     const formatPhoneNumber = (number) => {
-      if (!number) return null;
-      return number.startsWith("+234")
-        ? number
-        : `+234${number.replace(/^\+234/, "").replace(/^0/, "")}`;
+      return `+${number}`;
     };
 
     const facilityData = {
