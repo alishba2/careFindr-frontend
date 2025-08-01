@@ -45,7 +45,7 @@ export const initialCapabilitiesState = {
     limitationForCareCoverage: "",
     claimProcessSteps: "",
     daysToSettleClaims: "",
-    conPayments: false, // Note: Boolean type in backend
+    conPayments: "", // Note: Boolean type in backend
     handleRejectedClaims: "",
     paymentSystem: "",
     canVerifyCoverage: "",

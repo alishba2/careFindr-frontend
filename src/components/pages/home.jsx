@@ -138,7 +138,7 @@ export default function Landing() {
                                             <Hospital className="w-6 h-6 text-white" />
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-gray-900">1000+ Healthcare Facilities</div>
+                                            <div className="font-semibold text-gray-900">1,000+ Healthcare Facilities</div>
                                             <div className="text-sm text-gray-500">Verified Partners</div>
                                         </div>
                                     </div>
@@ -630,7 +630,7 @@ export default function Landing() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="text-center">
-                                    <div className="text-3xl font-bold text-primarysolid">1000+</div>
+                                    <div className="text-3xl font-bold text-primarysolid">1,000+</div>
                                     <div className="text-sm text-gray-600">Verified Healthcare Facilities</div>
                                 </div>
                                 <div className="text-center">

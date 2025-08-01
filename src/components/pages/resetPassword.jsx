@@ -77,7 +77,7 @@ export const ResetPassword = () => {
           </p>
           <div className="flex flex-row items-center justify-center gap-10 text-xl sm:text-2xl font-semibold">
             <div className="flex flex-col items-center leading-none">
-              <span className="text-3xl sm:text-5xl">1000+</span>
+              <span className="text-3xl sm:text-5xl">1,000+</span>
               <span className="text-base sm:text-lg font-normal mt-2">Facilities Registered</span>
             </div>
             <div className="flex flex-col items-center leading-none">
